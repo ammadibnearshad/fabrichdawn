@@ -1,0 +1,804 @@
+{{ 'section-fullscreen-vertical-slider.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'fullscreen-vertical-slider.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign is_adapt = false
+  if section.settings.slider_height == 'adapt_first_image'
+    assign is_adapt = true
+  endif
+
+  assign first_block = section.blocks.first
+  assign adapt_desktop_ratio = 56.25
+  assign adapt_mobile_ratio = 177.78
+
+  if first_block.settings.image_desktop != blank
+    assign adapt_desktop_ratio = 1 | divided_by: first_block.settings.image_desktop.aspect_ratio | times: 100
+  elsif first_block.settings.image_mobile != blank
+    assign adapt_desktop_ratio = 1 | divided_by: first_block.settings.image_mobile.aspect_ratio | times: 100
+  endif
+
+  if first_block.settings.image_mobile != blank
+    assign adapt_mobile_ratio = 1 | divided_by: first_block.settings.image_mobile.aspect_ratio | times: 100
+  elsif first_block.settings.image_desktop != blank
+    assign adapt_mobile_ratio = 1 | divided_by: first_block.settings.image_desktop.aspect_ratio | times: 100
+  endif
+
+  assign enable_snap = section.settings.enable_scroll_snap
+  if is_adapt
+    assign enable_snap = false
+  endif
+
+  assign header_color_rgb = '255, 255, 255'
+  if section.settings.header_text_color != blank
+    assign header_color_rgb = section.settings.header_text_color.red
+    assign header_color_rgb = header_color_rgb | append: ', ' | append: section.settings.header_text_color.green
+    assign header_color_rgb = header_color_rgb | append: ', ' | append: section.settings.header_text_color.blue
+  endif
+-%}
+
+{%- style -%}
+  #FVS-{{ section.id }} {
+    --fvs-speed: {{ section.settings.transition_speed }}ms;
+    --fvs-dots-color: {{ section.settings.dots_color }};
+    --fvs-dots-active-color: {{ section.settings.dots_active_color }};
+    --fvs-dots-size: {{ section.settings.dots_size }}px;
+    --fvs-dots-gap: {{ section.settings.dots_gap }}px;
+    --fvs-dots-offset: {{ section.settings.dots_offset_desktop }}px;
+    --fvs-dots-offset-m: {{ section.settings.dots_offset_mobile }}px;
+  }
+
+  {%- if is_adapt -%}
+    #FVS-{{ section.id }} {
+      --fvs-height: {{ adapt_mobile_ratio }}vw;
+    }
+
+    @media screen and (min-width: 750px) {
+      #FVS-{{ section.id }} {
+        --fvs-height: {{ adapt_desktop_ratio }}vw;
+      }
+    }
+  {%- endif -%}
+{%- endstyle -%}
+
+<fullscreen-vertical-slider
+  id="FVS-{{ section.id }}"
+  class="fvs color-{{ section.settings.color_scheme }} gradient fvs--height-{{ section.settings.slider_height }} fvs--transition-{{ section.settings.transition_style }}{% unless section.settings.full_width %} fvs--contained{% endunless %}{% if section.settings.overlap_header %} fvs--overlap-header{% endif %}{% if section.settings.dots_hide_on_mobile %} fvs--dots-hidden-mobile{% endif %}"
+  data-section-id="{{ section.id }}"
+  data-speed="{{ section.settings.transition_speed }}"
+  data-lock="{{ section.settings.scroll_lock_delay }}"
+  data-release="{{ section.settings.release_to_footer }}"
+  data-loop="{{ section.settings.loop }}"
+  data-keyboard="{{ section.settings.enable_keyboard }}"
+  data-autoplay="{{ section.settings.autoplay }}"
+  data-autoplay-speed="{{ section.settings.autoplay_speed | times: 1000 }}"
+  data-snap="{{ enable_snap }}"
+  data-mobile-snap="{{ section.settings.mobile_scroll_snap }}"
+  data-transition="{{ section.settings.transition_style }}"
+  data-overlap-header="{{ section.settings.overlap_header }}"
+  data-header-color="{{ header_color_rgb }}"
+  data-height-mode="{{ section.settings.slider_height }}"
+  role="region"
+  aria-roledescription="carousel"
+  aria-label="{{ section.settings.accessibility_label | default: 'Featured banners' | escape }}"
+>
+  <div class="fvs__track">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign desktop_image = block.settings.image_desktop
+        if desktop_image == blank
+          assign desktop_image = block.settings.image_mobile
+        endif
+
+        assign mobile_image = block.settings.image_mobile
+        if mobile_image == blank
+          assign mobile_image = desktop_image
+        endif
+
+        assign pos_desktop = block.settings.image_position_desktop
+        if pos_desktop == 'center' and desktop_image.presentation.focal_point != blank
+          assign pos_desktop = desktop_image.presentation.focal_point
+        endif
+
+        assign pos_mobile = block.settings.image_position_mobile
+        if pos_mobile == 'center' and mobile_image.presentation.focal_point != blank
+          assign pos_mobile = mobile_image.presentation.focal_point
+        endif
+
+        assign loading_attr = 'lazy'
+        assign fetch_priority = 'auto'
+        if forloop.first
+          assign loading_attr = 'eager'
+          assign fetch_priority = 'high'
+        endif
+
+        assign link_label = block.settings.link_label
+        if link_label == blank
+          assign link_label = desktop_image.alt
+        endif
+        if link_label == blank
+          assign link_label = 'Slide ' | append: forloop.index
+        endif
+
+        assign video_desktop = block.settings.video_desktop
+        if video_desktop == blank
+          assign video_desktop = block.settings.video_mobile
+        endif
+
+        assign video_mobile = block.settings.video_mobile
+        if video_mobile == blank
+          assign video_mobile = block.settings.video_desktop
+        endif
+
+        assign placeholder_index = forloop.index0 | modulo: 2
+      -%}
+      <div
+        class="fvs__slide{% if forloop.first %} is-active{% else %} is-below{% endif %}"
+        data-index="{{ forloop.index0 }}"
+        role="group"
+        aria-roledescription="slide"
+        aria-label="{{ forloop.index }} / {{ forloop.length }}"
+        style="--fvs-fit: {{ block.settings.image_fit }}; --fvs-pos-d: {{ pos_desktop }}; --fvs-pos-m: {{ pos_mobile }}; --fvs-overlay-color: {{ block.settings.overlay_color }}; --fvs-overlay-opacity: {{ block.settings.overlay_opacity | divided_by: 100.0 }};"
+        {{ block.shopify_attributes }}
+      >
+        <div class="fvs__media-wrap">
+          {%- if desktop_image != blank -%}
+            <picture class="fvs__media">
+              {%- if block.settings.image_mobile != blank and block.settings.image_desktop != blank -%}
+                <source
+                  media="(max-width: 749px)"
+                  srcset="
+                    {%- if mobile_image.width >= 375 -%}{{ mobile_image | image_url: width: 375 }} 375w,{%- endif -%}
+                    {%- if mobile_image.width >= 550 -%}{{ mobile_image | image_url: width: 550 }} 550w,{%- endif -%}
+                    {%- if mobile_image.width >= 750 -%}{{ mobile_image | image_url: width: 750 }} 750w,{%- endif -%}
+                    {%- if mobile_image.width >= 1100 -%}{{ mobile_image | image_url: width: 1100 }} 1100w,{%- endif -%}
+                    {%- if mobile_image.width >= 1500 -%}{{ mobile_image | image_url: width: 1500 }} 1500w,{%- endif -%}
+                    {{ mobile_image | image_url }} {{ mobile_image.width }}w
+                  "
+                  sizes="100vw"
+                  width="{{ mobile_image.width }}"
+                  height="{{ mobile_image.height }}"
+                >
+              {%- endif -%}
+              {{
+                desktop_image
+                | image_url: width: 3840
+                | image_tag:
+                  class: 'fvs__img',
+                  widths: '750, 1100, 1500, 1780, 2000, 2560, 3000, 3840',
+                  sizes: '100vw',
+                  loading: loading_attr,
+                  fetchpriority: fetch_priority,
+                  decoding: 'async',
+                  alt: desktop_image.alt
+              }}
+            </picture>
+          {%- else -%}
+            <div class="fvs__media fvs__media--placeholder">
+              {%- if placeholder_index == 0 -%}
+                {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg fvs__placeholder' }}
+              {%- else -%}
+                {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg fvs__placeholder' }}
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          {%- if video_desktop != blank -%}
+            {{
+              video_desktop
+              | video_tag:
+                image_size: '1500x',
+                autoplay: true,
+                loop: true,
+                controls: false,
+                muted: true,
+                class: 'fvs__video fvs__video--desktop'
+            }}
+          {%- endif -%}
+
+          {%- if video_mobile != blank -%}
+            {{
+              video_mobile
+              | video_tag:
+                image_size: '750x',
+                autoplay: true,
+                loop: true,
+                controls: false,
+                muted: true,
+                class: 'fvs__video fvs__video--mobile'
+            }}
+          {%- endif -%}
+        </div>
+
+        {%- if block.settings.overlay_opacity > 0 -%}
+          <div class="fvs__overlay" aria-hidden="true"></div>
+        {%- endif -%}
+
+        {%- if block.settings.link != blank -%}
+          <a
+            class="fvs__link"
+            href="{{ block.settings.link }}"
+            aria-label="{{ link_label | escape }}"
+            {% if block.settings.open_new_tab %}
+              target="_blank"
+              rel="noopener"
+            {% endif %}
+          ></a>
+        {%- endif -%}
+
+        {%- if block.settings.show_content -%}
+          <div class="fvs__content-wrap fvs__content-wrap--{{ block.settings.content_position_desktop }} fvs__content-wrap--m-{{ block.settings.content_position_mobile }}">
+            <div class="fvs__content fvs__content--{{ block.settings.content_alignment }}{% if block.settings.content_color_scheme != blank %} color-{{ block.settings.content_color_scheme }}{% endif %}">
+              {%- if block.settings.subheading != blank -%}
+                <p class="fvs__subheading subtitle">{{ block.settings.subheading | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.heading != blank -%}
+                <h2 class="fvs__heading {{ block.settings.heading_size }}">{{ block.settings.heading }}</h2>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <div class="fvs__text rte">{{ block.settings.text }}</div>
+              {%- endif -%}
+              {%- if block.settings.button_label != blank and block.settings.link != blank -%}
+                <a
+                  class="fvs__button button{% if block.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}"
+                  href="{{ block.settings.link }}"
+                  {% if block.settings.open_new_tab %}
+                    target="_blank"
+                    rel="noopener"
+                  {% endif %}
+                >
+                  {{- block.settings.button_label | escape -}}
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+  </div>
+
+  {%- if section.settings.show_scroll_hint -%}
+    <div class="fvs__hint" aria-hidden="true">
+      <span class="fvs__hint-mouse"><span class="fvs__hint-wheel"></span></span>
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.show_dots and section.blocks.size > 1 -%}
+    <nav
+      class="fvs__dots fvs__dots--{{ section.settings.dots_position }} fvs__dots--{{ section.settings.dots_style }}"
+      aria-label="Slide navigation"
+    >
+      {%- if section.settings.show_slide_counter -%}
+        <p class="fvs__counter" aria-hidden="true">
+          <span class="fvs__counter-current" data-fvs-counter>01</span>
+          <span class="fvs__counter-sep">/</span>
+          <span class="fvs__counter-total">{{ section.blocks.size | prepend: '0' | slice: -2, 2 }}</span>
+        </p>
+      {%- endif -%}
+      <ul class="fvs__dots-list list-unstyled" role="list">
+        {%- for block in section.blocks -%}
+          <li class="fvs__dots-item">
+            <button
+              type="button"
+              class="fvs__dot{% if forloop.first %} is-active{% endif %}"
+              data-index="{{ forloop.index0 }}"
+              aria-label="Go to slide {{ forloop.index }}"
+              {% if forloop.first %}
+                aria-current="true"
+              {% endif %}
+            >
+              {%- if section.settings.dots_style == 'number' -%}
+                <span class="fvs__dot-number">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+              {%- endif -%}
+            </button>
+          </li>
+        {%- endfor -%}
+      </ul>
+      {%- if section.settings.autoplay -%}
+        <button type="button" class="fvs__pause" data-fvs-pause aria-label="Pause slideshow">
+          <span class="fvs__pause-icon fvs__pause-icon--pause" aria-hidden="true"></span>
+          <span class="fvs__pause-icon fvs__pause-icon--play" aria-hidden="true"></span>
+        </button>
+      {%- endif -%}
+    </nav>
+  {%- endif -%}
+
+  <p class="visually-hidden" aria-live="polite" data-fvs-live></p>
+</fullscreen-vertical-slider>
+
+{% schema %}
+{
+  "name": "Fullscreen slider",
+  "tag": "section",
+  "class": "section section-fullscreen-vertical-slider",
+  "max_blocks": 20,
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "slider_height",
+      "label": "Slider height",
+      "options": [
+        { "value": "full", "label": "Full screen" },
+        { "value": "full_minus_header", "label": "Full screen minus header" },
+        { "value": "adapt_first_image", "label": "Adapt to first image (no scroll lock)" }
+      ],
+      "default": "full"
+    },
+    {
+      "type": "checkbox",
+      "id": "overlap_header",
+      "label": "Overlap header",
+      "info": "Places the slider behind a transparent header. Only applies when this is the first section on the page.",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "header_text_color",
+      "label": "Header text color while overlapping",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Make section full width",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "accessibility_label",
+      "label": "Accessibility label",
+      "info": "Describes the slider for screen readers.",
+      "default": "Featured banners"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Scroll behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_scroll_snap",
+      "label": "One scroll per slide",
+      "info": "Turn off to display slides as normal stacked full-height banners.",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "transition_style",
+      "label": "Transition",
+      "options": [
+        { "value": "slide", "label": "Slide" },
+        { "value": "fade", "label": "Fade" }
+      ],
+      "default": "slide"
+    },
+    {
+      "type": "range",
+      "id": "transition_speed",
+      "min": 300,
+      "max": 1500,
+      "step": 100,
+      "unit": "ms",
+      "label": "Transition speed",
+      "default": 800
+    },
+    {
+      "type": "range",
+      "id": "scroll_lock_delay",
+      "min": 200,
+      "max": 1500,
+      "step": 100,
+      "unit": "ms",
+      "label": "Scroll cool-down",
+      "info": "Stops one fast trackpad flick from skipping several slides.",
+      "default": 600
+    },
+    {
+      "type": "checkbox",
+      "id": "release_to_footer",
+      "label": "Release page after last slide",
+      "info": "Scrolling down on the last slide continues to the next section.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": "Loop slides",
+      "info": "Only applies when \"Release page after last slide\" is off.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_keyboard",
+      "label": "Enable keyboard navigation",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_scroll_snap",
+      "label": "One scroll per slide on mobile",
+      "info": "Turn off to use normal stacked scrolling below 750px.",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate slides",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Change slides every",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Pagination"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show pagination",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "dots_position",
+      "label": "Pagination position",
+      "options": [
+        { "value": "bottom_right", "label": "Bottom right" },
+        { "value": "center_right", "label": "Center right" },
+        { "value": "bottom_left", "label": "Bottom left" },
+        { "value": "center_left", "label": "Center left" }
+      ],
+      "default": "bottom_right"
+    },
+    {
+      "type": "select",
+      "id": "dots_style",
+      "label": "Pagination style",
+      "options": [
+        { "value": "dot", "label": "Dots" },
+        { "value": "line", "label": "Lines" },
+        { "value": "number", "label": "Numbers" }
+      ],
+      "default": "dot"
+    },
+    {
+      "type": "color",
+      "id": "dots_color",
+      "label": "Pagination color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "dots_active_color",
+      "label": "Active pagination color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "dots_size",
+      "min": 6,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Pagination size",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "dots_gap",
+      "min": 6,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Space between items",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "dots_offset_desktop",
+      "min": 12,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Distance from edge on desktop",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "dots_offset_mobile",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Distance from edge on mobile",
+      "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "dots_hide_on_mobile",
+      "label": "Hide pagination on mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_slide_counter",
+      "label": "Show slide counter",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Scroll hint"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_hint",
+      "label": "Show scroll hint on first slide",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Images"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_desktop",
+          "label": "Desktop image",
+          "info": "Recommended 2880 x 1620 px (16:9) or larger. Used from 750px up."
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Mobile image",
+          "info": "Recommended 1080 x 1920 px (9:16). Used below 750px. Falls back to the desktop image if empty."
+        },
+        {
+          "type": "select",
+          "id": "image_position_desktop",
+          "label": "Desktop image position",
+          "info": "\"Center\" uses the image focal point set in Shopify admin when one exists.",
+          "options": [
+            { "value": "center", "label": "Center" },
+            { "value": "top", "label": "Top" },
+            { "value": "bottom", "label": "Bottom" },
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" },
+            { "value": "top left", "label": "Top left" },
+            { "value": "top right", "label": "Top right" },
+            { "value": "bottom left", "label": "Bottom left" },
+            { "value": "bottom right", "label": "Bottom right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "image_position_mobile",
+          "label": "Mobile image position",
+          "options": [
+            { "value": "center", "label": "Center" },
+            { "value": "top", "label": "Top" },
+            { "value": "bottom", "label": "Bottom" },
+            { "value": "left", "label": "Left" },
+            { "value": "right", "label": "Right" },
+            { "value": "top left", "label": "Top left" },
+            { "value": "top right", "label": "Top right" },
+            { "value": "bottom left", "label": "Bottom left" },
+            { "value": "bottom right", "label": "Bottom right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "select",
+          "id": "image_fit",
+          "label": "Image fit",
+          "options": [
+            { "value": "cover", "label": "Fill the slide (crop)" },
+            { "value": "contain", "label": "Fit inside the slide" }
+          ],
+          "default": "cover"
+        },
+        {
+          "type": "header",
+          "content": "Video"
+        },
+        {
+          "type": "video",
+          "id": "video_desktop",
+          "label": "Desktop video",
+          "info": "Optional. Replaces the desktop image. Plays muted and looped."
+        },
+        {
+          "type": "video",
+          "id": "video_mobile",
+          "label": "Mobile video",
+          "info": "Optional. Replaces the mobile image."
+        },
+        {
+          "type": "header",
+          "content": "Link"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Banner link",
+          "info": "Makes the entire banner clickable."
+        },
+        {
+          "type": "checkbox",
+          "id": "open_new_tab",
+          "label": "Open link in a new tab",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Accessible link label",
+          "info": "Read by screen readers, e.g. \"Shop the Fall collection\". Not visible. Falls back to the image alt text."
+        },
+        {
+          "type": "header",
+          "content": "Overlay"
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay color",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "min": 0,
+          "max": 80,
+          "step": 5,
+          "unit": "%",
+          "label": "Overlay opacity",
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Text content"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_content",
+          "label": "Show text content",
+          "info": "Leave off for image-only banners where the text is part of the artwork.",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            { "value": "h2", "label": "Small" },
+            { "value": "h1", "label": "Medium" },
+            { "value": "h0", "label": "Large" },
+            { "value": "hxl", "label": "Extra large" },
+            { "value": "hxxl", "label": "Extra extra large" }
+          ],
+          "default": "h1"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "info": "Uses the banner link above."
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary",
+          "label": "Use outline button style",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "content_position_desktop",
+          "label": "Desktop content position",
+          "options": [
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-center", "label": "Top center" },
+            { "value": "top-right", "label": "Top right" },
+            { "value": "middle-left", "label": "Middle left" },
+            { "value": "middle-center", "label": "Middle center" },
+            { "value": "middle-right", "label": "Middle right" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-center", "label": "Bottom center" },
+            { "value": "bottom-right", "label": "Bottom right" }
+          ],
+          "default": "middle-center"
+        },
+        {
+          "type": "select",
+          "id": "content_position_mobile",
+          "label": "Mobile content position",
+          "options": [
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-center", "label": "Top center" },
+            { "value": "top-right", "label": "Top right" },
+            { "value": "middle-left", "label": "Middle left" },
+            { "value": "middle-center", "label": "Middle center" },
+            { "value": "middle-right", "label": "Middle right" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-center", "label": "Bottom center" },
+            { "value": "bottom-right", "label": "Bottom right" }
+          ],
+          "default": "bottom-center"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Content alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "color_scheme",
+          "id": "content_color_scheme",
+          "label": "Content color scheme",
+          "info": "Overrides the section color scheme for this slide's text.",
+          "default": "scheme-1"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Fullscreen slider",
+      "category": "Image",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
+    }
+  ]
+}
+{% endschema %}

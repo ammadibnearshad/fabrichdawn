@@ -1,0 +1,649 @@
+/* Fullscreen vertical slider
+   All rules are prefixed with .fvs (or .fvs-* for the two body/wrapper level hooks)
+   so nothing leaks into Dawn core styles. */
+
+.fvs {
+  --fvs-ease: cubic-bezier(0.77, 0, 0.175, 1);
+  --fvs-height: 100vh;
+  display: block;
+  position: relative;
+  width: 100%;
+  background-color: rgb(var(--color-background));
+}
+
+/* ---------- Height modes ---------- */
+
+.fvs--height-full {
+  --fvs-height: 100vh;
+}
+
+.fvs--height-full_minus_header {
+  --fvs-height: calc(100vh - var(--fvs-header-height, 0px));
+}
+
+@supports (height: 100svh) {
+  .fvs--height-full {
+    --fvs-height: 100svh;
+  }
+
+  .fvs--height-full_minus_header {
+    --fvs-height: calc(100svh - var(--fvs-header-height, 0px));
+  }
+}
+
+@supports (height: 100dvh) {
+  .fvs--height-full {
+    --fvs-height: 100dvh;
+  }
+
+  .fvs--height-full_minus_header {
+    --fvs-height: calc(100dvh - var(--fvs-header-height, 0px));
+  }
+}
+
+/* Stacked mode scrolls natively, so lock the height to the small viewport to
+   avoid the slides resizing while a mobile browser toolbar collapses. */
+@supports (height: 100svh) {
+  .fvs--stacked.fvs--height-full {
+    --fvs-height: 100svh;
+  }
+
+  .fvs--stacked.fvs--height-full_minus_header {
+    --fvs-height: calc(100svh - var(--fvs-header-height, 0px));
+  }
+}
+
+/* ---------- Layout ---------- */
+
+.fvs--contained {
+  max-width: var(--page-width);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.fvs--js {
+  height: var(--fvs-height);
+  overflow: hidden;
+}
+
+.fvs__track {
+  position: relative;
+  width: 100%;
+}
+
+.fvs--js .fvs__track {
+  height: 100%;
+}
+
+.fvs__slide {
+  position: relative;
+  width: 100%;
+  height: var(--fvs-height);
+  overflow: hidden;
+  background-color: rgb(var(--color-background));
+}
+
+.fvs--js .fvs__slide {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+}
+
+.fvs--js .fvs__slide:not(.is-active) {
+  pointer-events: none;
+}
+
+/* Overlap the Dawn header. The class is added by JS only when the section is
+   the first one inside <main>, because Liquid cannot know that reliably. */
+.shopify-section.fvs-overlap-parent {
+  position: relative;
+  z-index: 0;
+  margin-top: calc(var(--fvs-header-height, 0px) * -1);
+}
+
+/* ---------- Transitions ---------- */
+
+.fvs--js.fvs--transition-slide .fvs__slide {
+  transform: translate3d(0, 100%, 0);
+}
+
+.fvs--js.fvs--transition-slide .fvs__slide.is-above {
+  transform: translate3d(0, -100%, 0);
+}
+
+.fvs--js.fvs--transition-slide .fvs__slide.is-active {
+  transform: translate3d(0, 0, 0);
+}
+
+.fvs--js.fvs--transition-slide .fvs__slide.is-active,
+.fvs--js.fvs--transition-slide .fvs__slide.is-animating {
+  transition: transform var(--fvs-speed, 800ms) var(--fvs-ease);
+  will-change: transform;
+}
+
+.fvs--js.fvs--transition-fade .fvs__slide {
+  opacity: 0;
+  z-index: 0;
+}
+
+.fvs--js.fvs--transition-fade .fvs__slide.is-active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.fvs--js.fvs--transition-fade .fvs__slide.is-active,
+.fvs--js.fvs--transition-fade .fvs__slide.is-animating {
+  transition: opacity var(--fvs-speed, 800ms) ease;
+  will-change: opacity;
+}
+
+/* Instant repositioning (resize, block select, first paint). */
+.fvs--js.fvs--no-transition .fvs__slide,
+.fvs--js.fvs--no-transition .fvs__slide.is-active,
+.fvs--js.fvs--no-transition .fvs__slide.is-animating {
+  transition-duration: 0s;
+}
+
+/* ---------- Media ---------- */
+
+.fvs__media-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.fvs__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fvs__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: var(--fvs-fit, cover);
+  object-position: var(--fvs-pos-d, center);
+}
+
+.fvs__media--placeholder {
+  display: flex;
+  background-color: rgba(var(--color-foreground), 0.04);
+}
+
+.fvs__media--placeholder .fvs__placeholder {
+  width: 100%;
+  height: 100%;
+  fill: rgba(var(--color-foreground), 0.3);
+}
+
+.fvs__video {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: var(--fvs-fit, cover);
+  object-position: var(--fvs-pos-d, center);
+}
+
+.fvs__video--mobile {
+  display: block;
+}
+
+@media screen and (max-width: 749px) {
+  .fvs__img,
+  .fvs__video {
+    object-position: var(--fvs-pos-m, center);
+  }
+}
+
+@media screen and (min-width: 750px) {
+  .fvs__video--mobile {
+    display: none;
+  }
+
+  .fvs__video--desktop {
+    display: block;
+  }
+}
+
+.fvs__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-color: var(--fvs-overlay-color, #000000);
+  opacity: var(--fvs-overlay-opacity, 0);
+  pointer-events: none;
+}
+
+/* ---------- Whole-banner link ---------- */
+
+.fvs__link {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+}
+
+.fvs__link:focus-visible {
+  outline: 0.2rem solid rgb(var(--color-background));
+  outline-offset: -0.8rem;
+  box-shadow: inset 0 0 0 0.5rem rgba(var(--color-foreground), 0.4);
+}
+
+/* ---------- Optional text content ---------- */
+
+.fvs__content-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  padding: 4rem 2rem;
+  pointer-events: none;
+}
+
+.fvs__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  max-width: 62rem;
+  color: rgb(var(--color-foreground));
+  pointer-events: auto;
+}
+
+.fvs__content--left {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.fvs__content--center {
+  text-align: center;
+  align-items: center;
+}
+
+.fvs__content--right {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.fvs__subheading,
+.fvs__heading,
+.fvs__text {
+  margin: 0;
+}
+
+.fvs__content-wrap--m-top-left {
+  align-items: start;
+  justify-items: start;
+}
+.fvs__content-wrap--m-top-center {
+  align-items: start;
+  justify-items: center;
+}
+.fvs__content-wrap--m-top-right {
+  align-items: start;
+  justify-items: end;
+}
+.fvs__content-wrap--m-middle-left {
+  align-items: center;
+  justify-items: start;
+}
+.fvs__content-wrap--m-middle-center {
+  align-items: center;
+  justify-items: center;
+}
+.fvs__content-wrap--m-middle-right {
+  align-items: center;
+  justify-items: end;
+}
+.fvs__content-wrap--m-bottom-left {
+  align-items: end;
+  justify-items: start;
+}
+.fvs__content-wrap--m-bottom-center {
+  align-items: end;
+  justify-items: center;
+}
+.fvs__content-wrap--m-bottom-right {
+  align-items: end;
+  justify-items: end;
+}
+
+@media screen and (min-width: 750px) {
+  .fvs__content-wrap {
+    padding: 8rem 5rem;
+  }
+
+  .fvs__content-wrap--top-left {
+    align-items: start;
+    justify-items: start;
+  }
+  .fvs__content-wrap--top-center {
+    align-items: start;
+    justify-items: center;
+  }
+  .fvs__content-wrap--top-right {
+    align-items: start;
+    justify-items: end;
+  }
+  .fvs__content-wrap--middle-left {
+    align-items: center;
+    justify-items: start;
+  }
+  .fvs__content-wrap--middle-center {
+    align-items: center;
+    justify-items: center;
+  }
+  .fvs__content-wrap--middle-right {
+    align-items: center;
+    justify-items: end;
+  }
+  .fvs__content-wrap--bottom-left {
+    align-items: end;
+    justify-items: start;
+  }
+  .fvs__content-wrap--bottom-center {
+    align-items: end;
+    justify-items: center;
+  }
+  .fvs__content-wrap--bottom-right {
+    align-items: end;
+    justify-items: end;
+  }
+}
+
+/* ---------- Pagination ---------- */
+
+.fvs__dots {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fvs-dots-gap, 12px);
+}
+
+.fvs__dots-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fvs-dots-gap, 12px);
+  margin: 0;
+  padding: 0;
+}
+
+.fvs__dots-item {
+  display: flex;
+}
+
+.fvs__dots--bottom_right {
+  right: var(--fvs-dots-offset-m, 20px);
+  bottom: var(--fvs-dots-offset-m, 20px);
+}
+
+.fvs__dots--bottom_left {
+  left: var(--fvs-dots-offset-m, 20px);
+  bottom: var(--fvs-dots-offset-m, 20px);
+}
+
+.fvs__dots--center_right {
+  right: var(--fvs-dots-offset-m, 20px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.fvs__dots--center_left {
+  left: var(--fvs-dots-offset-m, 20px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media screen and (min-width: 750px) {
+  .fvs__dots--bottom_right {
+    right: var(--fvs-dots-offset, 40px);
+    bottom: var(--fvs-dots-offset, 40px);
+  }
+
+  .fvs__dots--bottom_left {
+    left: var(--fvs-dots-offset, 40px);
+    bottom: var(--fvs-dots-offset, 40px);
+  }
+
+  .fvs__dots--center_right {
+    right: var(--fvs-dots-offset, 40px);
+  }
+
+  .fvs__dots--center_left {
+    left: var(--fvs-dots-offset, 40px);
+  }
+}
+
+.fvs--dots-hidden-mobile .fvs__dots {
+  display: none;
+}
+
+@media screen and (min-width: 750px) {
+  .fvs--dots-hidden-mobile .fvs__dots {
+    display: flex;
+  }
+}
+
+.fvs__dot {
+  position: relative;
+  display: block;
+  width: var(--fvs-dots-size, 8px);
+  height: var(--fvs-dots-size, 8px);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--fvs-dots-color, #ffffff);
+  opacity: 0.5;
+  cursor: pointer;
+  filter: drop-shadow(0 0 0.2rem rgba(0, 0, 0, 0.45));
+  transition: opacity 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+}
+
+/* Enlarged hit area without shifting the visual dot. */
+.fvs__dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.4rem;
+  height: calc(100% + var(--fvs-dots-gap, 12px));
+  transform: translate(-50%, -50%);
+}
+
+.fvs__dot:hover {
+  opacity: 0.8;
+}
+
+.fvs__dot.is-active {
+  height: calc(var(--fvs-dots-size, 8px) * 2.5);
+  border-radius: calc(var(--fvs-dots-size, 8px));
+  background-color: var(--fvs-dots-active-color, #ffffff);
+  opacity: 1;
+}
+
+.fvs__dot:focus-visible {
+  outline: 0.2rem solid var(--fvs-dots-active-color, #ffffff);
+  outline-offset: 0.4rem;
+}
+
+.fvs__dots--line .fvs__dot {
+  width: 0.2rem;
+  height: calc(var(--fvs-dots-size, 8px) * 2);
+  border-radius: 0;
+}
+
+.fvs__dots--line .fvs__dot.is-active {
+  height: calc(var(--fvs-dots-size, 8px) * 4);
+  border-radius: 0;
+}
+
+.fvs__dots--number .fvs__dot {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: var(--fvs-dots-color, #ffffff);
+  font-family: var(--font-body-family);
+  font-size: 1.2rem;
+  letter-spacing: 0.1rem;
+  filter: drop-shadow(0 0 0.2rem rgba(0, 0, 0, 0.45));
+}
+
+.fvs__dots--number .fvs__dot.is-active {
+  height: auto;
+  color: var(--fvs-dots-active-color, #ffffff);
+}
+
+.fvs__counter {
+  margin: 0;
+  color: var(--fvs-dots-color, #ffffff);
+  font-family: var(--font-body-family);
+  font-size: 1.2rem;
+  letter-spacing: 0.1rem;
+  filter: drop-shadow(0 0 0.2rem rgba(0, 0, 0, 0.45));
+}
+
+.fvs__counter-current {
+  color: var(--fvs-dots-active-color, #ffffff);
+}
+
+.fvs__pause {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  padding: 0;
+  border: 0.1rem solid var(--fvs-dots-color, #ffffff);
+  border-radius: 50%;
+  background: none;
+  color: var(--fvs-dots-color, #ffffff);
+  cursor: pointer;
+  filter: drop-shadow(0 0 0.2rem rgba(0, 0, 0, 0.45));
+}
+
+.fvs__pause:focus-visible {
+  outline: 0.2rem solid var(--fvs-dots-active-color, #ffffff);
+  outline-offset: 0.3rem;
+}
+
+.fvs__pause-icon--pause {
+  width: 0.8rem;
+  height: 0.9rem;
+  border-left: 0.2rem solid currentColor;
+  border-right: 0.2rem solid currentColor;
+}
+
+.fvs__pause-icon--play {
+  display: none;
+  width: 0;
+  height: 0;
+  margin-left: 0.2rem;
+  border-top: 0.45rem solid transparent;
+  border-bottom: 0.45rem solid transparent;
+  border-left: 0.8rem solid currentColor;
+}
+
+.fvs__pause.is-paused .fvs__pause-icon--pause {
+  display: none;
+}
+
+.fvs__pause.is-paused .fvs__pause-icon--play {
+  display: block;
+}
+
+/* ---------- Scroll hint ---------- */
+
+.fvs__hint {
+  position: absolute;
+  left: 50%;
+  bottom: var(--fvs-dots-offset-m, 20px);
+  z-index: 4;
+  transform: translateX(-50%);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+@media screen and (min-width: 750px) {
+  .fvs__hint {
+    bottom: var(--fvs-dots-offset, 40px);
+  }
+}
+
+.fvs__hint.is-hidden {
+  opacity: 0;
+}
+
+.fvs__hint-mouse {
+  display: block;
+  width: 2.2rem;
+  height: 3.4rem;
+  border: 0.15rem solid var(--fvs-dots-color, #ffffff);
+  border-radius: 1.2rem;
+  filter: drop-shadow(0 0 0.2rem rgba(0, 0, 0, 0.45));
+}
+
+.fvs__hint-wheel {
+  display: block;
+  width: 0.3rem;
+  height: 0.7rem;
+  margin: 0.6rem auto 0;
+  border-radius: 0.2rem;
+  background-color: var(--fvs-dots-color, #ffffff);
+  animation: fvs-hint-wheel 1.6s ease-in-out infinite;
+}
+
+@keyframes fvs-hint-wheel {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0.8rem);
+    opacity: 0.2;
+  }
+}
+
+/* ---------- Transparent header while the slider owns the viewport ---------- */
+
+body.fvs-header-transparent .section-header:not(.shopify-section-header-sticky.scrolled-past-header) .header-wrapper {
+  --color-foreground: var(--fvs-header-color, 255, 255, 255);
+  --color-link: var(--fvs-header-color, 255, 255, 255);
+  background: transparent;
+  background-image: none;
+  border-bottom-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+body.fvs-header-transparent
+  .section-header:not(.shopify-section-header-sticky.scrolled-past-header)
+  .header__heading-link
+  .h2 {
+  color: rgb(var(--fvs-header-color, 255, 255, 255));
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .fvs--js .fvs__slide,
+  .fvs--js .fvs__slide.is-active,
+  .fvs--js .fvs__slide.is-animating {
+    transition-duration: 0.01ms;
+  }
+
+  .fvs__dot,
+  .fvs__hint {
+    transition-duration: 0.01ms;
+  }
+
+  .fvs__hint-wheel {
+    animation: none;
+  }
+}
