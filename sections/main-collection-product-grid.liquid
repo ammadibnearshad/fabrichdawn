@@ -1,6 +1,10 @@
 {{ 'template-collection.css' | asset_url | stylesheet_tag }}
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'component-card-cm.css' | asset_url | stylesheet_tag }}
+{{ 'section-cm-collection.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'cm-load-more.js' | asset_url }}" defer="defer"></script>
 
 {% if section.settings.image_shape == 'blob' %}
   {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
@@ -34,13 +38,20 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+  .section-{{ section.id }}-cm-grid {
+    --cm-grid-gap-mobile: {{ section.settings.grid_gap_mobile }}px;
+    --cm-grid-gap-desktop: {{ section.settings.grid_gap_desktop }}px;
+    --cm-row-gap-mobile: {{ section.settings.row_gap_mobile }}px;
+    --cm-row-gap-desktop: {{ section.settings.row_gap_desktop }}px;
+  }
 {%- endstyle -%}
 
 <collection-component
   view-event-payload="{{ collection | standard_event_data: 'view' | escape }}"
   data-collection-id="{{ collection.id }}"
 >
-  <div class="section-{{ section.id }}-padding gradient color-{{ section.settings.color_scheme }}">
+  <div class="cm-collection section-{{ section.id }}-cm-grid{% if section.settings.full_width_grid %} cm-collection--full-width{% endif %} section-{{ section.id }}-padding gradient color-{{ section.settings.color_scheme }}">
     {%- paginate collection.products by section.settings.products_per_page -%}
       {% comment %} Sort is the first tabbable element when filter type is vertical {% endcomment %}
       {%- if section.settings.enable_sorting and section.settings.filter_type == 'vertical' -%}
@@ -104,6 +115,80 @@
       <div class="{% if section.settings.filter_type == 'vertical' %} facets-vertical page-width{% endif %}">
         {{ 'component-facets.css' | asset_url | stylesheet_tag }}
         <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+        {%- comment -%}
+          "Products : N" sits directly above the toolbar. It mirrors Dawn's
+          #ProductCount (which facets.js rewrites on every AJAX filter/sort),
+          so the number always reflects the active filters.
+        {%- endcomment -%}
+        {%- if section.settings.show_product_count or section.settings.enable_column_switcher -%}
+          <div
+            class="cm-collection__meta-row{% if section.settings.filter_type != 'vertical' %} page-width{% endif %}"
+          >
+            {%- if section.settings.show_product_count -%}
+              <cm-product-count class="cm-collection__count-wrapper">
+                <p class="cm-collection__count">
+                  <span class="cm-collection__count-label">
+                    {{- section.settings.product_count_label -}}
+                  </span>
+                  <span data-cm-count>
+                    {{- collection.products_count | default: collection.all_products_count -}}
+                  </span>
+                </p>
+              </cm-product-count>
+            {%- endif -%}
+
+            {%- if section.settings.enable_column_switcher -%}
+              <cm-grid-switcher
+                class="cm-collection__switcher no-js-hidden"
+                data-default-desktop="{{ section.settings.columns_desktop }}"
+                data-default-mobile="{{ section.settings.columns_mobile }}"
+              >
+                <div
+                  class="cm-switcher__group cm-switcher__group--mobile medium-hide large-up-hide"
+                  role="group"
+                  aria-label="{{ 'sections.cm_collection.columns_label' | t }}"
+                >
+                  {%- for cols in (1..2) -%}
+                    <button
+                      type="button"
+                      class="cm-switcher__button"
+                      data-cols="{{ cols }}"
+                      aria-pressed="false"
+                    >
+                      <span class="cm-switcher__icon" aria-hidden="true">
+                        {%- for bar in (1..cols) -%}<i></i>{%- endfor -%}
+                      </span>
+                      <span class="visually-hidden">
+                        {{- 'sections.cm_collection.columns_count' | t: count: cols -}}
+                      </span>
+                    </button>
+                  {%- endfor -%}
+                </div>
+                <div
+                  class="cm-switcher__group cm-switcher__group--desktop small-hide"
+                  role="group"
+                  aria-label="{{ 'sections.cm_collection.columns_label' | t }}"
+                >
+                  {%- for cols in (2..4) -%}
+                    <button
+                      type="button"
+                      class="cm-switcher__button"
+                      data-cols="{{ cols }}"
+                      aria-pressed="false"
+                    >
+                      <span class="cm-switcher__icon" aria-hidden="true">
+                        {%- for bar in (1..cols) -%}<i></i>{%- endfor -%}
+                      </span>
+                      <span class="visually-hidden">
+                        {{- 'sections.cm_collection.columns_count' | t: count: cols -}}
+                      </span>
+                    </button>
+                  {%- endfor -%}
+                </div>
+              </cm-grid-switcher>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
         {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
           <aside
             aria-labelledby="verticalTitle"
@@ -158,8 +243,9 @@
               >
                 {% assign skip_card_product_styles = false %}
                 {%- for product in collection.products -%}
+                  {% comment %} The first row loads eagerly; everything below the fold is lazy. {% endcomment %}
                   {% assign lazy_load = false %}
-                  {%- if forloop.index > 2 -%}
+                  {%- if forloop.index > section.settings.columns_desktop -%}
                     {%- assign lazy_load = true -%}
                   {%- endif -%}
                   <li
@@ -169,7 +255,7 @@
                       style="--animation-order: {{ forloop.index }};"
                     {% endif %}
                   >
-                    {% render 'card-product',
+                    {% render 'card-product-cm',
                       card_product: product,
                       media_aspect_ratio: section.settings.image_ratio,
                       image_shape: section.settings.image_shape,
@@ -180,6 +266,8 @@
                       skip_styles: skip_card_product_styles,
                       quick_add: section.settings.quick_add,
                       section_id: section.id,
+                      columns_desktop: section.settings.columns_desktop,
+                      columns_mobile: section.settings.columns_mobile,
                       product_view_context: 'collection'
                     %}
                   </li>
@@ -187,8 +275,50 @@
                 {%- endfor -%}
               </ul>
 
-              {%- if paginate.pages > 1 -%}
-                {% render 'pagination', paginate: paginate, anchor: '' %}
+              {%- if section.settings.pagination_type == 'numbered' -%}
+                {%- if paginate.pages > 1 -%}
+                  {% render 'pagination', paginate: paginate, anchor: '' %}
+                {%- endif -%}
+              {%- elsif paginate.pages > 1 -%}
+                {%- liquid
+                  assign cm_viewed = paginate.current_offset | plus: collection.products.size
+                  assign cm_total = paginate.items
+                  assign cm_percent = 100
+                  if cm_total > 0
+                    assign cm_percent = cm_viewed | times: 100 | divided_by: cm_total
+                  endif
+                -%}
+                <cm-load-more
+                  class="cm-load-more"
+                  data-next-url="{{ paginate.next.url }}"
+                  data-section-id="{{ section.id }}"
+                  data-viewed="{{ cm_viewed }}"
+                  data-total="{{ cm_total }}"
+                  data-pagination-type="{{ section.settings.pagination_type }}"
+                >
+                  <p class="cm-load-more__status" aria-live="polite">
+                    {{- 'sections.cm_collection.viewed_status_html' | t: viewed: cm_viewed, total: cm_total -}}
+                  </p>
+                  <div
+                    class="cm-load-more__bar"
+                    role="progressbar"
+                    aria-label="{{ 'sections.cm_collection.progress_label' | t }}"
+                    aria-valuemin="0"
+                    aria-valuemax="{{ cm_total }}"
+                    aria-valuenow="{{ cm_viewed }}"
+                  >
+                    <span style="width: {{ cm_percent }}%;"></span>
+                  </div>
+                  {%- if paginate.next.url != blank -%}
+                    <a
+                      href="{{ paginate.next.url }}"
+                      class="cm-load-more__button button button--secondary"
+                    >
+                      {{- 'sections.cm_collection.load_more' | t -}}
+                      {%- render 'loading-spinner' -%}
+                    </a>
+                  {%- endif -%}
+                </cm-load-more>
               {%- endif -%}
             </div>
           {%- endif -%}
@@ -210,16 +340,16 @@
       "type": "range",
       "id": "products_per_page",
       "min": 8,
-      "max": 36,
+      "max": 48,
       "step": 4,
-      "default": 16,
+      "default": 24,
       "label": "t:sections.main-collection-product-grid.settings.products_per_page.label"
     },
     {
       "type": "range",
       "id": "columns_desktop",
-      "min": 1,
-      "max": 6,
+      "min": 2,
+      "max": 5,
       "step": 1,
       "default": 4,
       "label": "t:sections.main-collection-product-grid.settings.columns_desktop.label"
@@ -378,7 +508,7 @@
           "label": "t:sections.main-collection-product-grid.settings.filter_type.options__3.label"
         }
       ],
-      "default": "horizontal",
+      "default": "drawer",
       "label": "t:sections.main-collection-product-grid.settings.filter_type.label"
     },
     {
@@ -410,6 +540,99 @@
       "unit": "px",
       "label": "t:sections.all.padding.padding_bottom",
       "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Cambridge layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "default": true,
+      "label": "Show \"Products : N\" line"
+    },
+    {
+      "type": "text",
+      "id": "product_count_label",
+      "default": "Products :",
+      "label": "Product count label"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_grid",
+      "default": false,
+      "label": "Full width grid"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_column_switcher",
+      "default": false,
+      "label": "Show grid column switcher",
+      "info": "Lets shoppers change the number of columns. Off by default."
+    },
+    {
+      "type": "range",
+      "id": "grid_gap_desktop",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20,
+      "label": "Horizontal gap (desktop)"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap_mobile",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12,
+      "label": "Horizontal gap (mobile)"
+    },
+    {
+      "type": "range",
+      "id": "row_gap_desktop",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 40,
+      "label": "Vertical gap (desktop)"
+    },
+    {
+      "type": "range",
+      "id": "row_gap_mobile",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 28,
+      "label": "Vertical gap (mobile)"
+    },
+    {
+      "type": "header",
+      "content": "Pagination"
+    },
+    {
+      "type": "select",
+      "id": "pagination_type",
+      "options": [
+        {
+          "value": "load_more",
+          "label": "Load more button"
+        },
+        {
+          "value": "infinite",
+          "label": "Infinite scroll"
+        },
+        {
+          "value": "numbered",
+          "label": "Numbered pages (Dawn default)"
+        }
+      ],
+      "default": "load_more",
+      "label": "Pagination style"
     }
   ]
 }

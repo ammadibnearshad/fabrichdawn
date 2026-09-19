@@ -272,7 +272,7 @@
                     {%- case item.object_type -%}
                       {%- when 'product' -%}
                         {%- capture product_settings -%}{%- if section.settings.product_show_vendor -%}vendor,{%- endif -%}title,price{%- endcapture -%}
-                        {% render 'card-product',
+                        {% render 'card-product-cm',
                           card_product: item,
                           media_aspect_ratio: section.settings.image_ratio,
                           image_shape: section.settings.image_shape,
@@ -281,6 +281,8 @@
                           show_rating: section.settings.show_rating,
                           lazy_load: lazy_load,
                           skip_styles: skip_card_product_styles,
+                          columns_desktop: section.settings.columns_desktop,
+                          columns_mobile: section.settings.columns_mobile,
                           product_view_context: 'search'
                         %}
                         {%- assign skip_card_product_styles = true -%}

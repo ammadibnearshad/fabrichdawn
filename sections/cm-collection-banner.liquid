@@ -1,0 +1,290 @@
+{{ 'section-cm-collection-banner.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign cm_image = collection.image
+  assign cm_mobile_image = cm_image
+  if section.settings.mobile_image_source == 'metafield' and collection.metafields.custom.mobile_banner != blank
+    assign cm_mobile_image = collection.metafields.custom.mobile_banner.value
+  endif
+
+  assign cm_has_image = false
+  if section.settings.show_image and cm_image != blank
+    assign cm_has_image = true
+  endif
+-%}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="cm-collection-banner color-{{ section.settings.color_scheme }} gradient">
+  {%- if cm_has_image -%}
+    <div
+      class="
+        cm-collection-banner__media
+        cm-collection-banner__media--{{ section.settings.image_height_mobile }}
+        cm-collection-banner__media--desktop-{{ section.settings.image_height_desktop }}
+        {% unless section.settings.full_width %} page-width{% endunless %}
+      "
+      {% if section.settings.image_height_desktop == 'adapt' or section.settings.image_height_mobile == 'adapt' %}
+        style="--cm-banner-ratio: {{ cm_image.aspect_ratio | default: 3.2 }}; --cm-banner-ratio-mobile: {{ cm_mobile_image.aspect_ratio | default: 3.2 }};"
+      {% endif %}
+    >
+      <picture>
+        {%- if cm_mobile_image != cm_image and cm_mobile_image != blank -%}
+          <source
+            media="(max-width: 749px)"
+            srcset="
+              {{ cm_mobile_image | image_url: width: 750 }} 750w,
+              {{ cm_mobile_image | image_url: width: 1100 }} 1100w,
+              {{ cm_mobile_image | image_url: width: 1500 }} 1500w
+            "
+            sizes="100vw"
+            width="{{ cm_mobile_image.width }}"
+            height="{{ cm_mobile_image.height }}"
+          >
+        {%- endif -%}
+        {{
+          cm_image
+          | image_url: width: 3840
+          | image_tag:
+            loading: 'eager',
+            fetchpriority: 'high',
+            widths: '375, 550, 750, 1100, 1500, 1780, 2000, 2400, 3000, 3840',
+            sizes: '100vw',
+            width: cm_image.width,
+            height: cm_image.height,
+            alt: cm_image.alt,
+            class: 'cm-collection-banner__image'
+        }}
+      </picture>
+    </div>
+  {%- endif -%}
+
+  <div class="cm-collection-banner__content page-width section-{{ section.id }}-padding cm-collection-banner__content--{{ section.settings.content_alignment }}">
+    {%- if section.settings.show_breadcrumb -%}
+      <nav class="cm-breadcrumb" aria-label="{{ 'sections.cm_collection.breadcrumb' | t }}">
+        <ol class="cm-breadcrumb__list list-unstyled">
+          <li class="cm-breadcrumb__item">
+            <a href="{{ routes.root_url }}" class="cm-breadcrumb__link">
+              {{- 'sections.cm_collection.home' | t -}}
+            </a>
+          </li>
+          <li class="cm-breadcrumb__item" aria-current="page">
+            <span class="cm-breadcrumb__separator" aria-hidden="true">
+              {{- section.settings.breadcrumb_separator | default: '/' -}}
+            </span>
+            <span class="cm-breadcrumb__current">{{ collection.title | escape }}</span>
+          </li>
+        </ol>
+      </nav>
+    {%- endif -%}
+
+    {%- if section.settings.show_title -%}
+      <h1 class="cm-collection-banner__title {{ section.settings.title_size }}{% if section.settings.title_uppercase %} cm-collection-banner__title--uppercase{% endif %}">
+        <a href="{{ collection.url }}" class="cm-collection-banner__title-link">
+          {{- collection.title | escape -}}
+        </a>
+      </h1>
+    {%- endif -%}
+
+    {%- if section.settings.show_description and collection.description != blank -%}
+      <div class="cm-collection-banner__description rte">{{ collection.description }}</div>
+    {%- endif -%}
+  </div>
+</div>
+
+{%- if section.settings.show_breadcrumb -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": {{ 'sections.cm_collection.home' | t | json }},
+          "item": {{ request.origin | append: routes.root_url | json }}
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": {{ collection.title | json }},
+          "item": {{ request.origin | append: collection.url | json }}
+        }
+      ]
+    }
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "CM collection banner",
+  "class": "section cm-collection-banner-section",
+  "tag": "section",
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Banner image"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "default": true,
+      "label": "Show collection image"
+    },
+    {
+      "type": "select",
+      "id": "image_height_desktop",
+      "options": [
+        { "value": "adapt", "label": "Adapt to image" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "adapt",
+      "label": "Desktop height"
+    },
+    {
+      "type": "select",
+      "id": "image_height_mobile",
+      "options": [
+        { "value": "adapt", "label": "Adapt to image" },
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "adapt",
+      "label": "Mobile height"
+    },
+    {
+      "type": "select",
+      "id": "mobile_image_source",
+      "options": [
+        { "value": "same", "label": "Same as desktop" },
+        { "value": "metafield", "label": "Collection metafield (custom.mobile_banner)" }
+      ],
+      "default": "same",
+      "label": "Mobile image source",
+      "info": "The metafield must be a collection metafield of type File (image) with the key custom.mobile_banner."
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": true,
+      "label": "Make image full width"
+    },
+    {
+      "type": "header",
+      "content": "Breadcrumb"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumb",
+      "default": true,
+      "label": "Show breadcrumb"
+    },
+    {
+      "type": "text",
+      "id": "breadcrumb_separator",
+      "default": "/",
+      "label": "Separator"
+    },
+    {
+      "type": "header",
+      "content": "Title"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "default": true,
+      "label": "Show collection title"
+    },
+    {
+      "type": "checkbox",
+      "id": "title_uppercase",
+      "default": true,
+      "label": "Uppercase title"
+    },
+    {
+      "type": "select",
+      "id": "title_size",
+      "options": [
+        { "value": "h2", "label": "t:sections.all.heading_size.options__1.label" },
+        { "value": "h1", "label": "t:sections.all.heading_size.options__2.label" },
+        { "value": "h0", "label": "t:sections.all.heading_size.options__3.label" }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "default": false,
+      "label": "Show collection description"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left",
+      "label": "Content alignment"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "CM collection banner"
+    }
+  ]
+}
+{% endschema %}

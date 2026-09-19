@@ -38,7 +38,7 @@
         {% assign skip_card_product_styles = false %}
         {% for recommendation in recommendations.products %}
           <li class="grid__item">
-            {% render 'card-product',
+            {% render 'card-product-cm',
               card_product: recommendation,
               media_aspect_ratio: section.settings.image_ratio,
               image_shape: section.settings.image_shape,
@@ -46,6 +46,8 @@
               show_vendor: section.settings.show_vendor,
               show_rating: section.settings.show_rating,
               skip_styles: skip_card_product_styles,
+              columns_desktop: section.settings.columns_desktop,
+              columns_mobile: section.settings.columns_mobile,
               product_view_context: 'recommendation'
             %}
           </li>

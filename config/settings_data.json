@@ -198,7 +198,29 @@
           "shadow": "#121212"
         }
       }
-    }
+    },
+    "cm_card_image_ratio": "portrait_2_3",
+    "cm_card_hover_image": true,
+    "cm_card_hover_effect": "fade",
+    "cm_card_title_uppercase": true,
+    "cm_card_title_lines": 2,
+    "cm_card_text_align": "left",
+    "cm_card_info_spacing": 12,
+    "cm_card_show_colors_count": true,
+    "cm_card_color_option_names": "Color,Colour",
+    "cm_card_colors_label_mode": "reference",
+    "cm_card_show_fit": true,
+    "cm_card_fit_metafield": "custom.fit",
+    "cm_card_fit_fallback_tag_prefix": "fit:",
+    "cm_card_meta_divider": "|",
+    "cm_card_price_show_currency": true,
+    "cm_card_show_soldout_badge": true,
+    "cm_card_show_sale_badge": false,
+    "cm_card_show_discount_percent": false,
+    "cm_card_show_new_badge": false,
+    "cm_card_new_tag": "New",
+    "cm_card_badge_position": "top-left",
+    "cm_card_color_scheme": "scheme-1"
   },
   "presets": {
     "Dawn": {

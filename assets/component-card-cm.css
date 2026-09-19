@@ -1,0 +1,312 @@
+/*
+  Cambridge product card (card-product-cm.liquid)
+
+  Loaded globally by the card snippet. Every class is prefixed `cm-` so it
+  cannot collide with Dawn's own card styles. Type sizes are expressed as
+  calc(var(--font-body-scale) * Npx) so Dawn's global font-scale setting keeps
+  working.
+*/
+
+.cm-card-wrapper {
+  color: inherit;
+  display: block;
+  height: 100%;
+  position: relative;
+  text-decoration: none;
+}
+
+.cm-card {
+  --cm-ratio: 2 / 3;
+  --cm-title-lines: 2;
+  --cm-info-spacing: 12px;
+  --cm-muted: rgba(var(--color-foreground), 0.62);
+
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.cm-card--extend-height {
+  height: 100%;
+}
+
+/* ---------- Media ---------- */
+
+.cm-card__media {
+  aspect-ratio: var(--cm-ratio);
+  background: rgba(var(--color-foreground), 0.04);
+  border-radius: var(--card-corner-radius);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.cm-card__img {
+  display: block;
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  object-position: center;
+  position: absolute;
+  width: 100%;
+}
+
+.cm-card__img--hover {
+  opacity: 0;
+}
+
+.cm-card__placeholder {
+  height: 100%;
+  inset: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.cm-card__placeholder-svg {
+  background-color: rgba(var(--color-foreground), 0.04);
+  fill: rgba(var(--color-foreground), 0.55);
+  height: 100%;
+  width: 100%;
+}
+
+/* Hover swap and zoom: pointer devices only, never on touch. */
+@media (hover: hover) and (pointer: fine) {
+  .cm-card__img--primary,
+  .cm-card__img--hover {
+    transition: opacity var(--duration-long, 400ms) ease, transform 600ms ease;
+  }
+
+  .cm-card--hover-fade.cm-card--has-hover:hover .cm-card__img--primary,
+  .cm-card--hover-fade.cm-card--has-hover:focus-within .cm-card__img--primary {
+    opacity: 0;
+  }
+
+  .cm-card--hover-fade.cm-card--has-hover:hover .cm-card__img--hover,
+  .cm-card--hover-fade.cm-card--has-hover:focus-within .cm-card__img--hover {
+    opacity: 1;
+  }
+
+  .cm-card--hover-zoom.cm-card--has-hover:hover .cm-card__img--primary,
+  .cm-card--hover-zoom.cm-card--has-hover:focus-within .cm-card__img--primary {
+    opacity: 0;
+  }
+
+  .cm-card--hover-zoom.cm-card--has-hover:hover .cm-card__img--hover,
+  .cm-card--hover-zoom.cm-card--has-hover:focus-within .cm-card__img--hover {
+    opacity: 1;
+  }
+
+  .cm-card--hover-none .cm-card__img--hover {
+    display: none;
+  }
+}
+
+/* The zoom itself is motion, so it is opt-in for users who allow motion. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .cm-card--hover-zoom.cm-card--has-hover:hover .cm-card__img,
+  .cm-card--hover-zoom.cm-card--has-hover:focus-within .cm-card__img {
+    transform: scale(1.04);
+  }
+}
+
+/* Touch and coarse pointers never render the hover image at all. */
+@media (hover: none), (pointer: coarse) {
+  .cm-card__img--hover {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-card__img--primary,
+  .cm-card__img--hover {
+    transition: none;
+  }
+}
+
+/* ---------- Badges ---------- */
+
+.cm-card__badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.cm-card__badges--top-left {
+  align-items: flex-start;
+  left: 1rem;
+  top: 1rem;
+}
+
+.cm-card__badges--top-right {
+  align-items: flex-end;
+  right: 1rem;
+  top: 1rem;
+}
+
+.cm-card__badges--bottom-left {
+  align-items: flex-start;
+  bottom: 1rem;
+  left: 1rem;
+}
+
+.cm-card__badge {
+  font-size: calc(var(--font-body-scale) * 11px);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 0.5rem 0.9rem;
+}
+
+.cm-card__badge--new {
+  background-color: rgb(var(--color-foreground));
+  border-color: rgb(var(--color-foreground));
+  color: rgb(var(--color-background));
+}
+
+/* ---------- Info ---------- */
+
+.cm-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-top: var(--cm-info-spacing);
+  position: relative;
+}
+
+.cm-card--align-center .cm-card__info {
+  text-align: center;
+}
+
+.cm-card__title {
+  font-family: var(--font-body-family);
+  font-size: calc(var(--font-body-scale) * 12px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.cm-card__title--uppercase {
+  text-transform: uppercase;
+}
+
+.cm-card__title-link {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: var(--cm-title-lines);
+  line-clamp: var(--cm-title-lines);
+  overflow: hidden;
+  position: relative;
+  text-decoration: none;
+  z-index: 2;
+}
+
+.cm-card__title-link:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.6);
+  outline-offset: 0.3rem;
+}
+
+.cm-card__information {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cm-card--align-center .cm-card__information {
+  align-items: center;
+}
+
+.cm-card__meta {
+  color: var(--cm-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: calc(var(--font-body-scale) * 11px);
+  gap: 0 0.6rem;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.cm-card--align-center .cm-card__meta {
+  justify-content: center;
+}
+
+.cm-card__divider {
+  color: rgba(var(--color-foreground), 0.35);
+}
+
+.cm-card__vendor {
+  color: var(--cm-muted);
+  margin: 0;
+}
+
+.cm-card__price.price {
+  font-size: calc(var(--font-body-scale) * 13px);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.cm-card__price .price-item {
+  margin: 0;
+}
+
+.cm-card__price .price__sale .price-item--regular {
+  color: var(--cm-muted);
+  margin-right: 0.6rem;
+}
+
+/* ---------- Whole-card link ---------- */
+
+.cm-card__overlay-link {
+  display: block;
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+/* Quick add and badges must stay clickable above the overlay link. */
+.cm-card .quick-add,
+.cm-card .quick-add-modal,
+.cm-card quantity-popover {
+  position: relative;
+  z-index: 2;
+}
+
+.cm-card .quick-add {
+  margin-top: 1rem;
+}
+
+/* ---------- Horizontal variant (complementary products) ---------- */
+
+.cm-card--horizontal {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 9rem 1fr;
+  align-items: center;
+}
+
+.cm-card--horizontal .cm-card__info {
+  padding-top: 0;
+}
+
+.cm-card--horizontal .cm-card__title {
+  -webkit-line-clamp: 2;
+}
+
+@media screen and (min-width: 750px) {
+  .cm-card__title {
+    font-size: calc(var(--font-body-scale) * 13px);
+  }
+
+  .cm-card__meta {
+    font-size: calc(var(--font-body-scale) * 12px);
+  }
+
+  .cm-card__price.price {
+    font-size: calc(var(--font-body-scale) * 14px);
+  }
+}

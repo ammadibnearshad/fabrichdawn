@@ -1,0 +1,82 @@
+{% comment %}
+  Renders a Cambridge-style product price.
+
+  Same visual structure and class names as Dawn's `price` snippet, so
+  component-price.css keeps styling it, but the money format is driven by
+  settings.cm_card_price_show_currency instead of settings.currency_code_enabled,
+  and sale styling is applied strictly when compare_at_price > price.
+
+  Accepts:
+  - product: {Object} Product Liquid object (optional)
+  - placeholder: {Boolean} Renders a placeholder price (optional)
+  - price_class: {String} Extra class on the price element (optional)
+
+  Usage:
+  {% render 'cm-price', product: card_product, price_class: 'cm-card__price' %}
+{% endcomment %}
+
+{%- liquid
+  if placeholder
+    assign cm_target = null
+  else
+    assign cm_target = product
+  endif
+
+  assign cm_price = cm_target.price | default: 1999
+  assign cm_compare_at_price = cm_target.compare_at_price
+  assign cm_available = cm_target.available | default: false
+  assign cm_on_sale = false
+  if cm_compare_at_price > cm_price
+    assign cm_on_sale = true
+  endif
+
+  if settings.cm_card_price_show_currency
+    assign cm_money_price = cm_price | money_with_currency
+    assign cm_money_compare = cm_compare_at_price | money_with_currency
+  else
+    assign cm_money_price = cm_price | money
+    assign cm_money_compare = cm_compare_at_price | money
+  endif
+
+  if product.price_varies and placeholder != true
+    assign cm_money_price = 'products.product.price.from_price_html' | t: price: cm_money_price
+  endif
+-%}
+
+{%- unless cm_target == null and placeholder == null -%}
+  <div
+    class="
+      price cm-price
+      {%- if price_class %} {{ price_class }}{% endif -%}
+      {%- if cm_available == false %} price--sold-out{% endif -%}
+      {%- if cm_on_sale %} price--on-sale{% endif -%}
+    "
+  >
+    <div class="price__container">
+      <div class="price__regular">
+        <span class="visually-hidden visually-hidden--inline">
+          {{- 'products.product.price.regular_price' | t -}}
+        </span>
+        <span class="price-item price-item--regular">{{ cm_money_price }}</span>
+      </div>
+      <div class="price__sale">
+        <span class="visually-hidden visually-hidden--inline">
+          {{- 'products.product.price.regular_price' | t -}}
+        </span>
+        <span>
+          <s class="price-item price-item--regular">{{ cm_money_compare }}</s>
+        </span>
+        <span class="visually-hidden visually-hidden--inline">
+          {{- 'products.product.price.sale_price' | t -}}
+        </span>
+        <span class="price-item price-item--sale price-item--last">{{ cm_money_price }}</span>
+      </div>
+      {%- if product.selected_or_first_available_variant.unit_price_measurement -%}
+        {%- render 'unit-price',
+          price: product.selected_or_first_available_variant.unit_price,
+          measurement: product.selected_or_first_available_variant.unit_price_measurement
+        -%}
+      {%- endif -%}
+    </div>
+  </div>
+{%- endunless -%}

@@ -107,6 +107,12 @@
   },
   "products": {
     "product": {
+      "cm": {
+        "colors_count": "{{ count }} Colors",
+        "colors_count_one": "{{ count }} Color",
+        "new_badge": "New",
+        "discount_percent": "-{{ percent }}%"
+      },
       "add_to_cart": "Aggiungi al carrello",
       "description": "Descrizione",
       "on_sale": "In offerta",
@@ -276,6 +282,15 @@
     }
   },
   "sections": {
+    "cm_collection": {
+      "breadcrumb": "Breadcrumb",
+      "home": "Home",
+      "viewed_status_html": "You've viewed <span data-viewed>{{ viewed }}</span> of <span data-total>{{ total }}</span> products",
+      "progress_label": "Products loaded",
+      "load_more": "Load More",
+      "columns_label": "Products per row",
+      "columns_count": "{{ count }} per row"
+    },
     "header": {
       "announcement": "Annuncio",
       "menu": "Menu",

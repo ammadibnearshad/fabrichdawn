@@ -1466,5 +1466,246 @@
         "label": "t:settings_schema.customer_accounts.settings.customer_account_menu.label"
       }
     ]
+  },
+  {
+    "name": "Product card (Cambridge)",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Image"
+      },
+      {
+        "type": "select",
+        "id": "cm_card_image_ratio",
+        "options": [
+          {
+            "value": "portrait_2_3",
+            "label": "Portrait 2:3"
+          },
+          {
+            "value": "portrait_3_4",
+            "label": "Portrait 3:4"
+          },
+          {
+            "value": "square",
+            "label": "Square"
+          },
+          {
+            "value": "adapt",
+            "label": "Adapt to image"
+          }
+        ],
+        "default": "portrait_2_3",
+        "label": "Image ratio",
+        "info": "Used when a section passes \"Adapt\" or nothing."
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_hover_image",
+        "default": true,
+        "label": "Show second image on hover",
+        "info": "Desktop only. Sections that turn off their own secondary image still win."
+      },
+      {
+        "type": "select",
+        "id": "cm_card_hover_effect",
+        "options": [
+          {
+            "value": "fade",
+            "label": "Fade"
+          },
+          {
+            "value": "zoom",
+            "label": "Fade and zoom"
+          },
+          {
+            "value": "none",
+            "label": "None"
+          }
+        ],
+        "default": "fade",
+        "label": "Hover effect"
+      },
+      {
+        "type": "header",
+        "content": "Title"
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_title_uppercase",
+        "default": true,
+        "label": "Uppercase title"
+      },
+      {
+        "type": "range",
+        "id": "cm_card_title_lines",
+        "min": 1,
+        "max": 3,
+        "step": 1,
+        "default": 2,
+        "label": "Title lines before truncating"
+      },
+      {
+        "type": "select",
+        "id": "cm_card_text_align",
+        "options": [
+          {
+            "value": "left",
+            "label": "Left"
+          },
+          {
+            "value": "center",
+            "label": "Center"
+          }
+        ],
+        "default": "left",
+        "label": "Text alignment"
+      },
+      {
+        "type": "range",
+        "id": "cm_card_info_spacing",
+        "min": 4,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "default": 12,
+        "label": "Space between image and title"
+      },
+      {
+        "type": "header",
+        "content": "Meta row"
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_show_colors_count",
+        "default": true,
+        "label": "Show colour count"
+      },
+      {
+        "type": "text",
+        "id": "cm_card_color_option_names",
+        "default": "Color,Colour",
+        "label": "Colour option names",
+        "info": "Comma separated. Matched case-insensitively."
+      },
+      {
+        "type": "select",
+        "id": "cm_card_colors_label_mode",
+        "options": [
+          {
+            "value": "reference",
+            "label": "Always plural (1 Colors)"
+          },
+          {
+            "value": "grammatical",
+            "label": "Singular and plural (1 Color)"
+          }
+        ],
+        "default": "reference",
+        "label": "Colour count wording"
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_show_fit",
+        "default": true,
+        "label": "Show fit label"
+      },
+      {
+        "type": "text",
+        "id": "cm_card_fit_metafield",
+        "default": "custom.fit",
+        "label": "Fit metafield",
+        "info": "namespace.key of a single line text product metafield."
+      },
+      {
+        "type": "text",
+        "id": "cm_card_fit_fallback_tag_prefix",
+        "default": "fit:",
+        "label": "Fit tag fallback prefix",
+        "info": "Used when the metafield is empty, e.g. a tag of fit:Regular Fit."
+      },
+      {
+        "type": "text",
+        "id": "cm_card_meta_divider",
+        "default": "|",
+        "label": "Divider character"
+      },
+      {
+        "type": "header",
+        "content": "Price"
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_price_show_currency",
+        "default": true,
+        "label": "Show currency code",
+        "info": "Rs.6,495 PKR instead of Rs.6,495."
+      },
+      {
+        "type": "header",
+        "content": "Badges"
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_show_soldout_badge",
+        "default": true,
+        "label": "Show sold out badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_show_sale_badge",
+        "default": false,
+        "label": "Show sale badge",
+        "info": "Only appears when the compare-at price is higher than the price."
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_show_discount_percent",
+        "default": false,
+        "label": "Show discount percentage on the sale badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "cm_card_show_new_badge",
+        "default": false,
+        "label": "Show new badge"
+      },
+      {
+        "type": "text",
+        "id": "cm_card_new_tag",
+        "default": "New",
+        "label": "New badge tag"
+      },
+      {
+        "type": "select",
+        "id": "cm_card_badge_position",
+        "options": [
+          {
+            "value": "top-left",
+            "label": "Top left"
+          },
+          {
+            "value": "top-right",
+            "label": "Top right"
+          },
+          {
+            "value": "bottom-left",
+            "label": "Bottom left"
+          }
+        ],
+        "default": "top-left",
+        "label": "Badge position"
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "color_scheme",
+        "id": "cm_card_color_scheme",
+        "default": "scheme-1",
+        "label": "t:sections.all.colors.label"
+      }
+    ]
   }
 ]

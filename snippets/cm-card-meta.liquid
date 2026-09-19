@@ -1,0 +1,95 @@
+{% comment %}
+  Renders the Cambridge-style product card meta row: "N Colors | Regular Fit"
+
+  Accepts:
+  - product: {Object} Product Liquid object (required)
+
+  Colour count comes from the product option whose name matches one of
+  settings.cm_card_color_option_names (comma separated, case-insensitive).
+
+  Fit comes from the metafield named in settings.cm_card_fit_metafield
+  ("namespace.key"), falling back to the first tag starting with
+  settings.cm_card_fit_fallback_tag_prefix.
+
+  Renders nothing when both parts are empty.
+
+  Usage:
+  {% render 'cm-card-meta', product: card_product %}
+{% endcomment %}
+
+{%- liquid
+  assign cm_colors_count = 0
+
+  if settings.cm_card_show_colors_count and product != blank
+    assign cm_color_names = settings.cm_card_color_option_names | default: 'Color,Colour' | downcase | split: ','
+    for cm_option in product.options_with_values
+      assign cm_option_name = cm_option.name | downcase | strip
+      for cm_name in cm_color_names
+        assign cm_candidate = cm_name | strip
+        if cm_candidate != blank and cm_option_name == cm_candidate
+          assign cm_colors_count = cm_option.values.size
+          break
+        endif
+      endfor
+      if cm_colors_count > 0
+        break
+      endif
+    endfor
+  endif
+
+  assign cm_fit = ''
+
+  if settings.cm_card_show_fit and product != blank
+    assign cm_mf_parts = settings.cm_card_fit_metafield | default: 'custom.fit' | split: '.'
+    assign cm_mf_namespace = cm_mf_parts[0] | strip
+    assign cm_mf_key = cm_mf_parts[1] | strip
+
+    if cm_mf_namespace != blank and cm_mf_key != blank
+      assign cm_fit_metafield = product.metafields[cm_mf_namespace][cm_mf_key]
+      if cm_fit_metafield.type contains 'list.'
+        assign cm_fit = cm_fit_metafield.value.first | default: ''
+      else
+        assign cm_fit = cm_fit_metafield.value | default: ''
+      endif
+    endif
+
+    if cm_fit == blank
+      assign cm_tag_prefix = settings.cm_card_fit_fallback_tag_prefix | default: 'fit:'
+      assign cm_tag_prefix_down = cm_tag_prefix | downcase
+      assign cm_tag_prefix_size = cm_tag_prefix | size
+      if cm_tag_prefix != blank
+        for cm_tag in product.tags
+          assign cm_tag_head = cm_tag | downcase | slice: 0, cm_tag_prefix_size
+          if cm_tag_head == cm_tag_prefix_down
+            assign cm_fit = cm_tag | slice: cm_tag_prefix_size, 255 | strip
+            break
+          endif
+        endfor
+      endif
+    endif
+  endif
+
+  assign cm_fit = cm_fit | strip
+
+  if settings.cm_card_colors_label_mode == 'grammatical' and cm_colors_count == 1
+    assign cm_colors_label = 'products.product.cm.colors_count_one' | t: count: cm_colors_count
+  else
+    assign cm_colors_label = 'products.product.cm.colors_count' | t: count: cm_colors_count
+  endif
+-%}
+
+{%- if cm_colors_count > 0 or cm_fit != blank -%}
+  <p class="cm-card__meta">
+    {%- if cm_colors_count > 0 -%}
+      <span class="cm-card__meta-item cm-card__meta-item--colors">{{ cm_colors_label }}</span>
+    {%- endif -%}
+    {%- if cm_colors_count > 0 and cm_fit != blank -%}
+      <span class="cm-card__divider" aria-hidden="true">
+        {{- settings.cm_card_meta_divider | default: '|' -}}
+      </span>
+    {%- endif -%}
+    {%- if cm_fit != blank -%}
+      <span class="cm-card__meta-item cm-card__meta-item--fit">{{ cm_fit | escape }}</span>
+    {%- endif -%}
+  </p>
+{%- endif -%}

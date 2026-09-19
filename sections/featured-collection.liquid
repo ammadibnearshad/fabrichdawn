@@ -117,7 +117,7 @@
                   style="--animation-order: {{ forloop.index }};"
                 {% endif %}
               >
-                {% render 'card-product',
+                {% render 'card-product-cm',
                   card_product: product,
                   media_aspect_ratio: section.settings.image_ratio,
                   image_shape: section.settings.image_shape,
@@ -128,6 +128,8 @@
                   skip_styles: skip_card_product_styles,
                   section_id: section.id,
                   quick_add: section.settings.quick_add,
+                  columns_desktop: section.settings.columns_desktop,
+                  columns_mobile: section.settings.columns_mobile,
                   product_view_context: 'collection'
                 %}
               </li>
@@ -153,7 +155,7 @@
                 endcase
               %}
               {%- assign placeholder_image = 'product-apparel-' | append: ridx -%}
-              {% render 'card-product',
+              {% render 'card-product-cm',
                 show_vendor: section.settings.show_vendor,
                 media_aspect_ratio: section.settings.image_ratio,
                 image_shape: section.settings.image_shape,
