@@ -1,0 +1,203 @@
+{% comment %}
+  Renders the Cambridge-style "Size Chart" link and its modal/drawer.
+
+  Built on Dawn's `modal-opener` + `modal-dialog` pair (the same pattern as the
+  Popup block), so focus trap, Esc, outside-click and focus restore all come
+  from Dawn's global.js — this snippet ships no JavaScript of its own.
+
+  Content is resolved in this order, and the link is not rendered at all when
+  none of them resolve:
+    1. product metafield named by block.settings.metafield_key
+    2. a page whose handle matches the product's size-chart tag
+    3. the block's own page / image settings
+
+  Accepts:
+  - product: {Object} Product Liquid object. Required.
+  - block: {Object} The `cm_size_chart` block. Required.
+  - part: {String} 'opener' (the link) or 'dialog' (the modal). Required.
+
+  Usage:
+  {% render 'cm-size-chart', product: product, block: block, part: 'opener' %}
+{% endcomment %}
+
+{%- liquid
+  assign cm_sc_page = null
+  assign cm_sc_image = null
+  assign cm_sc_richtext = ''
+  assign cm_sc_source = block.settings.source | default: 'page'
+
+  # --- 1. Product metafield -------------------------------------------------
+  assign cm_sc_mf_parts = block.settings.metafield_key | default: 'custom.size_chart' | split: '.'
+  assign cm_sc_mf_ns = cm_sc_mf_parts[0] | strip
+  assign cm_sc_mf_key = cm_sc_mf_parts[1] | strip
+  if cm_sc_mf_ns != blank and cm_sc_mf_key != blank
+    assign cm_sc_mf = product.metafields[cm_sc_mf_ns][cm_sc_mf_key]
+    if cm_sc_mf != blank
+      if cm_sc_mf.type == 'page_reference'
+        assign cm_sc_page = cm_sc_mf.value
+      elsif cm_sc_mf.type == 'file_reference'
+        assign cm_sc_image = cm_sc_mf.value
+      elsif cm_sc_mf.value != blank
+        assign cm_sc_richtext = cm_sc_mf | metafield_tag
+      endif
+    endif
+  endif
+
+  # --- 2. Tag-matched page --------------------------------------------------
+  if cm_sc_page == null and cm_sc_image == null and cm_sc_richtext == blank
+    assign cm_sc_tag_prefix = block.settings.tag_prefix | downcase | strip
+    assign cm_sc_tag_prefix_size = cm_sc_tag_prefix | size
+
+    for cm_sc_tag in product.tags
+      assign cm_sc_tag_down = cm_sc_tag | downcase
+      assign cm_sc_match = false
+
+      if cm_sc_tag_prefix != blank
+        assign cm_sc_tag_head = cm_sc_tag_down | slice: 0, cm_sc_tag_prefix_size
+        if cm_sc_tag_head == cm_sc_tag_prefix
+          assign cm_sc_match = true
+        endif
+      endif
+
+      unless cm_sc_match
+        assign cm_sc_tag_size = cm_sc_tag_down | size
+        if cm_sc_tag_size > 9
+          assign cm_sc_tag_start = cm_sc_tag_size | minus: 9
+          assign cm_sc_tag_tail = cm_sc_tag_down | slice: cm_sc_tag_start, 9
+          if cm_sc_tag_tail == 'sizechart'
+            assign cm_sc_match = true
+          endif
+        endif
+      endunless
+
+      if cm_sc_match
+        assign cm_sc_handle = cm_sc_tag | handleize
+        if pages[cm_sc_handle] != empty
+          assign cm_sc_page = pages[cm_sc_handle]
+          break
+        endif
+      endif
+    endfor
+  endif
+
+  # --- 3. Block defaults ----------------------------------------------------
+  if cm_sc_page == null and cm_sc_image == null and cm_sc_richtext == blank
+    if cm_sc_source == 'image'
+      assign cm_sc_image = block.settings.image_desktop
+    else
+      assign cm_sc_page = block.settings.page
+    endif
+  endif
+
+  assign cm_sc_has_content = false
+  if cm_sc_page != null and cm_sc_page != empty
+    assign cm_sc_has_content = true
+  endif
+  if cm_sc_image != null and cm_sc_image != blank
+    assign cm_sc_has_content = true
+  endif
+  if cm_sc_richtext != blank
+    assign cm_sc_has_content = true
+  endif
+
+  assign cm_sc_label = block.settings.label | default: 'Size Chart'
+  assign cm_sc_title = cm_sc_page.title | default: cm_sc_label
+-%}
+
+{%- if cm_sc_has_content -%}
+  {%- if part == 'opener' -%}
+    <modal-opener
+      class="cm-size-chart quick-add-hidden"
+      data-modal="#CmSizeChartModal-{{ block.id }}"
+      {{ block.shopify_attributes }}
+    >
+      <button
+        id="CmSizeChartOpener-{{ block.id }}"
+        class="cm-size-chart__button link"
+        type="button"
+        aria-haspopup="dialog"
+      >
+        {%- case block.settings.icon -%}
+          {%- when 'ruler' -%}
+            <svg class="cm-size-chart__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+              <rect x="2.75" y="8.75" width="18.5" height="6.5" rx="1"/>
+              <path d="M7 8.75v3M11 8.75v4.5M15 8.75v3M19 8.75v4.5"/>
+            </svg>
+          {%- when 'hanger' -%}
+            <svg class="cm-size-chart__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+              <path d="M12 9.5V8a2 2 0 1 1 2-2"/>
+              <path d="M12 9.5 3.6 15.2a1.2 1.2 0 0 0 .67 2.2h15.46a1.2 1.2 0 0 0 .67-2.2L12 9.5Z"/>
+            </svg>
+        {%- endcase -%}
+        <span>{{ cm_sc_label | escape }}</span>
+      </button>
+    </modal-opener>
+
+  {%- elsif part == 'dialog' -%}
+    <modal-dialog
+      id="CmSizeChartModal-{{ block.id }}"
+      class="cm-size-chart-modal cm-size-chart-modal--{{ block.settings.display | default: 'modal' }}"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="CmSizeChartTitle-{{ block.id }}"
+        class="cm-size-chart-modal__content"
+        tabindex="-1"
+      >
+        <button
+          id="ModalClose-{{ block.id }}"
+          type="button"
+          class="cm-size-chart-modal__close"
+          aria-label="{{ 'accessibility.close' | t }}"
+        >
+          {{- 'icon-close.svg' | inline_asset_content -}}
+        </button>
+
+        <h2 id="CmSizeChartTitle-{{ block.id }}" class="cm-size-chart-modal__title h3">
+          {{- cm_sc_title | escape -}}
+        </h2>
+
+        <div class="cm-size-chart-modal__body rte">
+          {%- if cm_sc_image != blank -%}
+            {%- if block.settings.image_mobile != blank -%}
+              <picture>
+                <source
+                  media="(min-width: 750px)"
+                  srcset="{{ cm_sc_image | image_url: width: 1400 }}"
+                >
+                {{
+                  block.settings.image_mobile
+                  | image_url: width: 900
+                  | image_tag:
+                    class: 'cm-size-chart-modal__image',
+                    loading: 'lazy',
+                    alt: cm_sc_title,
+                    widths: '375, 550, 750, 900'
+                }}
+              </picture>
+            {%- else -%}
+              {{
+                cm_sc_image
+                | image_url: width: 1400
+                | image_tag:
+                  class: 'cm-size-chart-modal__image',
+                  loading: 'lazy',
+                  alt: cm_sc_title,
+                  widths: '375, 550, 750, 1100, 1400'
+              }}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if cm_sc_richtext != blank -%}
+            {{ cm_sc_richtext }}
+          {%- endif -%}
+
+          {%- if cm_sc_page != null and cm_sc_page != empty -%}
+            {{ cm_sc_page.content }}
+          {%- endif -%}
+        </div>
+      </div>
+    </modal-dialog>
+  {%- endif -%}
+{%- endif -%}

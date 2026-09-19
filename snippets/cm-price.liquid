@@ -10,6 +10,10 @@
   - product: {Object} Product Liquid object (optional)
   - placeholder: {Boolean} Renders a placeholder price (optional)
   - price_class: {String} Extra class on the price element (optional)
+  - use_variant: {Boolean} Price the selected variant instead of the product
+      (used on the product page). Default: false (optional)
+  - show_currency: {Boolean} Overrides settings.cm_card_price_show_currency for
+      this call. Pass nothing to keep the global setting. (optional)
 
   Usage:
   {% render 'cm-price', product: card_product, price_class: 'cm-card__price' %}
@@ -22,6 +26,10 @@
     assign cm_target = product
   endif
 
+  if use_variant and cm_target != null
+    assign cm_target = cm_target.selected_or_first_available_variant
+  endif
+
   assign cm_price = cm_target.price | default: 1999
   assign cm_compare_at_price = cm_target.compare_at_price
   assign cm_available = cm_target.available | default: false
@@ -30,7 +38,12 @@
     assign cm_on_sale = true
   endif
 
-  if settings.cm_card_price_show_currency
+  assign cm_show_currency = show_currency
+  if show_currency == nil
+    assign cm_show_currency = settings.cm_card_price_show_currency
+  endif
+
+  if cm_show_currency
     assign cm_money_price = cm_price | money_with_currency
     assign cm_money_compare = cm_compare_at_price | money_with_currency
   else
@@ -38,7 +51,7 @@
     assign cm_money_compare = cm_compare_at_price | money
   endif
 
-  if product.price_varies and placeholder != true
+  if product.price_varies and placeholder != true and use_variant != true
     assign cm_money_price = 'products.product.price.from_price_html' | t: price: cm_money_price
   endif
 -%}

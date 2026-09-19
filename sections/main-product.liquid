@@ -1,6 +1,102 @@
+{%- liquid
+  # ---- Cambridge (cm) product page state -------------------------------
+  # Everything below is inert when section.settings.cm_style is off, which
+  # leaves this section rendering as stock Dawn.
+  assign cm_style = section.settings.cm_style
+
+  assign cm_breadcrumb_block = section.blocks | where: 'type', 'cm_breadcrumb' | first
+  assign cm_sibling_block = section.blocks | where: 'type', 'cm_sibling_swatches' | first
+  assign cm_size_chart_blocks = section.blocks | where: 'type', 'cm_size_chart'
+  assign cm_buy_buttons_block = section.blocks | where: 'type', 'buy_buttons' | first
+
+  # Middle breadcrumb crumb: metafield (opt-in) -> URL collection -> fallback.
+  assign cm_bc_collection = null
+  if cm_breadcrumb_block
+    if cm_breadcrumb_block.settings.use_metafield_collection
+      assign cm_bc_collection = product.metafields.custom.primary_collection.value
+    endif
+    if cm_bc_collection == blank and cm_breadcrumb_block.settings.show_collection
+      assign cm_bc_collection = collection
+    endif
+    if cm_bc_collection == blank
+      assign cm_bc_collection = cm_breadcrumb_block.settings.fallback_collection
+    endif
+  endif
+
+  # Position of a single-value colour option, so the redundant Color row in
+  # Dawn's variant picker can be hidden while its input still submits.
+  assign cm_hide_color_position = 0
+  if cm_style and cm_sibling_block and cm_sibling_block.settings.hide_color_option_in_picker
+    assign cm_color_names = settings.cm_card_color_option_names | default: 'Color,Colour' | downcase | split: ','
+    for cm_option in product.options_with_values
+      assign cm_option_name = cm_option.name | downcase | strip
+      for cm_name in cm_color_names
+        assign cm_candidate = cm_name | strip
+        if cm_candidate != blank and cm_option_name == cm_candidate and cm_option.values.size == 1
+          assign cm_hide_color_position = cm_option.position
+          break
+        endif
+      endfor
+      if cm_hide_color_position > 0
+        break
+      endif
+    endfor
+  endif
+
+  # First non-colour option is treated as the size option.
+  assign cm_size_option_name = ''
+  assign cm_color_names_all = settings.cm_card_color_option_names | default: 'Color,Colour' | downcase | split: ','
+  for cm_opt in product.options_with_values
+    assign cm_opt_name = cm_opt.name | downcase | strip
+    assign cm_opt_is_color = false
+    for cm_cname in cm_color_names_all
+      assign cm_cname_stripped = cm_cname | strip
+      if cm_cname_stripped != blank and cm_opt_name == cm_cname_stripped
+        assign cm_opt_is_color = true
+        break
+      endif
+    endfor
+    if cm_opt_is_color == false and cm_size_option_name == blank
+      assign cm_size_option_name = cm_opt.name
+    endif
+  endfor
+
+  assign cm_require_size = false
+  if cm_style and cm_buy_buttons_block.settings.require_size_selection and product.has_only_default_variant == false
+    assign cm_require_size = true
+  endif
+
+  assign cm_zoom_hint = false
+  if cm_style and section.settings.show_zoom_hint and section.settings.image_zoom == 'lightbox' and section.settings.zoom_hint_text != blank
+    assign cm_zoom_hint = true
+  endif
+
+  assign cm_sticky_atc = section.settings.sticky_atc | default: 'none'
+  if cm_style == false
+    assign cm_sticky_atc = 'none'
+  endif
+
+  assign cm_share_block = section.blocks | where: 'type', 'cm_share' | first
+  assign cm_note_block = section.blocks | where: 'type', 'cm_note' | first
+
+  assign cm_needs_js = false
+  if cm_sticky_atc != 'none' or cm_require_size
+    assign cm_needs_js = true
+  endif
+  if cm_share_block.settings.native_share_mobile or cm_share_block.settings.copy_link
+    assign cm_needs_js = true
+  endif
+
+  # The Cambridge blocks carry their own styling, so the stylesheet is needed
+  # whenever one of them is in play, not only when cm_style is on.
+  assign cm_needs_css = cm_style
+  if cm_breadcrumb_block or cm_sibling_block or cm_share_block or cm_note_block or cm_size_chart_blocks.size > 0
+    assign cm_needs_css = true
+  endif
+-%}
 <product-info
   id="MainProduct-{{ section.id }}"
-  class="section-{{ section.id }}-padding gradient color-{{ section.settings.color_scheme }}"
+  class="section-{{ section.id }}-padding gradient color-{{ section.settings.color_scheme }}{% if cm_style %} cm-product{% endif %}{% if cm_zoom_hint %} cm-product--zoom-hint{% endif %}"
   data-section="{{ section.id }}"
   data-product-id="{{ product.id }}"
   data-update-url="true"
@@ -24,6 +120,9 @@
   {%- if product.quantity_price_breaks_configured? -%}
     {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
   {%- endif -%}
+  {%- if cm_needs_css -%}
+    {{ 'section-cm-product.css' | asset_url | stylesheet_tag }}
+  {%- endif -%}
 
   {%- style -%}
     .section-{{ section.id }}-padding {
@@ -37,10 +136,33 @@
         padding-bottom: {{ section.settings.padding_bottom }}px;
       }
     }
+
+    {%- if cm_style -%}
+      #MainProduct-{{ section.id }} {
+        --cm-info-gap: {{ section.settings.cm_info_gap | default: 16 }}px;
+        --cm-media-split: {{ section.settings.cm_media_split | default: 58 }}%;
+        {%- if cm_zoom_hint -%}
+          --cm-zoom-hint: '{{ section.settings.zoom_hint_text | replace: "'", '' | strip }}';
+        {%- endif -%}
+      }
+
+      {%- comment -%}
+        Hide the single-value Color row: the radio stays in the DOM and checked,
+        so `variant-selects` still reports it and the form submits a real variant.
+      {%- endcomment -%}
+      {%- if cm_hide_color_position > 0 -%}
+        #variant-selects-{{ section.id }} > *:nth-child({{ cm_hide_color_position }}) {
+          display: none;
+        }
+      {%- endif -%}
+    {%- endif -%}
   {%- endstyle -%}
 
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
   <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+  {%- if cm_needs_js -%}
+    <script src="{{ 'cm-product.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
   {%- if product.quantity_price_breaks_configured? -%}
     <script src="{{ 'show-more.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'price-per-item.js' | asset_url }}" defer="defer"></script>
@@ -75,6 +197,17 @@
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
   <product-component view-event-payload="{{ product | standard_event_data: 'view', context: 'page' | escape }}">
     <div class="page-width">
+      {%- if cm_breadcrumb_block and cm_breadcrumb_block.settings.position == 'above_columns' -%}
+        <div class="cm-product__breadcrumb quick-add-hidden" {{ cm_breadcrumb_block.shopify_attributes }}>
+          {%- render 'cm-breadcrumb',
+            cm_current: product.title,
+            cm_collection: cm_bc_collection,
+            cm_separator: cm_breadcrumb_block.settings.separator,
+            cm_uppercase_last: cm_breadcrumb_block.settings.uppercase_last
+          -%}
+        </div>
+      {%- endif -%}
+
       <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
         <div class="grid__item product__media-wrapper">
           {% render 'product-media-gallery', variant_images: variant_images %}
@@ -98,29 +231,49 @@
                     {{- block.settings.text -}}
                   </p>
                 {%- when 'title' -%}
-                  <div class="product__title" {{ block.shopify_attributes }}>
-                    <h1>{{ product.title | escape }}</h1>
+                  {%- liquid
+                    assign cm_title_size = 'h1'
+                    if cm_style
+                      assign cm_title_size = block.settings.heading_size | default: 'h2'
+                    endif
+                  -%}
+                  <div
+                    class="product__title{% if cm_style and block.settings.uppercase %} cm-title--uppercase{% endif %}"
+                    {{ block.shopify_attributes }}
+                  >
+                    <h1 class="{{ cm_title_size }}">{{ product.title | escape }}</h1>
                     <a href="{{ product.url }}" class="product__title">
-                      <h2 class="h1">
+                      <h2 class="{{ cm_title_size }}">
                         {{ product.title | escape }}
                       </h2>
                     </a>
                   </div>
                 {%- when 'price' -%}
                   <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
-                    {%- render 'price',
-                      product: product,
-                      use_variant: true,
-                      show_badges: true,
-                      price_class: 'price--large'
-                    -%}
+                    {%- if cm_style -%}
+                      {%- render 'cm-price',
+                        product: product,
+                        use_variant: true,
+                        show_currency: block.settings.show_currency_code,
+                        price_class: 'price--large cm-price--product'
+                      -%}
+                    {%- else -%}
+                      {%- render 'price',
+                        product: product,
+                        use_variant: true,
+                        show_badges: true,
+                        price_class: 'price--large'
+                      -%}
+                    {%- endif -%}
                   </div>
                   {%- if product.quantity_price_breaks_configured? -%}
                     <div class="volume-pricing-note" id="Volume-Note-{{ section.id }}">
                       <span>{{ 'products.product.volume_pricing.note' | t }}</span>
                     </div>
                   {%- endif -%}
-                  {%- if cart.taxes_included or cart.duties_included or shop.shipping_policy.body != blank -%}
+                  {%- if cm_style and block.settings.show_tax_note == false -%}
+                    {%- comment -%} Reference PDP shows no tax/shipping note. {%- endcomment -%}
+                  {%- elsif cart.taxes_included or cart.duties_included or shop.shipping_policy.body != blank -%}
                     <div class="product__tax caption rte">
                       {%- if cart.duties_included and cart.taxes_included -%}
                         {{ 'products.product.duties_and_taxes_included' | t }}
@@ -134,13 +287,15 @@
                       {%- endif -%}
                     </div>
                   {%- endif -%}
-                  <div {{ block.shopify_attributes }}>
-                    {%- assign product_form_installment_id = 'product-form-installment-' | append: section.id -%}
-                    {%- form 'product', product, id: product_form_installment_id, class: 'installment caption-large' -%}
-                      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-                      {{ form | payment_terms }}
-                    {%- endform -%}
-                  </div>
+                  {%- unless cm_style and block.settings.show_payment_terms == false -%}
+                    <div {{ block.shopify_attributes }}>
+                      {%- assign product_form_installment_id = 'product-form-installment-' | append: section.id -%}
+                      {%- form 'product', product, id: product_form_installment_id, class: 'installment caption-large' -%}
+                        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                        {{ form | payment_terms }}
+                      {%- endform -%}
+                    </div>
+                  {%- endunless -%}
                 {%- when 'inventory' -%}
                   <p
                     class="product__inventory{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}{% if product.selected_or_first_available_variant.inventory_management != 'shopify' %} visibility-hidden{% endif %}"
@@ -193,20 +348,67 @@
                     {%- endif -%}
                   </p>
                 {%- when 'description' -%}
-                  {%- if product.description != blank -%}
-                    <div class="product__description rte quick-add-hidden" {{ block.shopify_attributes }}>
-                      {{ product.description }}
-                    </div>
+                  {%- liquid
+                    assign cm_desc_specs = false
+                    if cm_style and block.settings.spec_source == 'metafields'
+                      assign cm_desc_specs = true
+                    endif
+                  -%}
+                  {%- capture cm_description_content -%}
+                    {{ product.description }}
+                    {%- if cm_desc_specs -%}
+                      {%- render 'cm-product-specs', product: product, block: block -%}
+                    {%- endif -%}
+                  {%- endcapture -%}
+                  {%- assign cm_description_trimmed = cm_description_content | strip -%}
+                  {%- if cm_description_trimmed != blank -%}
+                    {%- if cm_style and block.settings.description_display == 'collapsible' -%}
+                      <div class="product__accordion accordion quick-add-hidden" {{ block.shopify_attributes }}>
+                        <details id="Details-{{ block.id }}-{{ section.id }}" open>
+                          <summary>
+                            <div class="summary__title">
+                              <h2 class="h4 accordion__title">
+                                {{- block.settings.collapsible_heading | default: 'Description' | escape -}}
+                              </h2>
+                            </div>
+                            {{- 'icon-caret.svg' | inline_asset_content -}}
+                          </summary>
+                          <div
+                            class="accordion__content rte product__description cm-description"
+                            id="ProductAccordion-{{ block.id }}-{{ section.id }}"
+                          >
+                            {{ cm_description_content }}
+                          </div>
+                        </details>
+                      </div>
+                    {%- else -%}
+                      <div
+                        class="product__description rte quick-add-hidden{% if cm_style %} cm-description{% endif %}"
+                        {{ block.shopify_attributes }}
+                      >
+                        {{ cm_description_content }}
+                      </div>
+                    {%- endif -%}
                   {%- endif -%}
                 {%- when 'sku' -%}
+                  {%- liquid
+                    assign cm_sku = product.selected_or_first_available_variant.sku
+                    if cm_style and block.settings.strip_suffix and block.settings.strip_separator != blank
+                      assign cm_sku = cm_sku | split: block.settings.strip_separator | first
+                    endif
+                  -%}
                   <p
-                    class="product__sku{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}{% if product.selected_or_first_available_variant.sku.size == 0 %} visibility-hidden{% endif %}"
+                    class="product__sku{% if cm_style %} cm-sku{% endif %}{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}{% if product.selected_or_first_available_variant.sku.size == 0 %} visibility-hidden{% endif %}"
                     id="Sku-{{ section.id }}"
                     role="status"
                     {{ block.shopify_attributes }}
                   >
-                    <span class="visually-hidden">{{ 'products.product.sku' | t }}:</span>
-                    {{- product.selected_or_first_available_variant.sku -}}
+                    {%- if cm_style and block.settings.sku_label != blank -%}
+                      <span class="cm-sku__label">{{ block.settings.sku_label | escape }}</span>
+                    {%- else -%}
+                      <span class="visually-hidden">{{ 'products.product.sku' | t }}:</span>
+                    {%- endif -%}
+                    {{ cm_sku }}
                   </p>
                 {%- when 'custom_liquid' -%}
                   {{ block.settings.custom_liquid }}
@@ -492,13 +694,31 @@
                     product_form_id: product_form_id
                   %}
                 {%- when 'buy_buttons' -%}
+                  {%- if cm_require_size -%}
+                    <cm-size-guard
+                      class="cm-size-guard"
+                      data-section="{{ section.id }}"
+                      data-option-name="{{ cm_size_option_name | escape }}"
+                    >
+                      <div class="product-form__error-message-wrapper" role="alert" data-cm-guard-error hidden>
+                        <span class="svg-wrapper">
+                          {{- 'icon-error.svg' | inline_asset_content -}}
+                        </span>
+                        <span class="product-form__error-message">
+                          {{- 'products.product.cm.select_size' | t: option: cm_size_option_name -}}
+                        </span>
+                      </div>
+                  {%- endif -%}
                   {%- render 'buy-buttons',
                     block: block,
                     product: product,
                     product_form_id: product_form_id,
                     section_id: section.id,
-                    show_pickup_availability: true
+                    show_pickup_availability: block.settings.show_pickup_availability
                   -%}
+                  {%- if cm_require_size -%}
+                    </cm-size-guard>
+                  {%- endif -%}
                 {%- when 'rating' -%}
                   {%- if product.metafields.reviews.rating.value != blank -%}
                     <div class="rating-wrapper">
@@ -688,6 +908,60 @@
                   </product-recommendations>
                 {%- when 'icon-with-text' -%}
                   {% render 'icon-with-text', block: block %}
+
+                {%- when 'cm_breadcrumb' -%}
+                  {%- if block.settings.position != 'above_columns' -%}
+                    <div class="cm-product__breadcrumb quick-add-hidden" {{ block.shopify_attributes }}>
+                      {%- render 'cm-breadcrumb',
+                        cm_current: product.title,
+                        cm_collection: cm_bc_collection,
+                        cm_separator: block.settings.separator,
+                        cm_uppercase_last: block.settings.uppercase_last
+                      -%}
+                    </div>
+                  {%- endif -%}
+
+                {%- when 'cm_size_chart' -%}
+                  {%- render 'cm-size-chart', product: product, block: block, part: 'opener' -%}
+
+                {%- when 'cm_sibling_swatches' -%}
+                  {%- render 'cm-sibling-swatches',
+                    product: product,
+                    block: block,
+                    cm_collection: collection
+                  -%}
+
+                {%- when 'cm_note' -%}
+                  {%- liquid
+                    assign cm_note_text = block.settings.text
+
+                    if block.settings.use_global and settings.cm_product_note != blank
+                      assign cm_note_text = settings.cm_product_note
+                    endif
+
+                    assign cm_note_parts = block.settings.metafield_override | default: 'custom.product_note' | split: '.'
+                    assign cm_note_ns = cm_note_parts[0] | strip
+                    assign cm_note_key = cm_note_parts[1] | strip
+                    if cm_note_ns != blank and cm_note_key != blank
+                      assign cm_note_mf = product.metafields[cm_note_ns][cm_note_key]
+                      if cm_note_mf.value != blank
+                        assign cm_note_text = cm_note_mf.value
+                      endif
+                    endif
+                  -%}
+                  {%- if cm_note_text != blank -%}
+                    <p class="cm-note quick-add-hidden" {{ block.shopify_attributes }}>
+                      {%- if block.settings.label != blank -%}
+                        <strong class="cm-note__label">{{ block.settings.label | escape }}</strong>
+                      {%- endif -%}
+                      <span class="cm-note__text">{{ cm_note_text }}</span>
+                    </p>
+                  {%- endif -%}
+
+                {%- when 'cm_share' -%}
+                  <div class="quick-add-hidden">
+                    {%- render 'cm-share-links', product: product, block: block -%}
+                  </div>
               {%- endcase -%}
             {%- endfor -%}
             <a href="{{ product.url }}" class="link product__view-details animate-arrow">
@@ -699,6 +973,10 @@
       </div>
 
       {% render 'product-media-modal', variant_images: variant_images %}
+
+      {%- for cm_sc_block in cm_size_chart_blocks -%}
+        {%- render 'cm-size-chart', product: product, block: cm_sc_block, part: 'dialog' -%}
+      {%- endfor -%}
 
       {% assign popups = section.blocks | where: 'type', 'popup' %}
       {%- for block in popups -%}
@@ -751,6 +1029,73 @@
       </script>
     </div>
   </product-component>
+
+  {%- if cm_sticky_atc != 'none' -%}
+    {%- liquid
+      assign cm_sticky_variant = product.selected_or_first_available_variant
+      assign cm_sticky_media = cm_sticky_variant.featured_media | default: product.featured_media
+    -%}
+    <cm-sticky-atc
+      class="cm-sticky-atc cm-sticky-atc--{{ cm_sticky_atc }} quick-add-hidden"
+      data-section="{{ section.id }}"
+      data-require-size="{{ cm_require_size }}"
+      hidden
+    >
+      <div class="cm-sticky-atc__inner page-width">
+        {%- if cm_sticky_media != blank -%}
+          <div class="cm-sticky-atc__media">
+            {{
+              cm_sticky_media
+              | image_url: width: 160
+              | image_tag:
+                class: 'cm-sticky-atc__image',
+                loading: 'lazy',
+                alt: product.title,
+                widths: '80, 120, 160',
+                sizes: '56px'
+            }}
+          </div>
+        {%- endif -%}
+
+        <div class="cm-sticky-atc__info">
+          <p class="cm-sticky-atc__title">{{ product.title | escape }}</p>
+          <div class="cm-sticky-atc__meta">
+            <div class="cm-sticky-atc__price" data-cm-sticky-price>
+              {%- render 'cm-price',
+                product: product,
+                use_variant: true,
+                show_currency: section.settings.cm_sticky_show_currency
+              -%}
+            </div>
+            {%- unless product.has_only_default_variant -%}
+              <span class="cm-sticky-atc__variant" data-cm-sticky-variant>
+                {{- cm_sticky_variant.title -}}
+              </span>
+            {%- endunless -%}
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          name="add"
+          form="{{ 'product-form-' | append: section.id }}"
+          class="button button--primary cm-sticky-atc__button"
+          data-cm-sticky-submit
+          {% if cm_sticky_variant.available == false %}
+            disabled
+          {% endif %}
+        >
+          <span>
+            {%- if cm_sticky_variant.available -%}
+              {{ 'products.product.add_to_cart' | t }}
+            {%- else -%}
+              {{ 'products.product.sold_out' | t }}
+            {%- endif -%}
+          </span>
+        </button>
+      </div>
+    </cm-sticky-atc>
+  {%- endif -%}
 </product-info>
 
 {% schema %}
@@ -797,12 +1142,61 @@
     {
       "type": "title",
       "name": "t:sections.main-product.blocks.title.name",
-      "limit": 1
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Cambridge"
+        },
+        {
+          "type": "checkbox",
+          "id": "uppercase",
+          "default": true,
+          "label": "Uppercase title"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "options": [
+            { "value": "h2", "label": "Small" },
+            { "value": "h1", "label": "Medium" },
+            { "value": "h0", "label": "Large" }
+          ],
+          "default": "h2",
+          "label": "Title size",
+          "info": "The reference store uses Small (22px at the default type scale)."
+        }
+      ]
     },
     {
       "type": "price",
       "name": "t:sections.main-product.blocks.price.name",
-      "limit": 1
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Cambridge"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_currency_code",
+          "default": true,
+          "label": "Show currency code",
+          "info": "Renders Rs.5,295 PKR instead of Rs.5,295."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_tax_note",
+          "default": false,
+          "label": "Show tax and shipping note"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_payment_terms",
+          "default": false,
+          "label": "Show payment terms (Shop Pay instalments)"
+        }
+      ]
     },
     {
       "type": "sku",
@@ -828,6 +1222,30 @@
           ],
           "default": "body",
           "label": "t:sections.main-product.blocks.sku.settings.text_style.label"
+        },
+        {
+          "type": "header",
+          "content": "Cambridge"
+        },
+        {
+          "type": "text",
+          "id": "sku_label",
+          "default": "SKU:",
+          "label": "SKU label",
+          "info": "Leave blank to hide the label and keep it screen-reader only."
+        },
+        {
+          "type": "checkbox",
+          "id": "strip_suffix",
+          "default": false,
+          "label": "Trim the SKU at a separator",
+          "info": "Useful when variant SKUs add a size suffix."
+        },
+        {
+          "type": "text",
+          "id": "strip_separator",
+          "default": "-",
+          "label": "Separator to trim at"
         }
       ]
     },
@@ -940,13 +1358,76 @@
           "default": true,
           "label": "t:sections.main-product.blocks.buy_buttons.settings.show_gift_card_recipient.label",
           "info": "t:sections.main-product.blocks.buy_buttons.settings.show_gift_card_recipient.info"
+        },
+        {
+          "type": "header",
+          "content": "Cambridge"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_pickup_availability",
+          "default": true,
+          "label": "Show pickup availability"
+        },
+        {
+          "type": "checkbox",
+          "id": "require_size_selection",
+          "default": false,
+          "label": "Require an explicit size choice",
+          "info": "Add to cart stays disabled until a size is tapped. Shopify still preselects a variant behind the scenes, so the price and gallery are correct from the start."
         }
       ]
     },
     {
       "type": "description",
       "name": "t:sections.main-product.blocks.description.name",
-      "limit": 1
+      "limit": 1,
+      "settings": [
+        {
+          "type": "header",
+          "content": "Cambridge"
+        },
+        {
+          "type": "select",
+          "id": "description_display",
+          "options": [
+            { "value": "inline", "label": "Always visible" },
+            { "value": "collapsible", "label": "Collapsible row" }
+          ],
+          "default": "inline",
+          "label": "Display"
+        },
+        {
+          "type": "text",
+          "id": "collapsible_heading",
+          "default": "Description",
+          "label": "Collapsible row heading"
+        },
+        {
+          "type": "select",
+          "id": "spec_source",
+          "options": [
+            { "value": "description", "label": "Inside the description" },
+            { "value": "metafields", "label": "From metafields" }
+          ],
+          "default": "description",
+          "label": "Specifications source",
+          "info": "\"Inside the description\" styles the spec grid the merchant already authored in the product description."
+        },
+        {
+          "type": "text",
+          "id": "spec_heading",
+          "default": "Specifications",
+          "label": "Specifications heading"
+        },
+        {
+          "type": "textarea",
+          "id": "spec_metafields",
+          "default": "custom.fabric_type: Fabric Type\ncustom.sleeves: Sleeves\ncustom.neck: Neck\ncustom.fit: Fit\ncustom.fabric: Fabric\ncustom.occasion: Occasion",
+          "label": "Specification metafields",
+          "info": "One namespace.key: Label per line. Empty metafields are skipped."
+        }
+      ]
     },
     {
       "type": "share",
@@ -1519,6 +2000,333 @@
           "id": "enable_quick_add",
           "label": "t:sections.main-product.blocks.complementary_products.settings.enable_quick_add.label",
           "default": false
+        }
+      ]
+    },
+    {
+      "type": "cm_breadcrumb",
+      "name": "Breadcrumb (Cambridge)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "position",
+          "options": [
+            { "value": "above_columns", "label": "Above both columns" },
+            { "value": "in_info", "label": "In the product info column" }
+          ],
+          "default": "above_columns",
+          "label": "Position",
+          "info": "Above both columns matches the reference. The block stays reorderable either way."
+        },
+        {
+          "type": "text",
+          "id": "separator",
+          "default": "\u203a",
+          "label": "Separator"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_collection",
+          "default": true,
+          "label": "Show the collection the product was reached from"
+        },
+        {
+          "type": "collection",
+          "id": "fallback_collection",
+          "label": "Fallback collection",
+          "info": "Used on direct /products/ links, where no collection is in the URL."
+        },
+        {
+          "type": "checkbox",
+          "id": "use_metafield_collection",
+          "default": false,
+          "label": "Prefer the product primary collection metafield",
+          "info": "Reads custom.primary_collection before the URL collection."
+        },
+        {
+          "type": "checkbox",
+          "id": "uppercase_last",
+          "default": false,
+          "label": "Uppercase the product name"
+        }
+      ]
+    },
+    {
+      "type": "cm_size_chart",
+      "name": "Size chart (Cambridge)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "default": "Size Chart",
+          "label": "Link label"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "ruler", "label": "Ruler" },
+            { "value": "hanger", "label": "Hanger" }
+          ],
+          "default": "ruler",
+          "label": "Icon"
+        },
+        {
+          "type": "select",
+          "id": "display",
+          "options": [
+            { "value": "modal", "label": "Centred modal" },
+            { "value": "drawer", "label": "Side drawer" }
+          ],
+          "default": "modal",
+          "label": "Display"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "paragraph",
+          "content": "Resolved in this order: product metafield, then a page whose handle matches the size chart tag, then the fallback below. The link is hidden when nothing resolves."
+        },
+        {
+          "type": "text",
+          "id": "metafield_key",
+          "default": "custom.size_chart",
+          "label": "Product metafield",
+          "info": "Accepts a page reference, a file reference (image) or rich text."
+        },
+        {
+          "type": "text",
+          "id": "tag_prefix",
+          "default": "",
+          "label": "Size chart tag prefix",
+          "info": "Leave blank to match any tag ending in Sizechart, such as W26SCO01-Regular-Sweatshirt-SimplifiedSizechart."
+        },
+        {
+          "type": "select",
+          "id": "source",
+          "options": [
+            { "value": "page", "label": "Page" },
+            { "value": "image", "label": "Image" }
+          ],
+          "default": "page",
+          "label": "Fallback type"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Fallback page"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_desktop",
+          "label": "Fallback image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_mobile",
+          "label": "Fallback image (mobile)"
+        }
+      ]
+    },
+    {
+      "type": "cm_sibling_swatches",
+      "name": "Colour swatches, sibling products (Cambridge)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "For stores where each colourway is its own product. On a Shopify combined listing this block renders nothing and the Dawn colour picker takes over."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Color",
+          "label": "Heading"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_selected_name",
+          "default": true,
+          "label": "Show the selected colour name"
+        },
+        {
+          "type": "select",
+          "id": "swatch_style",
+          "options": [
+            { "value": "pill", "label": "Text pill" },
+            { "value": "color", "label": "Colour circle" },
+            { "value": "image", "label": "Product image" }
+          ],
+          "default": "pill",
+          "label": "Swatch style"
+        },
+        {
+          "type": "range",
+          "id": "swatch_size",
+          "min": 28,
+          "max": 80,
+          "step": 4,
+          "unit": "px",
+          "default": 44,
+          "label": "Swatch size",
+          "info": "Applies to the colour circle and product image styles."
+        },
+        {
+          "type": "range",
+          "id": "max_swatches",
+          "min": 4,
+          "max": 50,
+          "step": 2,
+          "default": 20,
+          "label": "Maximum swatches"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_color_option_in_picker",
+          "default": true,
+          "label": "Hide the single-value Color row in the variant picker",
+          "info": "The hidden input stays in the form, so add to cart still submits a valid variant."
+        },
+        {
+          "type": "header",
+          "content": "Where siblings come from"
+        },
+        {
+          "type": "select",
+          "id": "source",
+          "options": [
+            { "value": "metafield", "label": "Product list metafield" },
+            { "value": "tag_group", "label": "Shared group tag" },
+            { "value": "collection", "label": "Shared SKU prefix" }
+          ],
+          "default": "metafield",
+          "label": "Source",
+          "info": "The metafield key is set in Theme settings, Product page (Cambridge)."
+        },
+        {
+          "type": "collection",
+          "id": "sibling_collection",
+          "label": "Collection to search",
+          "info": "Required for the group tag and SKU prefix sources. Liquid cannot search the whole catalogue."
+        },
+        {
+          "type": "text",
+          "id": "group_tag_prefix",
+          "default": "group:",
+          "label": "Group tag prefix"
+        }
+      ]
+    },
+    {
+      "type": "cm_note",
+      "name": "Note (Cambridge)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "default": "Note:",
+          "label": "Label"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "text",
+          "default": "Actual product may vary from the picture due to the lights being used in photography",
+          "label": "Text"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_global",
+          "default": true,
+          "label": "Use the global disclaimer",
+          "info": "Set in Theme settings, Product page (Cambridge), so every product matches."
+        },
+        {
+          "type": "text",
+          "id": "metafield_override",
+          "default": "custom.product_note",
+          "label": "Per-product override metafield"
+        }
+      ]
+    },
+    {
+      "type": "cm_share",
+      "name": "Share links (Cambridge)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "default": "Share:",
+          "label": "Label"
+        },
+        {
+          "type": "checkbox",
+          "id": "facebook",
+          "default": true,
+          "label": "Facebook"
+        },
+        {
+          "type": "checkbox",
+          "id": "twitter",
+          "default": true,
+          "label": "X (Twitter)"
+        },
+        {
+          "type": "checkbox",
+          "id": "pinterest",
+          "default": true,
+          "label": "Pinterest"
+        },
+        {
+          "type": "checkbox",
+          "id": "whatsapp",
+          "default": true,
+          "label": "WhatsApp"
+        },
+        {
+          "type": "checkbox",
+          "id": "email",
+          "default": false,
+          "label": "Email"
+        },
+        {
+          "type": "checkbox",
+          "id": "copy_link",
+          "default": false,
+          "label": "Copy link"
+        },
+        {
+          "type": "checkbox",
+          "id": "native_share_mobile",
+          "default": false,
+          "label": "Add the device share sheet on mobile",
+          "info": "Shown only where the browser supports navigator.share."
+        },
+        {
+          "type": "select",
+          "id": "style",
+          "options": [
+            { "value": "icon", "label": "Plain icons" },
+            { "value": "icon_circle", "label": "Icons in circles" }
+          ],
+          "default": "icon",
+          "label": "Style"
+        },
+        {
+          "type": "range",
+          "id": "icon_size",
+          "min": 14,
+          "max": 32,
+          "step": 2,
+          "unit": "px",
+          "default": 20,
+          "label": "Icon size"
         }
       ]
     },
@@ -2147,6 +2955,72 @@
     }
   ],
   "settings": [
+    {
+      "type": "header",
+      "content": "Cambridge"
+    },
+    {
+      "type": "checkbox",
+      "id": "cm_style",
+      "default": true,
+      "label": "Cambridge product page styling",
+      "info": "Turn off to render this section as stock Dawn. The Cambridge blocks stay available either way."
+    },
+    {
+      "type": "range",
+      "id": "cm_info_gap",
+      "min": 8,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "label": "Space between info blocks"
+    },
+    {
+      "type": "range",
+      "id": "cm_media_split",
+      "min": 45,
+      "max": 70,
+      "step": 1,
+      "unit": "%",
+      "default": 58,
+      "label": "Gallery column width",
+      "info": "Desktop only. The reference store uses 58%."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_zoom_hint",
+      "default": true,
+      "label": "Show the zoom hint on images",
+      "info": "Hidden on touch devices and when image zoom is off."
+    },
+    {
+      "type": "text",
+      "id": "zoom_hint_text",
+      "default": "Click to enlarge",
+      "label": "Zoom hint text"
+    },
+    {
+      "type": "select",
+      "id": "sticky_atc",
+      "options": [
+        { "value": "none", "label": "Off" },
+        { "value": "mobile", "label": "Mobile only" },
+        { "value": "all", "label": "All screens" }
+      ],
+      "default": "none",
+      "label": "Sticky add to cart bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "cm_sticky_show_currency",
+      "default": false,
+      "label": "Show currency code in the sticky bar"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.main-product.name"
+    },
     {
       "type": "checkbox",
       "id": "enable_sticky_info",

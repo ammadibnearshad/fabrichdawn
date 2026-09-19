@@ -1,0 +1,66 @@
+{% comment %}
+  Renders the Cambridge-style 2-column Specifications grid from product
+  metafields instead of from `body_html`.
+
+  It emits the same `.index-tableContainer / .index-row / .index-rowKey /
+  .index-rowValue` markup the reference store authors inside its description, so
+  a single block of CSS in section-cm-product.css styles both sources and the
+  merchant can migrate specs out of the description without a redesign.
+
+  Accepts:
+  - product: {Object} Product Liquid object. Required.
+  - block: {Object} The `description` block (holds the field map). Required.
+
+  block.settings.spec_metafields is one "namespace.key: Label" per line. Rows
+  whose metafield is empty are skipped; the whole grid is skipped when no row
+  resolves.
+
+  Usage:
+  {% render 'cm-product-specs', product: product, block: block %}
+{% endcomment %}
+
+{%- capture cm_specs_rows -%}
+  {%- assign cm_specs_lines = block.settings.spec_metafields | newline_to_br | split: '<br />' -%}
+  {%- for cm_specs_line in cm_specs_lines -%}
+    {%- liquid
+      assign cm_specs_pair = cm_specs_line | strip | split: ':'
+      assign cm_specs_path = cm_specs_pair[0] | strip
+      assign cm_specs_label = cm_specs_pair[1] | strip
+      assign cm_specs_parts = cm_specs_path | split: '.'
+      assign cm_specs_ns = cm_specs_parts[0] | strip
+      assign cm_specs_key = cm_specs_parts[1] | strip
+      assign cm_specs_value = ''
+
+      if cm_specs_ns != blank and cm_specs_key != blank
+        assign cm_specs_mf = product.metafields[cm_specs_ns][cm_specs_key]
+        if cm_specs_mf.type contains 'list.'
+          assign cm_specs_value = cm_specs_mf.value | join: ', '
+        else
+          assign cm_specs_value = cm_specs_mf.value | default: ''
+        endif
+      endif
+
+      if cm_specs_label == blank
+        assign cm_specs_label = cm_specs_key | replace: '_', ' ' | capitalize
+      endif
+    -%}
+    {%- if cm_specs_value != blank -%}
+      <div class="index-row">
+        <div class="index-rowKey">{{ cm_specs_label | escape }}</div>
+        <div class="index-rowValue">{{ cm_specs_value }}</div>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- assign cm_specs_rows_trimmed = cm_specs_rows | strip -%}
+{%- if cm_specs_rows_trimmed != blank -%}
+  <div class="cm-specs">
+    {%- if block.settings.spec_heading != blank -%}
+      <p><strong>{{ block.settings.spec_heading | escape }}</strong></p>
+    {%- endif -%}
+    <div class="index-tableContainer">
+      {{ cm_specs_rows }}
+    </div>
+  </div>
+{%- endif -%}

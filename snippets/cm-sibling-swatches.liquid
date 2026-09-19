@@ -1,0 +1,192 @@
+{% comment %}
+  Renders the Cambridge-style Color row for stores where every colourway is a
+  separate product. Each swatch is a link to a sibling product, not a variant
+  radio, so this never interferes with Dawn's variant form.
+
+  Renders nothing when the product's colour option already holds more than one
+  value (a Shopify combined listing) — Dawn's own variant picker handles that
+  case, and main-product.liquid keeps the Color row visible for it.
+
+  Accepts:
+  - product: {Object} Product Liquid object. Required.
+  - block: {Object} The `cm_sibling_swatches` block. Required.
+  - cm_collection: {Object} Collection to keep in the sibling URLs (optional).
+
+  Sibling sources (block.settings.source):
+  - metafield  : list-of-products metafield named by settings.cm_sibling_metafield
+  - tag_group  : products in block.settings.sibling_collection sharing the current
+                 product's `group:` tag
+  - collection : products in block.settings.sibling_collection whose first variant
+                 SKU starts with the same SKU prefix
+
+  Usage:
+  {% render 'cm-sibling-swatches', product: product, block: block, cm_collection: collection %}
+{% endcomment %}
+
+{%- liquid
+  assign cm_sw_color_names = settings.cm_card_color_option_names | default: 'Color,Colour' | downcase | split: ','
+
+  # Locate the colour option and the size (first non-colour) option on this product.
+  assign cm_sw_color_option = null
+  assign cm_sw_size_index = -1
+  for cm_sw_option in product.options_with_values
+    assign cm_sw_option_name = cm_sw_option.name | downcase | strip
+    assign cm_sw_is_color = false
+    for cm_sw_name in cm_sw_color_names
+      assign cm_sw_candidate = cm_sw_name | strip
+      if cm_sw_candidate != blank and cm_sw_option_name == cm_sw_candidate
+        assign cm_sw_is_color = true
+        break
+      endif
+    endfor
+    if cm_sw_is_color and cm_sw_color_option == null
+      assign cm_sw_color_option = cm_sw_option
+    elsif cm_sw_is_color == false and cm_sw_size_index == -1
+      assign cm_sw_size_index = cm_sw_option.position | minus: 1
+    endif
+  endfor
+
+  assign cm_sw_render = true
+  if cm_sw_color_option == null
+    assign cm_sw_render = false
+  endif
+  if cm_sw_color_option.values.size > 1
+    # Combined listing: fall back to Dawn's colour picker.
+    assign cm_sw_render = false
+  endif
+
+  assign cm_sw_current_color = cm_sw_color_option.selected_value | default: cm_sw_color_option.values.first
+
+  assign cm_sw_target_size = ''
+  if cm_sw_size_index >= 0
+    assign cm_sw_target_size = product.selected_or_first_available_variant.options[cm_sw_size_index]
+  endif
+-%}
+
+{%- if cm_sw_render -%}
+  {%- liquid
+    # ---- Resolve the sibling product list -------------------------------
+    assign cm_sw_siblings = null
+    assign cm_sw_source = block.settings.source | default: 'metafield'
+
+    if cm_sw_source == 'metafield'
+      assign cm_sw_mf_parts = settings.cm_sibling_metafield | default: 'custom.siblings' | split: '.'
+      assign cm_sw_mf_ns = cm_sw_mf_parts[0] | strip
+      assign cm_sw_mf_key = cm_sw_mf_parts[1] | strip
+      if cm_sw_mf_ns != blank and cm_sw_mf_key != blank
+        assign cm_sw_siblings = product.metafields[cm_sw_mf_ns][cm_sw_mf_key].value
+      endif
+    endif
+  -%}
+
+  {%- capture cm_sw_items -%}
+    {%- assign cm_sw_limit = block.settings.max_swatches | default: 20 -%}
+
+    {%- if cm_sw_source == 'metafield' -%}
+      {%- for cm_sibling in cm_sw_siblings limit: cm_sw_limit -%}
+        {%- render 'cm-sibling-swatch-item',
+          cm_sibling: cm_sibling,
+          product: product,
+          block: block,
+          cm_collection: cm_collection,
+          cm_sw_color_names: cm_sw_color_names,
+          cm_sw_target_size: cm_sw_target_size,
+          cm_sw_current_color: cm_sw_current_color
+        -%}
+      {%- endfor -%}
+
+    {%- elsif cm_sw_source == 'tag_group' -%}
+      {%- liquid
+        assign cm_sw_tag_prefix = block.settings.group_tag_prefix | default: 'group:' | downcase
+        assign cm_sw_tag_prefix_size = cm_sw_tag_prefix | size
+        assign cm_sw_group_tag = ''
+        for cm_sw_tag in product.tags
+          assign cm_sw_tag_head = cm_sw_tag | downcase | slice: 0, cm_sw_tag_prefix_size
+          if cm_sw_tag_head == cm_sw_tag_prefix
+            assign cm_sw_group_tag = cm_sw_tag | downcase
+            break
+          endif
+        endfor
+      -%}
+      {%- if cm_sw_group_tag != blank -%}
+        {%- for cm_sibling in block.settings.sibling_collection.products limit: 50 -%}
+          {%- liquid
+            assign cm_sw_match = false
+            for cm_sw_tag in cm_sibling.tags
+              assign cm_sw_tag_down = cm_sw_tag | downcase
+              if cm_sw_tag_down == cm_sw_group_tag
+                assign cm_sw_match = true
+                break
+              endif
+            endfor
+          -%}
+          {%- if cm_sw_match -%}
+            {%- render 'cm-sibling-swatch-item',
+              cm_sibling: cm_sibling,
+              product: product,
+              block: block,
+              cm_collection: cm_collection,
+              cm_sw_color_names: cm_sw_color_names,
+              cm_sw_target_size: cm_sw_target_size,
+              cm_sw_current_color: cm_sw_current_color
+            -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+    {%- else -%}
+      {%- liquid
+        assign cm_sw_sku = product.variants.first.sku | default: '' | downcase | strip
+        assign cm_sw_sku_size = cm_sw_sku | size
+      -%}
+      {%- if cm_sw_sku != blank -%}
+        {%- for cm_sibling in block.settings.sibling_collection.products limit: 50 -%}
+          {%- liquid
+            assign cm_sw_sibling_sku = cm_sibling.variants.first.sku | default: '' | downcase | slice: 0, cm_sw_sku_size
+          -%}
+          {%- if cm_sw_sibling_sku == cm_sw_sku -%}
+            {%- render 'cm-sibling-swatch-item',
+              cm_sibling: cm_sibling,
+              product: product,
+              block: block,
+              cm_collection: cm_collection,
+              cm_sw_color_names: cm_sw_color_names,
+              cm_sw_target_size: cm_sw_target_size,
+              cm_sw_current_color: cm_sw_current_color
+            -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endcapture -%}
+
+  <div
+    class="cm-swatches cm-swatches--{{ block.settings.swatch_style }}"
+    style="--cm-swatch-size: {{ block.settings.swatch_size | default: 44 }}px;"
+    {{ block.shopify_attributes }}
+  >
+    <h2 class="cm-block__heading cm-swatches__heading">
+      {{- block.settings.heading | default: 'Color' | escape -}}
+      {%- if block.settings.show_selected_name -%}
+        <span class="cm-swatches__selected">{{ cm_sw_current_color | escape }}</span>
+      {%- endif -%}
+    </h2>
+
+    {%- assign cm_sw_items_trimmed = cm_sw_items | strip -%}
+    <ul class="cm-swatches__list list-unstyled" role="list">
+      {%- if cm_sw_items_trimmed != blank -%}
+        {{ cm_sw_items }}
+      {%- else -%}
+        {%- comment -%} No siblings resolved: show the current colour on its own. {%- endcomment -%}
+        <li class="cm-swatches__item">
+          <span
+            class="cm-swatch cm-swatch--current"
+            aria-current="true"
+          >
+            <span class="cm-swatch__label">{{ cm_sw_current_color | escape }}</span>
+          </span>
+        </li>
+      {%- endif -%}
+    </ul>
+  </div>
+{%- endif -%}

@@ -1,0 +1,99 @@
+{% comment %}
+  Renders a Cambridge-style breadcrumb trail: Home › Collection › Current page.
+
+  Reusable on any template. The caller resolves which collection (if any) the
+  middle crumb should point at, so this snippet stays free of product logic.
+
+  Accepts:
+  - cm_current: {String} Text for the last crumb. Required. Rendered as plain
+      text with aria-current="page", never as a link.
+  - cm_collection: {Object} Collection object for the middle crumb (optional).
+  - cm_separator: {String} Separator glyph. Default: '›' (optional).
+  - cm_uppercase_last: {Boolean} Uppercase the last crumb. Default: false (optional).
+  - cm_emit_jsonld: {Boolean} Output BreadcrumbList JSON-LD. Default: true (optional).
+  - cm_class: {String} Extra class on the <nav>. (optional)
+
+  Usage:
+  {% render 'cm-breadcrumb',
+    cm_current: product.title,
+    cm_collection: collection,
+    cm_separator: block.settings.separator
+  %}
+{% endcomment %}
+
+{%- liquid
+  assign cm_bc_current = cm_current | default: page_title
+  assign cm_bc_separator = cm_separator | default: '›'
+  assign cm_bc_home = 'sections.cm_collection.home' | t
+
+  assign cm_bc_emit_jsonld = cm_emit_jsonld
+  if cm_emit_jsonld == nil
+    assign cm_bc_emit_jsonld = true
+  endif
+-%}
+
+{%- if cm_bc_current != blank -%}
+  <nav
+    class="cm-breadcrumb{% if cm_class != blank %} {{ cm_class }}{% endif %}"
+    aria-label="{{ 'sections.cm_collection.breadcrumb' | t }}"
+  >
+    <ol class="cm-breadcrumb__list list-unstyled">
+      <li class="cm-breadcrumb__item">
+        <a href="{{ routes.root_url }}" class="cm-breadcrumb__link">{{ cm_bc_home }}</a>
+      </li>
+
+      {%- if cm_collection != blank and cm_collection.title != blank -%}
+        <li class="cm-breadcrumb__item">
+          <span class="cm-breadcrumb__separator" aria-hidden="true">{{ cm_bc_separator }}</span>
+          <a href="{{ cm_collection.url }}" class="cm-breadcrumb__link">{{ cm_collection.title | escape }}</a>
+        </li>
+      {%- endif -%}
+
+      <li class="cm-breadcrumb__item" aria-current="page">
+        <span class="cm-breadcrumb__separator" aria-hidden="true">{{ cm_bc_separator }}</span>
+        <span class="cm-breadcrumb__current{% if cm_uppercase_last %} cm-breadcrumb__current--uppercase{% endif %}">
+          {{- cm_bc_current | escape -}}
+        </span>
+      </li>
+    </ol>
+  </nav>
+
+  {%- if cm_bc_emit_jsonld -%}
+    {%- capture cm_bc_jsonld -%}
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": {{ cm_bc_home | json }},
+            "item": {{ request.origin | append: routes.root_url | json }}
+          }
+          {%- if cm_collection != blank and cm_collection.title != blank -%}
+            ,{
+              "@type": "ListItem",
+              "position": 2,
+              "name": {{ cm_collection.title | json }},
+              "item": {{ request.origin | append: cm_collection.url | json }}
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": {{ cm_bc_current | json }}
+            }
+          {%- else -%}
+            ,{
+              "@type": "ListItem",
+              "position": 2,
+              "name": {{ cm_bc_current | json }}
+            }
+          {%- endif -%}
+        ]
+      }
+    {%- endcapture -%}
+    <script type="application/ld+json">
+      {{ cm_bc_jsonld }}
+    </script>
+  {%- endif -%}
+{%- endif -%}

@@ -110,7 +110,12 @@
         "colors_count": "{{ count }} Colors",
         "colors_count_one": "{{ count }} Color",
         "new_badge": "New",
-        "discount_percent": "-{{ percent }}%"
+        "discount_percent": "-{{ percent }}%",
+        "share_on": "Share on {{ network }}",
+        "share_by_email": "Share by email",
+        "share_native": "Share",
+        "copy_link": "Copy link",
+        "select_size": "Please choose a {{ option }}"
       },
       "add_to_cart": "Læg i indkøbskurv",
       "description": "Beskrivelse",

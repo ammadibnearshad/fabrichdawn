@@ -1707,5 +1707,43 @@
         "label": "t:sections.all.colors.label"
       }
     ]
+  },
+  {
+    "name": "Product page (Cambridge)",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Defaults shared by every product page. Individual blocks in the product template can still override them."
+      },
+      {
+        "type": "header",
+        "content": "Disclaimer"
+      },
+      {
+        "type": "textarea",
+        "id": "cm_product_note",
+        "default": "Actual product may vary from the picture due to the lights being used in photography",
+        "label": "Global product note",
+        "info": "Shown by the Note block. A product metafield override wins over this."
+      },
+      {
+        "type": "header",
+        "content": "Colour siblings"
+      },
+      {
+        "type": "text",
+        "id": "cm_sibling_metafield",
+        "default": "custom.siblings",
+        "label": "Sibling products metafield",
+        "info": "A list-of-products metafield that contains every colourway, including the product itself."
+      },
+      {
+        "type": "textarea",
+        "id": "cm_swatch_color_map",
+        "default": "",
+        "label": "Colour name to hex map",
+        "info": "One NAME: #hex per line, for example LIGHT BROWN: #A9825C. Used only by the colour circle swatch style, and only when no swatch metafield or Shopify swatch is set."
+      }
+    ]
   }
 ]

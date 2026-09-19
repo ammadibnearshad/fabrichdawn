@@ -1,0 +1,138 @@
+{% comment %}
+  Renders one sibling-colour swatch. Called only by `cm-sibling-swatches`.
+
+  Accepts:
+  - cm_sibling: {Object} The sibling product. Required.
+  - product: {Object} The product currently on the page. Required.
+  - block: {Object} The `cm_sibling_swatches` block. Required.
+  - cm_collection: {Object} Collection to keep in the URL (optional).
+  - cm_sw_color_names: {Array} Lower-cased colour option names.
+  - cm_sw_target_size: {String} Size value to carry over to the sibling (optional).
+  - cm_sw_current_color: {String} Colour value of the product on the page.
+{% endcomment %}
+
+{%- liquid
+  assign cm_i_color = ''
+  assign cm_i_color_value = null
+  assign cm_i_size_index = -1
+
+  for cm_i_option in cm_sibling.options_with_values
+    assign cm_i_option_name = cm_i_option.name | downcase | strip
+    assign cm_i_is_color = false
+    for cm_i_name in cm_sw_color_names
+      assign cm_i_candidate = cm_i_name | strip
+      if cm_i_candidate != blank and cm_i_option_name == cm_i_candidate
+        assign cm_i_is_color = true
+        break
+      endif
+    endfor
+    if cm_i_is_color and cm_i_color == blank
+      assign cm_i_color = cm_i_option.values.first
+      assign cm_i_color_value = cm_i_option.values.first
+    elsif cm_i_is_color == false and cm_i_size_index == -1
+      assign cm_i_size_index = cm_i_option.position | minus: 1
+    endif
+  endfor
+
+  if cm_i_color == blank
+    assign cm_i_color = cm_sibling.title
+  endif
+
+  assign cm_i_is_current = false
+  if cm_sibling.id == product.id
+    assign cm_i_is_current = true
+  endif
+
+  # Carry the selected size across to the sibling when it stocks that size.
+  assign cm_i_variant_id = ''
+  if cm_sw_target_size != blank and cm_i_size_index >= 0
+    for cm_i_variant in cm_sibling.variants
+      if cm_i_variant.options[cm_i_size_index] == cm_sw_target_size
+        assign cm_i_variant_id = cm_i_variant.id
+        if cm_i_variant.available
+          break
+        endif
+      endif
+    endfor
+  endif
+
+  if cm_collection != blank
+    assign cm_i_url = cm_sibling.url | within: cm_collection
+  else
+    assign cm_i_url = cm_sibling.url
+  endif
+  if cm_i_variant_id != blank
+    assign cm_i_url = cm_i_url | append: '?variant=' | append: cm_i_variant_id
+  endif
+
+  # Swatch background, in priority order: swatch_color metafield, native swatch,
+  # then the global NAME:#hex mapping.
+  assign cm_i_bg = ''
+  assign cm_i_mf_color = cm_sibling.metafields.custom.swatch_color
+  if cm_i_mf_color != blank
+    assign cm_i_bg = cm_i_mf_color.value | default: cm_i_mf_color
+  endif
+  if cm_i_bg == blank and cm_i_color_value.swatch.image != blank
+    assign cm_i_swatch_image = cm_i_color_value.swatch.image | image_url: width: 100
+    assign cm_i_bg = 'url(' | append: cm_i_swatch_image | append: ')'
+  endif
+  if cm_i_bg == blank and cm_i_color_value.swatch.color != blank
+    assign cm_i_bg = 'rgb(' | append: cm_i_color_value.swatch.color.rgb | append: ')'
+  endif
+  if cm_i_bg == blank and settings.cm_swatch_color_map != blank
+    assign cm_i_color_key = cm_i_color | downcase | strip
+    assign cm_i_map_lines = settings.cm_swatch_color_map | newline_to_br | split: '<br />'
+    for cm_i_line in cm_i_map_lines
+      assign cm_i_pair = cm_i_line | strip | split: ':'
+      if cm_i_pair.size > 1
+        assign cm_i_key = cm_i_pair[0] | downcase | strip
+        if cm_i_key == cm_i_color_key
+          assign cm_i_bg = cm_i_pair[1] | strip
+          break
+        endif
+      endif
+    endfor
+  endif
+-%}
+
+<li class="cm-swatches__item">
+  <a
+    class="cm-swatch{% if cm_i_is_current %} cm-swatch--current{% endif %}{% unless cm_sibling.available %} cm-swatch--sold-out{% endunless %}"
+    href="{{ cm_i_url }}"
+    aria-label="{{ block.settings.heading | default: 'Color' | escape }}: {{ cm_i_color | escape }}"
+    {% if cm_i_is_current %}
+      aria-current="true"
+    {% endif %}
+    {% if cm_i_bg != blank %}
+      style="--cm-swatch-bg: {{ cm_i_bg }};"
+    {% endif %}
+  >
+    {%- case block.settings.swatch_style -%}
+      {%- when 'color' -%}
+        <span class="cm-swatch__dot{% if cm_i_bg == blank %} cm-swatch__dot--unknown{% endif %}" aria-hidden="true"></span>
+        <span class="visually-hidden">{{ cm_i_color | escape }}</span>
+      {%- when 'image' -%}
+        {%- if cm_sibling.featured_media != blank -%}
+          {{
+            cm_sibling.featured_media
+            | image_url: width: 200
+            | image_tag:
+              class: 'cm-swatch__image',
+              loading: 'lazy',
+              alt: cm_i_color,
+              widths: '100, 150, 200',
+              sizes: '(min-width: 750px) 60px, 52px'
+          }}
+        {%- else -%}
+          <span class="cm-swatch__dot cm-swatch__dot--unknown" aria-hidden="true"></span>
+        {%- endif -%}
+        <span class="visually-hidden">{{ cm_i_color | escape }}</span>
+      {%- else -%}
+        <span class="cm-swatch__label">{{ cm_i_color | escape }}</span>
+    {%- endcase -%}
+
+    {%- unless cm_sibling.available -%}
+      <span class="visually-hidden">{{ 'products.product.sold_out' | t }}</span>
+    {%- endunless -%}
+  </a>
+</li>
