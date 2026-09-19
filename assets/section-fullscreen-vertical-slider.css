@@ -115,6 +115,22 @@ body.fvs-header-pinned .section-header.shopify-section-header-hidden.menu-open {
   top: 0;
 }
 
+/* Footer as a full-viewport panel: content sits at the bottom, the empty space
+   falls above it. Sized in svh, not dvh, because the footer scrolls normally
+   and dvh would resize it while a mobile browser toolbar collapses. */
+body.fvs-footer-full .footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100vh;
+}
+
+@supports (min-height: 100svh) {
+  body.fvs-footer-full .footer {
+    min-height: 100svh;
+  }
+}
+
 /* ---------- Transitions ---------- */
 
 .fvs--js.fvs--transition-slide .fvs__slide {

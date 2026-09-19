@@ -70,6 +70,7 @@
       this.overlapHeader = this.dataset.overlapHeader === 'true';
       this.pinHeader = this.dataset.pinHeader === 'true';
       this.transparentHeader = this.dataset.transparentHeader === 'true';
+      this.fullFooter = this.dataset.fullFooter === 'true';
       this.heightMode = this.dataset.heightMode || 'full';
       this.designMode = Boolean(window.Shopify && window.Shopify.designMode);
       this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -96,6 +97,7 @@
 
       this.measure();
       if (this.pinHeader) document.body.classList.add('fvs-header-pinned');
+      if (this.fullFooter) document.body.classList.add('fvs-footer-full');
       this.setMode(true);
 
       // The header group can change height after fonts load or when an
@@ -180,6 +182,9 @@
       this.setBodyHeaderClass(false);
       if (!document.querySelector('fullscreen-vertical-slider[data-pin-header="true"]')) {
         document.body.classList.remove('fvs-header-pinned');
+      }
+      if (!document.querySelector('fullscreen-vertical-slider[data-full-footer="true"]')) {
+        document.body.classList.remove('fvs-footer-full');
       }
       if (this.sectionWrapper) this.sectionWrapper.classList.remove('fvs-overlap-parent');
     }
@@ -611,9 +616,13 @@
       while (next && next.offsetHeight === 0) next = next.nextElementSibling;
       if (next) return next.getBoundingClientRect().top + window.scrollY - pinned;
 
+      // A full-height footer is meant to be read whole, so land on its top
+      // edge rather than nudging its last line below the fold.
       var footer =
         document.querySelector('.shopify-section-group-footer-group') || document.querySelector('footer');
-      if (footer) return footer.getBoundingClientRect().top + window.scrollY - pinned;
+      if (footer) {
+        return footer.getBoundingClientRect().top + window.scrollY - (this.fullFooter ? 0 : pinned);
+      }
 
       return wrapper.getBoundingClientRect().bottom + window.scrollY;
     }
