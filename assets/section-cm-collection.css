@@ -7,8 +7,8 @@
 */
 
 .cm-collection {
-  --cm-grid-gap-mobile: 12px;
-  --cm-grid-gap-desktop: 20px;
+  --cm-grid-gap-mobile: 4px;
+  --cm-grid-gap-desktop: 8px;
   --cm-row-gap-mobile: 28px;
   --cm-row-gap-desktop: 40px;
 }
