@@ -66,6 +66,7 @@
       this.snapEnabled = this.dataset.snap === 'true';
       this.mobileSnapEnabled = this.dataset.mobileSnap === 'true';
       this.overlapHeader = this.dataset.overlapHeader === 'true';
+      this.pinHeader = this.dataset.pinHeader === 'true';
       this.heightMode = this.dataset.heightMode || 'full';
       this.designMode = Boolean(window.Shopify && window.Shopify.designMode);
       this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -91,7 +92,17 @@
       this.hasScrolled = window.scrollY > 0;
 
       this.measure();
+      if (this.pinHeader) document.body.classList.add('fvs-header-pinned');
       this.setMode(true);
+
+      // The header group can change height after fonts load or when an
+      // announcement rotates, which would leave the overlap offset stale.
+      if (window.ResizeObserver && this.headerGroupEls.length) {
+        this.headerObserver = new ResizeObserver(this.onResize);
+        for (var g = 0; g < this.headerGroupEls.length; g++) {
+          this.headerObserver.observe(this.headerGroupEls[g]);
+        }
+      }
 
       window.addEventListener('wheel', this.onWheel, { passive: false });
       this.addEventListener('touchstart', this.onTouchStart, { passive: true });
@@ -152,6 +163,7 @@
       this.removeEventListener('focusout', this.onPointerLeave);
 
       if (this.observer) this.observer.disconnect();
+      if (this.headerObserver) this.headerObserver.disconnect();
       this.teardownStackedObserver();
 
       clearTimeout(this.animationTimer);
@@ -162,19 +174,50 @@
       this.rafId = null;
 
       this.setBodyHeaderClass(false);
+      if (!document.querySelector('fullscreen-vertical-slider[data-pin-header="true"]')) {
+        document.body.classList.remove('fvs-header-pinned');
+      }
       if (this.sectionWrapper) this.sectionWrapper.classList.remove('fvs-overlap-parent');
     }
 
     /* ---------------- setup helpers ---------------- */
 
     measure() {
+      var main = document.querySelector('#MainContent') || document.querySelector('main');
+
       this.headerEl = document.querySelector('.section-header');
       this.headerHeight = this.headerEl ? this.headerEl.offsetHeight : 0;
-      document.documentElement.style.setProperty('--fvs-header-height', this.headerHeight + 'px');
 
-      var main = document.querySelector('#MainContent') || document.querySelector('main');
+      // Everything the theme renders above <main>: announcement bar, header,
+      // and any app section a merchant has added to the header group.
+      this.headerGroupEls = [];
+      this.headerGroupHeight = 0;
+      var nodes = document.querySelectorAll('.shopify-section-group-header-group');
+      for (var i = 0; i < nodes.length; i++) {
+        if (main && main.contains(nodes[i])) continue;
+        this.headerGroupEls.push(nodes[i]);
+        this.headerGroupHeight += nodes[i].offsetHeight;
+      }
+
+      var sticky = document.querySelector('sticky-header');
+      var stickyType = sticky ? sticky.dataset.stickyType : 'none';
+      this.headerIsPinned =
+        this.pinHeader || stickyType === 'always' || stickyType === 'reduce-logo-size';
+
+      document.documentElement.style.setProperty(
+        '--fvs-header-group-height',
+        this.headerGroupHeight + 'px'
+      );
+      // Only the part of the header that stays on screen counts against the
+      // "full screen minus header" height.
+      this.style.setProperty(
+        '--fvs-header-height',
+        (this.headerIsPinned ? this.headerHeight : 0) + 'px'
+      );
+
       this.isFirstSection = Boolean(main && this.sectionWrapper && main.firstElementChild === this.sectionWrapper);
-      this.overlapActive = this.overlapHeader && this.isFirstSection;
+      this.overlapActive =
+        this.overlapHeader && this.isFirstSection && this.heightMode !== 'full_minus_header';
 
       if (this.sectionWrapper) {
         this.sectionWrapper.classList.toggle('fvs-overlap-parent', this.overlapActive);
@@ -448,7 +491,7 @@
     }
 
     getTopOffset() {
-      if (this.heightMode === 'full_minus_header' && !this.overlapActive) return this.headerHeight;
+      if (this.heightMode === 'full_minus_header' && this.headerIsPinned) return this.headerHeight;
       return 0;
     }
 
@@ -508,14 +551,16 @@
     }
 
     getNextScrollTarget() {
+      // A pinned header covers the top of whatever we land on.
+      var pinned = this.headerIsPinned ? this.headerHeight : 0;
       var wrapper = this.sectionWrapper || this;
       var next = wrapper.nextElementSibling;
       while (next && next.offsetHeight === 0) next = next.nextElementSibling;
-      if (next) return next.getBoundingClientRect().top + window.scrollY;
+      if (next) return next.getBoundingClientRect().top + window.scrollY - pinned;
 
       var footer =
         document.querySelector('.shopify-section-group-footer-group') || document.querySelector('footer');
-      if (footer) return footer.getBoundingClientRect().top + window.scrollY;
+      if (footer) return footer.getBoundingClientRect().top + window.scrollY - pinned;
 
       return wrapper.getBoundingClientRect().bottom + window.scrollY;
     }

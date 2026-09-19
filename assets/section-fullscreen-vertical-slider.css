@@ -93,12 +93,26 @@
   pointer-events: none;
 }
 
-/* Overlap the Dawn header. The class is added by JS only when the section is
-   the first one inside <main>, because Liquid cannot know that reliably. */
+/* Overlap the whole Dawn header group (announcement bar + header) so the first
+   slide is flush with the top of the viewport and owns scrolling straight away.
+   The class is added by JS only when the section is the first one inside
+   <main>, because Liquid cannot know that reliably. */
 .shopify-section.fvs-overlap-parent {
   position: relative;
   z-index: 0;
-  margin-top: calc(var(--fvs-header-height, 0px) * -1);
+  margin-top: calc(var(--fvs-header-group-height, 0px) * -1);
+}
+
+/* Keep the header pinned to the top of the page, whatever sticky mode the
+   header section itself is set to, and stop Dawn hiding it on scroll down. */
+body.fvs-header-pinned .section-header.shopify-section-group-header-group {
+  position: sticky;
+  top: 0;
+}
+
+body.fvs-header-pinned .section-header.shopify-section-header-hidden,
+body.fvs-header-pinned .section-header.shopify-section-header-hidden.menu-open {
+  top: 0;
 }
 
 /* ---------- Transitions ---------- */

@@ -75,6 +75,7 @@
   data-mobile-snap="{{ section.settings.mobile_scroll_snap }}"
   data-transition="{{ section.settings.transition_style }}"
   data-overlap-header="{{ section.settings.overlap_header }}"
+  data-pin-header="{{ section.settings.pin_header }}"
   data-header-color="{{ header_color_rgb }}"
   data-height-mode="{{ section.settings.slider_height }}"
   role="region"
@@ -334,7 +335,14 @@
       "type": "checkbox",
       "id": "overlap_header",
       "label": "Overlap header",
-      "info": "Places the slider behind a transparent header. Only applies when this is the first section on the page.",
+      "info": "The slider fills the viewport and the announcement bar and header sit on top of it. Only applies when this is the first section on the page.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "pin_header",
+      "label": "Keep header fixed while scrolling",
+      "info": "Pins the header to the top of every page that uses this section, whatever the header section's own sticky setting is.",
       "default": true
     },
     {
