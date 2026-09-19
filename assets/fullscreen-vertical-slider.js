@@ -33,6 +33,8 @@
       this.wheelAccum = 0;
       this.lastWheelTime = 0;
       this.needsGap = false;
+      this.pendingDirection = 0;
+      this.flushTimer = null;
       this.suppressClick = false;
       this.touchActive = false;
       this.userPaused = false;
@@ -67,6 +69,7 @@
       this.mobileSnapEnabled = this.dataset.mobileSnap === 'true';
       this.overlapHeader = this.dataset.overlapHeader === 'true';
       this.pinHeader = this.dataset.pinHeader === 'true';
+      this.transparentHeader = this.dataset.transparentHeader === 'true';
       this.heightMode = this.dataset.heightMode || 'full';
       this.designMode = Boolean(window.Shopify && window.Shopify.designMode);
       this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -167,6 +170,7 @@
       this.teardownStackedObserver();
 
       clearTimeout(this.animationTimer);
+      clearTimeout(this.flushTimer);
       clearTimeout(this.resizeTimer);
       clearTimeout(this.autoplayTimer);
       clearTimeout(this.autoplayResumeTimer);
@@ -248,6 +252,7 @@
       }
 
       this.hijack = next === 'slider' && !this.designMode;
+      this.clearPending();
       this.applySlideStates(true);
     }
 
@@ -384,6 +389,52 @@
       return true;
     }
 
+    /* Every input funnels through here. A gesture that lands during the
+       transition or the cool-down is remembered rather than dropped, and
+       replayed the moment the slider is free — otherwise a visitor scrolling
+       at a steady pace sees every second gesture do nothing. Only the most
+       recent direction is kept, so a burst can never skip several slides. */
+    requestStep(direction) {
+      if (!direction) return;
+      if (this.isAnimating || performance.now() < this.lockUntil) {
+        this.pendingDirection = direction;
+        this.scheduleFlush();
+        return;
+      }
+      this.clearPending();
+      this.handleDirection(direction);
+    }
+
+    scheduleFlush() {
+      clearTimeout(this.flushTimer);
+      var self = this;
+      var wait = Math.max(0, this.lockUntil - performance.now()) + 16;
+      this.flushTimer = setTimeout(function () {
+        self.flushPending();
+      }, wait);
+    }
+
+    flushPending() {
+      var direction = this.pendingDirection;
+      if (!direction) return;
+      if (!this.isActive || this.mode !== 'slider') {
+        this.clearPending();
+        return;
+      }
+      if (this.isAnimating || performance.now() < this.lockUntil) {
+        this.scheduleFlush();
+        return;
+      }
+      this.clearPending();
+      this.handleDirection(direction);
+    }
+
+    clearPending() {
+      this.pendingDirection = 0;
+      clearTimeout(this.flushTimer);
+      this.flushTimer = null;
+    }
+
     handleDirection(direction) {
       this.hideHint();
       if (this.step(direction)) return true;
@@ -514,11 +565,12 @@
     deactivate() {
       if (!this.isActive) return;
       this.isActive = false;
+      this.clearPending();
       this.stopAutoplay();
     }
 
     updateHeaderState(rect) {
-      if (!this.overlapActive || !this.headerEl) {
+      if (!this.transparentHeader || !this.overlapActive || !this.headerEl) {
         this.setBodyHeaderClass(false);
         return;
       }
@@ -540,6 +592,7 @@
 
     release(direction) {
       this.isActive = false;
+      this.clearPending();
       this.stopAutoplay();
       this.releaseGuard = true;
       this.snapTarget = null;
@@ -593,6 +646,12 @@
       this.lastWheelTime = now;
 
       if (this.isAnimating || now < this.lockUntil) {
+        // A gap this long means a fresh, deliberate gesture rather than
+        // trackpad inertia from the one we just handled: queue it.
+        if (gap >= WHEEL_GAP) {
+          this.pauseAutoplayForUser();
+          this.requestStep(this.normalizeDelta(event) > 0 ? 1 : -1);
+        }
         this.wheelAccum = 0;
         this.needsGap = true;
         return;
@@ -613,7 +672,7 @@
       var direction = this.wheelAccum > 0 ? 1 : -1;
       this.wheelAccum = 0;
       this.pauseAutoplayForUser();
-      this.handleDirection(direction);
+      this.requestStep(direction);
     }
 
     onTouchStart(event) {
@@ -649,10 +708,9 @@
       if (!this.hijack || !this.isActive || this.isBlocked()) return;
       if (Math.abs(this.touchDeltaY) < TOUCH_THRESHOLD) return;
       if (Math.abs(this.touchDeltaY) <= Math.abs(this.touchDeltaX)) return;
-      if (this.isAnimating || performance.now() < this.lockUntil) return;
 
       this.pauseAutoplayForUser();
-      this.handleDirection(this.touchDeltaY < 0 ? 1 : -1);
+      this.requestStep(this.touchDeltaY < 0 ? 1 : -1);
     }
 
     onClickCapture(event) {
@@ -698,14 +756,14 @@
 
       if (!handled) return;
       event.preventDefault();
-      if (this.isAnimating || performance.now() < this.lockUntil) return;
 
       this.pauseAutoplayForUser();
       if (jumpTo !== null) {
+        if (this.isAnimating || performance.now() < this.lockUntil) return;
         this.hideHint();
         this.goTo(jumpTo);
       } else {
-        this.handleDirection(direction);
+        this.requestStep(direction);
       }
     }
 

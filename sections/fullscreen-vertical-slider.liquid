@@ -76,6 +76,7 @@
   data-transition="{{ section.settings.transition_style }}"
   data-overlap-header="{{ section.settings.overlap_header }}"
   data-pin-header="{{ section.settings.pin_header }}"
+  data-transparent-header="{{ section.settings.transparent_header }}"
   data-header-color="{{ header_color_rgb }}"
   data-height-mode="{{ section.settings.slider_height }}"
   role="region"
@@ -346,9 +347,17 @@
       "default": true
     },
     {
+      "type": "checkbox",
+      "id": "transparent_header",
+      "label": "Use a transparent header over the slider",
+      "info": "Off: the header keeps its own color scheme and stays solid. On: the header background disappears over the slider and returns once you scroll past it.",
+      "default": false
+    },
+    {
       "type": "color",
       "id": "header_text_color",
-      "label": "Header text color while overlapping",
+      "label": "Header text color while transparent",
+      "info": "Only used when the transparent header is turned on.",
       "default": "#FFFFFF"
     },
     {
@@ -409,8 +418,8 @@
       "step": 100,
       "unit": "ms",
       "label": "Scroll cool-down",
-      "info": "Stops one fast trackpad flick from skipping several slides.",
-      "default": 600
+      "info": "Pause after each slide before the next one can start. Stops one fast trackpad flick from skipping several slides.",
+      "default": 300
     },
     {
       "type": "checkbox",
