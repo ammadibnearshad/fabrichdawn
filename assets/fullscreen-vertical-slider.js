@@ -35,6 +35,10 @@
       this.needsGap = false;
       this.pendingDirection = 0;
       this.flushTimer = null;
+      this.footerMode = false;
+      this.footerTop = 0;
+      this.isScrolling = false;
+      this.scrollRaf = null;
       this.suppressClick = false;
       this.touchActive = false;
       this.userPaused = false;
@@ -110,10 +114,12 @@
       }
 
       window.addEventListener('wheel', this.onWheel, { passive: false });
-      this.addEventListener('touchstart', this.onTouchStart, { passive: true });
-      this.addEventListener('touchmove', this.onTouchMove, { passive: false });
-      this.addEventListener('touchend', this.onTouchEnd, { passive: true });
-      this.addEventListener('touchcancel', this.onTouchEnd, { passive: true });
+      // On document, not on the element: while parked on the footer the touches
+      // land on the footer, and we still need to catch the swipe that comes back.
+      document.addEventListener('touchstart', this.onTouchStart, { passive: true });
+      document.addEventListener('touchmove', this.onTouchMove, { passive: false });
+      document.addEventListener('touchend', this.onTouchEnd, { passive: true });
+      document.addEventListener('touchcancel', this.onTouchEnd, { passive: true });
       this.addEventListener('click', this.onClickCapture, true);
       window.addEventListener('keydown', this.onKeyDown);
       window.addEventListener('scroll', this.onScroll, { passive: true });
@@ -146,10 +152,10 @@
 
     disconnectedCallback() {
       window.removeEventListener('wheel', this.onWheel, { passive: false });
-      this.removeEventListener('touchstart', this.onTouchStart);
-      this.removeEventListener('touchmove', this.onTouchMove);
-      this.removeEventListener('touchend', this.onTouchEnd);
-      this.removeEventListener('touchcancel', this.onTouchEnd);
+      document.removeEventListener('touchstart', this.onTouchStart);
+      document.removeEventListener('touchmove', this.onTouchMove);
+      document.removeEventListener('touchend', this.onTouchEnd);
+      document.removeEventListener('touchcancel', this.onTouchEnd);
       this.removeEventListener('click', this.onClickCapture, true);
       window.removeEventListener('keydown', this.onKeyDown);
       window.removeEventListener('scroll', this.onScroll);
@@ -177,7 +183,10 @@
       clearTimeout(this.autoplayTimer);
       clearTimeout(this.autoplayResumeTimer);
       if (this.rafId) cancelAnimationFrame(this.rafId);
+      if (this.scrollRaf) cancelAnimationFrame(this.scrollRaf);
       this.rafId = null;
+      this.scrollRaf = null;
+      this.isScrolling = false;
 
       this.setBodyHeaderClass(false);
       if (!document.querySelector('fullscreen-vertical-slider[data-pin-header="true"]')) {
@@ -517,6 +526,8 @@
       this.updateHeaderState(rect);
 
       if (!this.hijack || this.mode !== 'slider') return;
+      // Our own animated scroll is in charge; don't second-guess it mid-flight.
+      if (this.isScrolling) return;
 
       var offset = this.getTopOffset();
       var distance = rect.top - offset;
@@ -560,6 +571,7 @@
     }
 
     activate() {
+      this.footerMode = false;
       if (this.isActive) return;
       this.isActive = true;
       this.needsGap = true;
@@ -595,6 +607,47 @@
       }
     }
 
+    /* One rAF-driven scroll so the page moves with the same duration and easing
+       as a slide change, and so we know exactly when it has landed —
+       window.scrollTo({behavior:'smooth'}) gives us no completion hook. */
+    animateScrollTo(target, done) {
+      if (this.scrollRaf) cancelAnimationFrame(this.scrollRaf);
+
+      var start = window.scrollY;
+      var change = Math.round(target) - start;
+
+      if (this.prefersReduced() || Math.abs(change) < 2) {
+        window.scrollTo(0, Math.round(target));
+        this.isScrolling = false;
+        this.scrollRaf = null;
+        if (done) done();
+        return;
+      }
+
+      var self = this;
+      var began = performance.now();
+      this.isScrolling = true;
+
+      var step = function (now) {
+        var progress = Math.min(1, (now - began) / self.speed);
+        var eased =
+          progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        window.scrollTo(0, Math.round(start + change * eased));
+
+        if (progress < 1) {
+          self.scrollRaf = requestAnimationFrame(step);
+          return;
+        }
+        self.scrollRaf = null;
+        self.isScrolling = false;
+        if (done) done();
+      };
+
+      this.scrollRaf = requestAnimationFrame(step);
+    }
+
     release(direction) {
       this.isActive = false;
       this.clearPending();
@@ -605,7 +658,37 @@
       var target = direction === 'down' ? this.getNextScrollTarget() : this.getPreviousScrollTarget();
       if (target === null) return;
 
-      window.scrollTo({ top: target, behavior: this.prefersReduced() ? 'auto' : 'smooth' });
+      var self = this;
+      this.animateScrollTo(target, function () {
+        if (direction !== 'down') return;
+        // Park at the footer and wait for one scroll up to come back in.
+        self.footerMode = true;
+        self.footerTop = Math.round(Math.min(target, window.scrollY));
+      });
+    }
+
+    returnToSlider() {
+      this.footerMode = false;
+      this.releaseGuard = false;
+      this.clearPending();
+
+      var self = this;
+      this.animateScrollTo(this.getSliderScrollTop(), function () {
+        self.activate();
+      });
+    }
+
+    getSliderScrollTop() {
+      return Math.round(this.getBoundingClientRect().top + window.scrollY - this.getTopOffset());
+    }
+
+    /* At rest on the footer, one upward gesture animates back into the slider
+       on the last slide. Downward gestures stay native so a footer taller than
+       the viewport can still be scrolled. */
+    canReturnFromFooter(direction) {
+      if (!this.footerMode || this.isScrolling) return false;
+      if (direction >= 0) return false;
+      return window.scrollY <= this.footerTop + 2;
     }
 
     getNextScrollTarget() {
@@ -645,9 +728,23 @@
     }
 
     onWheel(event) {
-      if (!this.hijack || !this.isActive) return;
+      if (!this.hijack) return;
       if (this.isBlocked()) return;
       if (event.ctrlKey) return;
+
+      if (!this.isActive) {
+        var released = performance.now();
+        var sinceLast = released - this.lastWheelTime;
+        this.lastWheelTime = released;
+        if (!this.canReturnFromFooter(this.normalizeDelta(event))) return;
+        // Only a fresh gesture returns — not the tail of the one that brought
+        // us here, nor a continuous scroll up through a tall footer.
+        if (sinceLast < WHEEL_GAP) return;
+        if (event.cancelable) event.preventDefault();
+        this.returnToSlider();
+        return;
+      }
+
       if (event.cancelable) event.preventDefault();
 
       var now = performance.now();
@@ -714,7 +811,17 @@
       this.touchActive = false;
       if (this.touchMoved > CLICK_SUPPRESS_DISTANCE) this.suppressClick = true;
 
-      if (!this.hijack || !this.isActive || this.isBlocked()) return;
+      if (!this.hijack || this.isBlocked()) return;
+
+      if (!this.isActive) {
+        // Dragging the finger down means scrolling up.
+        if (Math.abs(this.touchDeltaY) < TOUCH_THRESHOLD) return;
+        if (Math.abs(this.touchDeltaY) <= Math.abs(this.touchDeltaX)) return;
+        if (!this.canReturnFromFooter(this.touchDeltaY > 0 ? -1 : 1)) return;
+        this.returnToSlider();
+        return;
+      }
+
       if (Math.abs(this.touchDeltaY) < TOUCH_THRESHOLD) return;
       if (Math.abs(this.touchDeltaY) <= Math.abs(this.touchDeltaX)) return;
 
@@ -730,11 +837,19 @@
     }
 
     onKeyDown(event) {
-      if (!this.keyboardEnabled || !this.hijack || !this.isActive) return;
+      if (!this.keyboardEnabled || !this.hijack) return;
       if (this.isBlocked()) return;
 
       var target = event.target;
       if (target && (FORM_TAGS.indexOf(target.tagName) !== -1 || target.isContentEditable)) return;
+
+      if (!this.isActive) {
+        var goesUp = event.key === 'ArrowUp' || event.key === 'PageUp' || event.key === 'Home';
+        if (!goesUp || !this.canReturnFromFooter(-1)) return;
+        event.preventDefault();
+        this.returnToSlider();
+        return;
+      }
 
       var isSpace = event.key === ' ' || event.key === 'Spacebar';
       if (isSpace && target && (target.tagName === 'BUTTON' || target.tagName === 'A')) return;
