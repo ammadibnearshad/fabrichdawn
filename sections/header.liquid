@@ -16,6 +16,14 @@
   <link rel="stylesheet" href="{{ 'component-mega-menu.css' | asset_url }}" media="print" onload="this.media='all'">
 {%- endif -%}
 
+{%- if section.settings.menu_type_desktop == 'mega-custom' -%}
+  {{ 'header-mega-menu-custom.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
+{%- if section.settings.enable_hover_menus and section.settings.menu_type_desktop != 'drawer' -%}
+  <script src="{{ 'header-hover-menu.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
 <style>
   header-drawer {
     justify-self: start;
@@ -38,6 +46,10 @@
 
   .menu-drawer-container {
     display: flex;
+  }
+
+  hover-menu {
+    display: contents;
   }
 
   .list-menu {
@@ -213,15 +225,25 @@
       {%- endif -%}
     {%- endif -%}
 
-    {%- liquid
-      if section.settings.menu != blank
-        if section.settings.menu_type_desktop == 'dropdown'
-          render 'header-dropdown-menu'
-        elsif section.settings.menu_type_desktop != 'drawer'
-          render 'header-mega-menu'
-        endif
-      endif
-    %}
+    {%- if section.settings.menu != blank and section.settings.menu_type_desktop != 'drawer' -%}
+      {%- if section.settings.enable_hover_menus -%}
+        <hover-menu data-open-delay="{{ section.settings.hover_open_delay }}" data-close-delay="240">
+      {%- endif -%}
+      {%- liquid
+        case section.settings.menu_type_desktop
+          when 'dropdown'
+            render 'header-dropdown-menu'
+          when 'mega-custom'
+            render 'header-mega-menu-custom',
+              parent_link_clickable: section.settings.parent_link_clickable
+          else
+            render 'header-mega-menu'
+        endcase
+      -%}
+      {%- if section.settings.enable_hover_menus -%}
+        </hover-menu>
+      {%- endif -%}
+    {%- endif -%}
 
     {%- if section.settings.logo_position == 'middle-center' -%}
       {%- if request.page_type == 'index' -%}
@@ -318,6 +340,21 @@
     </div>
   </header>
 </{{ header_tag }}>
+
+{%- if request.design_mode and section.settings.menu_type_desktop == 'mega-custom' -%}
+  <script>
+    // Keep the mega menu open while its block is selected in the theme editor.
+    document.addEventListener('shopify:block:select', (event) => {
+      const details = event.target.closest('details');
+      if (details) details.open = true;
+    });
+
+    document.addEventListener('shopify:block:deselect', (event) => {
+      const details = event.target.closest('details');
+      if (details) details.open = false;
+    });
+  </script>
+{%- endif -%}
 
 {%- if settings.cart_type == 'notification' -%}
   {%- render 'cart-notification',
@@ -502,7 +539,7 @@
 {
   "name": "t:sections.header.name",
   "class": "section-header",
-  "max_blocks": 3,
+  "max_blocks": 30,
   "settings": [
     {
       "type": "select",
@@ -566,10 +603,39 @@
         {
           "value": "drawer",
           "label": "t:sections.header.settings.menu_type_desktop.options__3.label"
+        },
+        {
+          "value": "mega-custom",
+          "label": "Mega menu (custom)"
         }
       ],
       "default": "dropdown",
-      "label": "t:sections.header.settings.menu_type_desktop.label"
+      "label": "t:sections.header.settings.menu_type_desktop.label",
+      "info": "Choose \"Mega menu (custom)\" to use the Mega menu blocks below."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_menus",
+      "default": true,
+      "label": "Open menus on hover",
+      "info": "Desktop only. Touch devices keep tap-to-open."
+    },
+    {
+      "type": "range",
+      "id": "hover_open_delay",
+      "min": 0,
+      "max": 300,
+      "step": 20,
+      "unit": "ms",
+      "label": "Hover delay before opening",
+      "default": 80
+    },
+    {
+      "type": "checkbox",
+      "id": "parent_link_clickable",
+      "default": true,
+      "label": "Parent menu items link to their own page",
+      "info": "Desktop only. When menus open on hover, clicking a parent item goes to its URL."
     },
     {
       "type": "select",
@@ -679,6 +745,195 @@
     }
   ],
   "blocks": [
+    {
+      "type": "mega_menu",
+      "name": "Mega menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_item",
+          "label": "Top-level menu item",
+          "info": "Type the exact title of the item in your header menu, e.g. Bottoms. Not case-sensitive."
+        },
+        {
+          "type": "header",
+          "content": "Menu item style"
+        },
+        {
+          "type": "color",
+          "id": "item_color",
+          "label": "Menu item text colour",
+          "info": "Optional. Leave empty to inherit the header colour scheme."
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge text",
+          "info": "Optional. Shows a small pill above the menu item, e.g. New."
+        },
+        {
+          "type": "color",
+          "id": "badge_background",
+          "label": "Badge background"
+        },
+        {
+          "type": "color",
+          "id": "badge_text_color",
+          "label": "Badge text colour"
+        },
+        {
+          "type": "header",
+          "content": "Mega menu panel"
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_mega",
+          "default": true,
+          "label": "Show mega menu panel",
+          "info": "Turn off to keep a standard dropdown and only use the styling above."
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Columns menu",
+          "info": "Optional. Leave empty to use this item's own sub-links. Child links become column headings, grandchild links become the links underneath. Use # as a child link URL for a heading that is not clickable."
+        },
+        {
+          "type": "range",
+          "id": "columns",
+          "min": 1,
+          "max": 6,
+          "step": 1,
+          "default": 4,
+          "label": "Maximum link columns"
+        },
+        {
+          "type": "select",
+          "id": "panel_width",
+          "options": [
+            {
+              "value": "content",
+              "label": "Fit content (centred)"
+            },
+            {
+              "value": "page",
+              "label": "Page width"
+            },
+            {
+              "value": "full",
+              "label": "Full width"
+            }
+          ],
+          "default": "content",
+          "label": "Panel width"
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "t:sections.all.colors.label",
+          "default": "scheme-1"
+        },
+        {
+          "type": "header",
+          "content": "Images",
+          "info": "Add \"Mega menu image\" blocks and assign them to the same menu item."
+        },
+        {
+          "type": "select",
+          "id": "image_position",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left of links"
+            },
+            {
+              "value": "right",
+              "label": "Right of links"
+            },
+            {
+              "value": "top",
+              "label": "Above links"
+            },
+            {
+              "value": "bottom",
+              "label": "Below links"
+            }
+          ],
+          "default": "left",
+          "label": "Image position"
+        },
+        {
+          "type": "range",
+          "id": "image_width",
+          "min": 100,
+          "max": 400,
+          "step": 10,
+          "unit": "px",
+          "default": 180,
+          "label": "Image width"
+        },
+        {
+          "type": "select",
+          "id": "image_ratio",
+          "options": [
+            {
+              "value": "adapt",
+              "label": "Adapt to image"
+            },
+            {
+              "value": "0.75",
+              "label": "Portrait (3:4)"
+            },
+            {
+              "value": "0.6667",
+              "label": "Tall (2:3)"
+            },
+            {
+              "value": "1",
+              "label": "Square (1:1)"
+            },
+            {
+              "value": "1.3333",
+              "label": "Landscape (4:3)"
+            }
+          ],
+          "default": "0.75",
+          "label": "Image ratio"
+        }
+      ]
+    },
+    {
+      "type": "mega_image",
+      "name": "Mega menu image",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_item",
+          "label": "Top-level menu item",
+          "info": "Must match the \"Top-level menu item\" of the Mega menu block this image belongs to."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Image link"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption"
+        }
+      ]
+    },
     {
       "type": "@app"
     }

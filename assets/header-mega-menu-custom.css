@@ -1,0 +1,251 @@
+/* Custom mega menu - paired with snippets/header-mega-menu-custom.liquid */
+
+/* NOTE: the list item must stay unpositioned so the panel is placed against
+   .section-header (page/full width panels depend on it). */
+.mega-custom__item {
+  position: relative;
+}
+
+.mega-custom__item-label {
+  color: var(--mega-item-color, inherit);
+}
+
+.mega-custom__badge {
+  position: absolute;
+  top: -0.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  padding: 0.3rem 0.6rem;
+  border-radius: 1rem;
+  background-color: var(--mega-badge-bg, rgb(var(--color-foreground)));
+  color: var(--mega-badge-fg, rgb(var(--color-background)));
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Panel ------------------------------------------------------------------ */
+
+.mega-custom {
+  position: static;
+}
+
+.mega-custom__panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  padding: 3.2rem 0;
+  background-color: rgb(var(--color-background));
+  border-top: 0.1rem solid rgba(var(--color-foreground), 0.08);
+  box-shadow: 0 1rem 2.4rem rgba(var(--color-foreground), 0.06);
+  max-height: calc(100vh - var(--header-bottom-position-desktop, 20rem) - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.header-wrapper--border-bottom .mega-custom__panel {
+  border-top: 0;
+}
+
+.mega-custom__panel--full > .mega-custom__inner {
+  padding-left: 3rem;
+  padding-right: 3rem;
+}
+
+.mega-custom__panel--content {
+  --mega-x: -50%;
+
+  left: 50%;
+  right: auto;
+  width: max-content;
+  max-width: calc(100vw - 4rem);
+  transform: translateX(-50%);
+  padding: 3.2rem 4rem;
+  border: 0.1rem solid rgba(var(--color-foreground), 0.08);
+}
+
+.mega-custom[open] > .mega-custom__panel {
+  animation: megaCustomReveal var(--duration-default, 200ms) ease;
+}
+
+@keyframes megaCustomReveal {
+  from {
+    opacity: 0;
+    transform: translate(var(--mega-x, 0), -1rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(var(--mega-x, 0), 0);
+  }
+}
+
+/* Bridges the gap between the menu item and the panel so the pointer can
+   travel down without the panel closing. */
+.mega-custom[open] > summary::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 3rem;
+}
+
+/* Layout ----------------------------------------------------------------- */
+
+.mega-custom__inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 4rem;
+}
+
+.mega-custom__inner--right {
+  flex-direction: row-reverse;
+}
+
+.mega-custom__inner--top {
+  flex-direction: column;
+}
+
+.mega-custom__inner--bottom {
+  flex-direction: column-reverse;
+}
+
+.mega-custom__media {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+}
+
+.mega-custom__inner--top .mega-custom__media,
+.mega-custom__inner--bottom .mega-custom__media {
+  width: 100%;
+}
+
+.mega-custom__card {
+  display: block;
+  width: var(--mega-media-width, 18rem);
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mega-custom__card-media {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: var(--mega-ratio, 0.75);
+  background-color: rgba(var(--color-foreground), 0.04);
+}
+
+.mega-custom__card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-long, 500ms) ease;
+}
+
+.mega-custom__card:hover .mega-custom__card-media img {
+  transform: scale(1.04);
+}
+
+.mega-custom__card-heading {
+  display: block;
+  margin-top: 1rem;
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: calc(1 + 0.3 / var(--font-body-scale));
+}
+
+.mega-custom__card:hover .mega-custom__card-heading {
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+
+.mega-custom__card-caption {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 1.3rem;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+/* Link columns ----------------------------------------------------------- */
+
+.mega-custom__columns {
+  display: grid;
+  grid-template-columns: repeat(var(--mega-columns, 4), minmax(0, 1fr));
+  gap: 2.4rem 4rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mega-custom__panel--content .mega-custom__columns {
+  grid-template-columns: repeat(var(--mega-columns, 4), minmax(16rem, max-content));
+}
+
+.mega-custom__col-title {
+  display: block;
+  margin-bottom: 1.4rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.15);
+  color: rgb(var(--color-foreground));
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.mega-custom__col-title--link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+
+.mega-custom__link {
+  display: block;
+  padding: 0.7rem 0;
+  color: rgba(var(--color-foreground), 0.78);
+  font-size: 1.5rem;
+  line-height: calc(1 + 0.4 / var(--font-body-scale));
+  text-decoration: none;
+  word-wrap: break-word;
+}
+
+.mega-custom__link:hover,
+.mega-custom__link--active {
+  color: rgb(var(--color-foreground));
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+
+.mega-custom__link:focus-visible,
+.mega-custom__col-title--link:focus-visible,
+.mega-custom__card:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.6);
+  outline-offset: 0.3rem;
+}
+
+.mega-custom__link:focus:not(:focus-visible),
+.mega-custom__col-title--link:focus:not(:focus-visible),
+.mega-custom__card:focus:not(:focus-visible) {
+  outline: 0;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mega-custom[open] > .mega-custom__panel {
+    animation: none;
+  }
+
+  .mega-custom__card-media img,
+  .mega-custom__card:hover .mega-custom__card-media img {
+    transition: none;
+    transform: none;
+  }
+}

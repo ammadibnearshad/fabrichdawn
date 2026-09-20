@@ -1,0 +1,319 @@
+{% comment %}
+  Renders the desktop header navigation with a fully customizable mega menu.
+
+  Each top-level item of the header menu is rendered as one of three things:
+    1. Mega menu   - when a "Mega menu" block is assigned to it and it has content
+    2. Dropdown    - when it has sub-links but no mega menu block (child + grandchild)
+    3. Plain link  - when it has no sub-links
+
+  Panels are built from header section blocks, matched to a top-level link by the
+  handleized "Top-level menu item" value:
+    - "Mega menu"       -> layout, column source, badge and colour for one item
+    - "Mega menu image" -> one linkable image card for one item (add as many as needed)
+
+  Accepts:
+  - parent_link_clickable: {Boolean} On desktop, clicking a parent item follows its own URL.
+
+  Usage:
+  {% render 'header-mega-menu-custom', parent_link_clickable: true %}
+{% endcomment %}
+
+<nav class="header__inline-menu">
+  <ul class="list-menu list-menu--inline" role="list">
+    {%- for link in section.settings.menu.links -%}
+      {%- liquid
+        assign link_key = link.title | handleize
+        assign has_config = false
+        assign image_count = 0
+
+        for block in section.blocks
+          if block.settings.menu_item == blank
+            continue
+          endif
+
+          assign block_key = block.settings.menu_item | handleize
+          if block_key != link_key
+            continue
+          endif
+
+          if block.type == 'mega_menu'
+            assign has_config = true
+            assign config = block
+          elsif block.type == 'mega_image' and block.settings.image != blank
+            assign image_count = image_count | plus: 1
+          endif
+        endfor
+
+        assign child_links = link.links
+        if has_config and config.settings.menu != blank
+          assign child_links = config.settings.menu.links
+        endif
+
+        assign is_mega = false
+        if has_config and config.settings.enable_mega
+          if child_links != blank or image_count > 0
+            assign is_mega = true
+          endif
+        endif
+
+        assign item_style = ''
+        if has_config and config.settings.item_color != blank
+          capture item_style
+            echo 'style="--mega-item-color: '
+            echo config.settings.item_color
+            echo ';"'
+          endcapture
+        endif
+
+        assign parent_href = ''
+        if parent_link_clickable and link.url != blank and link.url != '#'
+          assign parent_href = link.url
+        endif
+      -%}
+
+      {%- capture item_label -%}
+        <span
+          class="mega-custom__item-label{% if link.current or link.child_active %} header__active-menu-item{% endif %}"
+        >
+          {{- link.title | escape -}}
+        </span>
+        {%- if has_config and config.settings.badge_text != blank -%}
+          <span
+            class="mega-custom__badge"
+            style="--mega-badge-bg: {{ config.settings.badge_background }}; --mega-badge-fg: {{ config.settings.badge_text_color }};"
+          >
+            {{- config.settings.badge_text | escape -}}
+          </span>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      <li class="mega-custom__item-wrapper">
+        {%- if is_mega -%}
+          {%- liquid
+            assign columns = config.settings.columns
+            assign column_count = child_links.size
+            if column_count > 0 and column_count < columns
+              assign columns = column_count
+            endif
+
+            assign media_position = config.settings.image_position
+            if image_count == 0
+              assign media_position = 'left'
+            endif
+          -%}
+          <header-menu>
+            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-custom">
+              <summary
+                id="HeaderMenu-{{ link.handle }}"
+                class="header__menu-item list-menu__item link focus-inset mega-custom__item"
+                {% if parent_href != blank %}
+                  data-href="{{ parent_href }}"
+                {% endif %}
+                {{ item_style }}
+              >
+                {{ item_label }}
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </summary>
+
+              <div
+                id="MegaMenu-Content-{{ forloop.index }}"
+                class="mega-custom__panel mega-custom__panel--{{ config.settings.panel_width }} color-{{ config.settings.color_scheme }} gradient motion-reduce"
+                tabindex="-1"
+                {{ config.shopify_attributes }}
+              >
+                <div
+                  class="mega-custom__inner mega-custom__inner--{{ media_position }}{% if config.settings.panel_width == 'page' %} page-width{% endif %}"
+                >
+                  {%- if image_count > 0 -%}
+                    <div class="mega-custom__media" style="--mega-media-width: {{ config.settings.image_width }}px;">
+                      {%- for block in section.blocks -%}
+                        {%- liquid
+                          assign render_card = false
+
+                          if block.type == 'mega_image' and block.settings.image != blank
+                            assign block_key = block.settings.menu_item | handleize
+                            if block_key == link_key
+                              assign render_card = true
+                            endif
+                          endif
+
+                          if render_card
+                            assign ratio = config.settings.image_ratio
+                            if ratio == 'adapt'
+                              assign ratio = block.settings.image.aspect_ratio
+                            endif
+
+                            assign card_tag = 'div'
+                            if block.settings.link != blank
+                              assign card_tag = 'a'
+                            endif
+
+                            assign card_alt = block.settings.image.alt | default: block.settings.heading | default: link.title
+                            assign card_sizes = config.settings.image_width | append: 'px'
+                          endif
+                        -%}
+                        {%- if render_card -%}
+                        <{{ card_tag }}
+                          class="mega-custom__card"
+                          {% if card_tag == 'a' %}
+                            href="{{ block.settings.link }}"
+                          {% endif %}
+                          style="--mega-ratio: {{ ratio }};"
+                          {{ block.shopify_attributes }}
+                        >
+                          <span class="mega-custom__card-media">
+                            {{
+                              block.settings.image
+                              | image_url: width: 880
+                              | image_tag:
+                                loading: 'lazy',
+                                widths: '165, 220, 275, 330, 440, 550, 660, 880',
+                                sizes: card_sizes,
+                                alt: card_alt
+                            }}
+                          </span>
+                          {%- if block.settings.heading != blank -%}
+                            <span class="mega-custom__card-heading">{{ block.settings.heading | escape }}</span>
+                          {%- endif -%}
+                          {%- if block.settings.caption != blank -%}
+                            <span class="mega-custom__card-caption">{{ block.settings.caption | escape }}</span>
+                          {%- endif -%}
+                        </{{ card_tag }}>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+
+                  {%- if child_links != blank -%}
+                    <ul class="mega-custom__columns list-unstyled" role="list" style="--mega-columns: {{ columns }};">
+                      {%- for childlink in child_links -%}
+                        <li class="mega-custom__col">
+                          {%- if childlink.url == blank or childlink.url == '#' -%}
+                            <span class="mega-custom__col-title">{{ childlink.title | escape }}</span>
+                          {%- else -%}
+                            <a
+                              id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                              href="{{ childlink.url }}"
+                              class="mega-custom__col-title mega-custom__col-title--link{% if childlink.current %} mega-custom__link--active{% endif %}"
+                              {% if childlink.current %}
+                                aria-current="page"
+                              {% endif %}
+                            >
+                              {{ childlink.title | escape }}
+                            </a>
+                          {%- endif -%}
+
+                          {%- if childlink.links != blank -%}
+                            <ul class="list-unstyled" role="list">
+                              {%- for grandchildlink in childlink.links -%}
+                                <li>
+                                  <a
+                                    id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                                    href="{{ grandchildlink.url }}"
+                                    class="mega-custom__link{% if grandchildlink.current %} mega-custom__link--active{% endif %}"
+                                    {% if grandchildlink.current %}
+                                      aria-current="page"
+                                    {% endif %}
+                                  >
+                                    {{ grandchildlink.title | escape }}
+                                  </a>
+                                </li>
+                              {%- endfor -%}
+                            </ul>
+                          {%- endif -%}
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                </div>
+              </div>
+            </details>
+          </header-menu>
+
+        {%- elsif child_links != blank -%}
+          <header-menu>
+            <details id="Details-HeaderMenu-{{ forloop.index }}">
+              <summary
+                id="HeaderMenu-{{ link.handle }}"
+                class="header__menu-item list-menu__item link focus-inset mega-custom__item"
+                {% if parent_href != blank %}
+                  data-href="{{ parent_href }}"
+                {% endif %}
+                {{ item_style }}
+              >
+                {{ item_label }}
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </summary>
+              <ul
+                id="HeaderMenu-MenuList-{{ forloop.index }}"
+                class="header__submenu list-menu list-menu--disclosure color-{{ section.settings.menu_color_scheme }} gradient caption-large motion-reduce global-settings-popup"
+                role="list"
+                tabindex="-1"
+              >
+                {%- for childlink in child_links -%}
+                  <li>
+                    {%- if childlink.links == blank -%}
+                      <a
+                        id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                        href="{{ childlink.url }}"
+                        class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if childlink.current %} list-menu__item--active{% endif %}"
+                        {% if childlink.current %}
+                          aria-current="page"
+                        {% endif %}
+                      >
+                        {{ childlink.title | escape }}
+                      </a>
+                    {%- else -%}
+                      <details id="Details-HeaderSubMenu-{{ link.handle }}-{{ childlink.handle }}">
+                        <summary
+                          id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                          class="header__menu-item link link--text list-menu__item focus-inset caption-large"
+                        >
+                          <span>{{ childlink.title | escape }}</span>
+                          {{- 'icon-caret.svg' | inline_asset_content -}}
+                        </summary>
+                        <ul
+                          id="HeaderMenu-SubMenuList-{{ link.handle }}-{{ childlink.handle }}"
+                          class="header__submenu list-menu motion-reduce"
+                          role="list"
+                        >
+                          {%- for grandchildlink in childlink.links -%}
+                            <li>
+                              <a
+                                id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                                href="{{ grandchildlink.url }}"
+                                class="header__menu-item list-menu__item link link--text focus-inset caption-large{% if grandchildlink.current %} list-menu__item--active{% endif %}"
+                                {% if grandchildlink.current %}
+                                  aria-current="page"
+                                {% endif %}
+                              >
+                                {{ grandchildlink.title | escape }}
+                              </a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </details>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </details>
+          </header-menu>
+
+        {%- else -%}
+          <a
+            id="HeaderMenu-{{ link.handle }}"
+            href="{{ link.url }}"
+            class="header__menu-item list-menu__item link link--text focus-inset mega-custom__item"
+            {% if link.current %}
+              aria-current="page"
+            {% endif %}
+            {{ item_style }}
+          >
+            {{ item_label }}
+          </a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>
