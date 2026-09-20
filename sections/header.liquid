@@ -18,9 +18,10 @@
 
 {%- if section.settings.menu_type_desktop == 'mega-custom' -%}
   {{ 'header-mega-menu-custom.css' | asset_url | stylesheet_tag }}
-{%- endif -%}
-
-{%- if section.settings.enable_hover_menus and section.settings.menu_type_desktop != 'drawer' -%}
+  {%- if section.settings.enable_hover_menus -%}
+    <script src="{{ 'header-mega-menu-custom.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+{%- elsif section.settings.enable_hover_menus and section.settings.menu_type_desktop != 'drawer' -%}
   <script src="{{ 'header-hover-menu.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
@@ -116,6 +117,12 @@
   .header {
     padding: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px 3rem {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px 3rem;
   }
+
+  {%- if section.settings.menu_item_hover_color != blank -%}
+    .header__inline-menu {
+      --menu-item-hover-color: {{ section.settings.menu_item_hover_color }};
+    }
+  {%- endif -%}
 
   .section-header {
     position: sticky; /* This is for fixing a Safari z-index issue. PR #2147 */
@@ -226,21 +233,30 @@
     {%- endif -%}
 
     {%- if section.settings.menu != blank and section.settings.menu_type_desktop != 'drawer' -%}
-      {%- if section.settings.enable_hover_menus -%}
+      {%- if section.settings.menu_type_desktop == 'mega-custom' -%}
+        {%- render 'header-mega-menu-custom',
+          hover_mode: section.settings.enable_hover_menus,
+          show_caret: section.settings.show_menu_caret,
+          open_delay: section.settings.hover_open_delay
+        -%}
+      {%- elsif section.settings.enable_hover_menus -%}
         <hover-menu data-open-delay="{{ section.settings.hover_open_delay }}" data-close-delay="240">
-      {%- endif -%}
-      {%- liquid
-        case section.settings.menu_type_desktop
-          when 'dropdown'
+          {%- liquid
+            if section.settings.menu_type_desktop == 'dropdown'
+              render 'header-dropdown-menu'
+            else
+              render 'header-mega-menu'
+            endif
+          -%}
+        </hover-menu>
+      {%- else -%}
+        {%- liquid
+          if section.settings.menu_type_desktop == 'dropdown'
             render 'header-dropdown-menu'
-          when 'mega-custom'
-            render 'header-mega-menu-custom', parent_link_clickable: section.settings.parent_link_clickable
           else
             render 'header-mega-menu'
-        endcase
-      -%}
-      {%- if section.settings.enable_hover_menus -%}
-        </hover-menu>
+          endif
+        -%}
       {%- endif -%}
     {%- endif -%}
 
@@ -343,15 +359,21 @@
 {%- if request.design_mode and section.settings.menu_type_desktop == 'mega-custom' -%}
   <script>
     // Keep the mega menu open while its block is selected in the theme editor.
-    document.addEventListener('shopify:block:select', (event) => {
-      const details = event.target.closest('details');
-      if (details) details.open = true;
-    });
+    // Handles both open modes: <mega-menu-item> (hover) and <details> (click).
+    const toggleMegaMenu = (event, isOpen) => {
+      const item = event.target.closest('mega-menu-item, details');
+      if (!item) return;
 
-    document.addEventListener('shopify:block:deselect', (event) => {
-      const details = event.target.closest('details');
-      if (details) details.open = false;
-    });
+      if (item.tagName === 'MEGA-MENU-ITEM') {
+        item.toggleAttribute('open', isOpen);
+        item.querySelector('[data-mega-trigger]')?.setAttribute('aria-expanded', isOpen);
+      } else {
+        item.open = isOpen;
+      }
+    };
+
+    document.addEventListener('shopify:block:select', (event) => toggleMegaMenu(event, true));
+    document.addEventListener('shopify:block:deselect', (event) => toggleMegaMenu(event, false));
   </script>
 {%- endif -%}
 
@@ -631,10 +653,16 @@
     },
     {
       "type": "checkbox",
-      "id": "parent_link_clickable",
-      "default": true,
-      "label": "Parent menu items link to their own page",
-      "info": "Desktop only. When menus open on hover, clicking a parent item goes to its URL."
+      "id": "show_menu_caret",
+      "default": false,
+      "label": "Show dropdown arrows",
+      "info": "Mega menu (custom) only."
+    },
+    {
+      "type": "color",
+      "id": "menu_item_hover_color",
+      "label": "Menu item colour on hover / open",
+      "info": "Mega menu (custom) only. Optional."
     },
     {
       "type": "select",

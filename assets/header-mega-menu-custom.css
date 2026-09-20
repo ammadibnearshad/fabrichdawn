@@ -1,13 +1,48 @@
-/* Custom mega menu - paired with snippets/header-mega-menu-custom.liquid */
+/* Custom mega menu - pairs with snippets/header-mega-menu-custom.liquid
+   and assets/header-mega-menu-custom.js */
 
-/* NOTE: the list item must stay unpositioned so the panel is placed against
-   .section-header (page/full width panels depend on it). */
+/* Trigger ---------------------------------------------------------------- */
+
+/* Static so the panel is positioned against .section-header, not the item.
+   Dawn sets `header-menu > details { position: relative }` in base.css. */
+mega-menu-item,
+.mega-custom {
+  position: static;
+  display: block;
+}
+
 .mega-custom__item {
   position: relative;
+  cursor: pointer;
+  color: var(--mega-item-color, inherit);
 }
 
 .mega-custom__item-label {
   color: var(--mega-item-color, inherit);
+}
+
+.header__inline-menu .mega-custom__item:hover .mega-custom__item-label,
+mega-menu-item[open] > .mega-custom__item .mega-custom__item-label,
+.mega-custom[open] > .mega-custom__item .mega-custom__item-label {
+  color: var(--mega-item-color, var(--menu-item-hover-color, rgb(var(--color-foreground))));
+}
+
+/* Dawn positions summary carets absolutely; ours sits in flow next to the label. */
+.mega-custom__caret {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.6rem;
+}
+
+.mega-custom__caret .icon-caret {
+  position: static;
+  height: 0.6rem;
+  transition: transform var(--duration-short, 100ms) ease;
+}
+
+mega-menu-item[open] .mega-custom__caret .icon-caret,
+.mega-custom[open] > .mega-custom__item .mega-custom__caret .icon-caret {
+  transform: rotate(180deg);
 }
 
 .mega-custom__badge {
@@ -30,16 +65,12 @@
 
 /* Panel ------------------------------------------------------------------ */
 
-.mega-custom {
-  position: static;
-}
-
 .mega-custom__panel {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 3;
+  z-index: 99;
   padding: 3.2rem 0;
   background-color: rgb(var(--color-background));
   border-top: 0.1rem solid rgba(var(--color-foreground), 0.08);
@@ -47,6 +78,31 @@
   max-height: calc(100vh - var(--header-bottom-position-desktop, 20rem) - 2rem);
   overflow-y: auto;
   overscroll-behavior: contain;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(var(--mega-x, 0), -1rem);
+  transition: opacity var(--duration-default, 200ms) ease, transform var(--duration-default, 200ms) ease,
+    visibility var(--duration-default, 200ms) ease;
+}
+
+mega-menu-item[open] > .mega-custom__panel,
+.mega-custom[open] > .mega-custom__panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(var(--mega-x, 0), 0);
+}
+
+/* No-JS fallback: hover / focus opens the panel with CSS alone. */
+.no-js mega-menu-item:hover > .mega-custom__panel,
+.no-js mega-menu-item:focus-within > .mega-custom__panel,
+.no-js mega-menu-item:hover > .header__submenu,
+.no-js mega-menu-item:focus-within > .header__submenu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(var(--mega-x, 0), 0);
 }
 
 .header-wrapper--border-bottom .mega-custom__panel {
@@ -65,36 +121,39 @@
   right: auto;
   width: max-content;
   max-width: calc(100vw - 4rem);
-  transform: translateX(-50%);
   padding: 3.2rem 4rem;
   border: 0.1rem solid rgba(var(--color-foreground), 0.08);
 }
 
-.mega-custom[open] > .mega-custom__panel {
-  animation: megaCustomReveal var(--duration-default, 200ms) ease;
-}
-
-@keyframes megaCustomReveal {
-  from {
-    opacity: 0;
-    transform: translate(var(--mega-x, 0), -1rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(var(--mega-x, 0), 0);
-  }
-}
-
-/* Bridges the gap between the menu item and the panel so the pointer can
-   travel down without the panel closing. */
-.mega-custom[open] > summary::after {
+/* Bridges the header's bottom padding so the pointer can travel from the
+   menu item down into the panel without crossing a dead zone. */
+mega-menu-item[open] > .mega-custom__item::after,
+.mega-custom[open] > .mega-custom__item::after {
   content: '';
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
   height: 3rem;
+}
+
+/* Standard dropdown inside a hover item (no mega menu block assigned) ----- */
+
+mega-menu-item > .header__submenu {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-1.5rem);
+  z-index: 1;
+  transition: opacity var(--duration-default, 200ms) ease, transform var(--duration-default, 200ms) ease,
+    visibility var(--duration-default, 200ms) ease;
+}
+
+mega-menu-item[open] > .header__submenu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 /* Layout ----------------------------------------------------------------- */
@@ -183,6 +242,7 @@
   gap: 2.4rem 4rem;
   flex: 1 1 auto;
   min-width: 0;
+  margin: 0;
 }
 
 .mega-custom__panel--content .mega-custom__columns {
@@ -209,7 +269,7 @@
 
 .mega-custom__link {
   display: block;
-  padding: 0.7rem 0;
+  padding: 0.8rem 0;
   color: rgba(var(--color-foreground), 0.78);
   font-size: 1.5rem;
   line-height: calc(1 + 0.4 / var(--font-body-scale));
@@ -239,13 +299,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mega-custom[open] > .mega-custom__panel {
-    animation: none;
+  .mega-custom__panel,
+  mega-menu-item > .header__submenu,
+  .mega-custom__card-media img,
+  .mega-custom__caret .icon-caret {
+    transition: none;
   }
 
-  .mega-custom__card-media img,
   .mega-custom__card:hover .mega-custom__card-media img {
-    transition: none;
     transform: none;
   }
 }
