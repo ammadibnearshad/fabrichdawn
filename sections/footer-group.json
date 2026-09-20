@@ -1,1 +1,103 @@
-{"name":"t:sections.footer.name","type":"footer","sections":{"footer":{"type":"footer","settings":{"color_scheme":"scheme-1","newsletter_enable":true,"newsletter_heading":"Subscribe to our emails","enable_follow_on_shop":true,"show_social":true,"enable_country_selector":true,"enable_language_selector":true,"payment_enable":true,"show_policy":true,"margin_top":0,"padding_top":36,"padding_bottom":36}}},"order":["footer"]}
+{
+  "name": "t:sections.footer.name",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "footer-custom",
+      "blocks": {
+        "utility_store": {
+          "type": "utility",
+          "settings": {
+            "position": "start",
+            "icon": "map_pin",
+            "label": "Find a store",
+            "link": ""
+          }
+        },
+        "utility_phone": {
+          "type": "utility",
+          "settings": {
+            "position": "end",
+            "icon": "phone",
+            "label": "",
+            "link": ""
+          }
+        },
+        "utility_email": {
+          "type": "utility",
+          "settings": {
+            "position": "end",
+            "icon": "envelope",
+            "label": "",
+            "link": ""
+          }
+        },
+        "utility_contact": {
+          "type": "utility",
+          "settings": {
+            "position": "end",
+            "icon": "none",
+            "label": "Get in touch",
+            "link": ""
+          }
+        },
+        "column_contact": {
+          "type": "text",
+          "settings": {
+            "heading": "Contact Us",
+            "content": "<p><strong>UAN:<\/strong> 021-111-119-336<\/p><p><strong>Email:<\/strong> cs@example.com<\/p>"
+          }
+        },
+        "column_orders": {
+          "type": "menu",
+          "settings": {
+            "heading": "Order Information",
+            "menu": ""
+          }
+        },
+        "column_help": {
+          "type": "menu",
+          "settings": {
+            "heading": "Help",
+            "menu": ""
+          }
+        },
+        "column_newsletter": {
+          "type": "newsletter",
+          "settings": {
+            "heading": "Sign Up For Our Newsletter",
+            "placeholder": "Your email address",
+            "button_label": "Subscribe",
+            "show_social": true
+          }
+        }
+      },
+      "block_order": [
+        "utility_store",
+        "utility_phone",
+        "utility_email",
+        "utility_contact",
+        "column_contact",
+        "column_orders",
+        "column_help",
+        "column_newsletter"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "show_top_border": true,
+        "utility_icon_size": 56,
+        "columns_desktop": 4,
+        "whatsapp_link": "",
+        "show_bottom_bar": true,
+        "show_policy": true,
+        "payment_enable": true,
+        "enable_country_selector": false,
+        "enable_language_selector": false,
+        "margin_top": 0,
+        "padding_top": 40,
+        "padding_bottom": 40
+      }
+    }
+  },
+  "order": ["footer"]
+}

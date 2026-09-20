@@ -1,0 +1,48 @@
+{% comment %}
+  Renders one inline icon for the custom footer's utility bar.
+
+  Accepts:
+  - name: {String} icon key, matching the "Icon" setting of a Utility item block
+
+  Usage:
+  {% render 'icon-utility', name: block.settings.icon %}
+{% endcomment %}
+
+{%- case name -%}
+  {%- when 'map_pin' -%}
+    {{- 'icon-map-pin.svg' | inline_asset_content -}}
+  {%- when 'phone' -%}
+    {{- 'icon-phone.svg' | inline_asset_content -}}
+  {%- when 'envelope' -%}
+    {{- 'icon-envelope.svg' | inline_asset_content -}}
+  {%- when 'whatsapp' -%}
+    {{- 'icon-whatsapp.svg' | inline_asset_content -}}
+  {%- when 'chat' -%}
+    {{- 'icon-chat-bubble.svg' | inline_asset_content -}}
+  {%- when 'question' -%}
+    {{- 'icon-question-mark.svg' | inline_asset_content -}}
+  {%- when 'truck' -%}
+    {{- 'icon-truck.svg' | inline_asset_content -}}
+  {%- when 'return' -%}
+    {{- 'icon-return.svg' | inline_asset_content -}}
+  {%- when 'lock' -%}
+    {{- 'icon-lock.svg' | inline_asset_content -}}
+  {%- when 'price_tag' -%}
+    {{- 'icon-price-tag.svg' | inline_asset_content -}}
+  {%- when 'stopwatch' -%}
+    {{- 'icon-stopwatch.svg' | inline_asset_content -}}
+  {%- when 'heart' -%}
+    {{- 'icon-heart.svg' | inline_asset_content -}}
+  {%- when 'star' -%}
+    {{- 'icon-star.svg' | inline_asset_content -}}
+  {%- when 'plane' -%}
+    {{- 'icon-plane.svg' | inline_asset_content -}}
+  {%- when 'box' -%}
+    {{- 'icon-box.svg' | inline_asset_content -}}
+  {%- when 'shirt' -%}
+    {{- 'icon-shirt.svg' | inline_asset_content -}}
+  {%- when 'ruler' -%}
+    {{- 'icon-ruler.svg' | inline_asset_content -}}
+  {%- when 'account' -%}
+    {{- 'icon-account.svg' | inline_asset_content -}}
+{%- endcase -%}
