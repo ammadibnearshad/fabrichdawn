@@ -15,8 +15,8 @@
         "slide_MWtFKC": {
           "type": "slide",
           "settings": {
-            "image_desktop": "shopify://shop_images/Desktop_jpg.jpg",
-            "image_mobile": "shopify://shop_images/Mobile_jpg.jpg",
+            "image_desktop": "shopify://shop_images/ERA_Desktop.png",
+            "image_mobile": "shopify://shop_images/ERA_Mobile.png",
             "image_position_desktop": "center",
             "image_position_mobile": "center",
             "image_fit": "cover",
@@ -41,8 +41,8 @@
         "slide_yBc4BP": {
           "type": "slide",
           "settings": {
-            "image_desktop": "shopify://shop_images/Desktop_jpg.jpg",
-            "image_mobile": "shopify://shop_images/Mobile_jpg.jpg",
+            "image_desktop": "shopify://shop_images/ERA_Desktop.png",
+            "image_mobile": "shopify://shop_images/ERA_Mobile.png",
             "image_position_desktop": "center",
             "image_position_mobile": "center",
             "image_fit": "cover",

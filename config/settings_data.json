@@ -9,7 +9,8 @@
  */
 {
   "current": {
-    "logo_width": 90,
+    "logo": "shopify://shop_images/Logo_File.png",
+    "logo_width": 180,
     "type_header_font": "poppins_n6",
     "heading_scale": 100,
     "type_body_font": "poppins_n4",
@@ -127,6 +128,28 @@
     "cart_drawer_collection": "",
     "cart_color_scheme": "scheme-1",
     "customer_account_menu": "customer-account-main-menu",
+    "cm_card_image_ratio": "portrait_2_3",
+    "cm_card_hover_image": true,
+    "cm_card_hover_effect": "fade",
+    "cm_card_title_uppercase": true,
+    "cm_card_title_lines": 2,
+    "cm_card_text_align": "left",
+    "cm_card_info_spacing": 12,
+    "cm_card_show_colors_count": true,
+    "cm_card_color_option_names": "Color,Colour",
+    "cm_card_colors_label_mode": "reference",
+    "cm_card_show_fit": true,
+    "cm_card_fit_metafield": "custom.fit",
+    "cm_card_fit_fallback_tag_prefix": "fit:",
+    "cm_card_meta_divider": "|",
+    "cm_card_price_show_currency": true,
+    "cm_card_show_soldout_badge": true,
+    "cm_card_show_sale_badge": false,
+    "cm_card_show_discount_percent": false,
+    "cm_card_show_new_badge": false,
+    "cm_card_new_tag": "New",
+    "cm_card_badge_position": "top-left",
+    "cm_card_color_scheme": "scheme-1",
     "sections": {
       "main-password-header": {
         "type": "main-password-header",
@@ -198,29 +221,7 @@
           "shadow": "#121212"
         }
       }
-    },
-    "cm_card_image_ratio": "portrait_2_3",
-    "cm_card_hover_image": true,
-    "cm_card_hover_effect": "fade",
-    "cm_card_title_uppercase": true,
-    "cm_card_title_lines": 2,
-    "cm_card_text_align": "left",
-    "cm_card_info_spacing": 12,
-    "cm_card_show_colors_count": true,
-    "cm_card_color_option_names": "Color,Colour",
-    "cm_card_colors_label_mode": "reference",
-    "cm_card_show_fit": true,
-    "cm_card_fit_metafield": "custom.fit",
-    "cm_card_fit_fallback_tag_prefix": "fit:",
-    "cm_card_meta_divider": "|",
-    "cm_card_price_show_currency": true,
-    "cm_card_show_soldout_badge": true,
-    "cm_card_show_sale_badge": false,
-    "cm_card_show_discount_percent": false,
-    "cm_card_show_new_badge": false,
-    "cm_card_new_tag": "New",
-    "cm_card_badge_position": "top-left",
-    "cm_card_color_scheme": "scheme-1"
+    }
   },
   "presets": {
     "Dawn": {
