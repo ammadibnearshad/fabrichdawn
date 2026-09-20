@@ -37,11 +37,59 @@
     },
     "header": {
       "type": "header",
+      "blocks": {
+        "mega_menu_LgbCg6": {
+          "type": "mega_menu",
+          "settings": {
+            "menu_item": "Wash & Wear",
+            "item_color": "",
+            "badge_text": "",
+            "badge_background": "",
+            "badge_text_color": "",
+            "enable_mega": true,
+            "menu": "",
+            "columns": 4,
+            "panel_width": "content",
+            "color_scheme": "scheme-1",
+            "image_position": "left",
+            "image_width": 180,
+            "image_ratio": "0.75"
+          }
+        },
+        "mega_image_x9WHrK": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Wash & Wear",
+            "image": "shopify://shop_images/FAB-SH-001_1.jpg",
+            "link": "",
+            "heading": "",
+            "caption": ""
+          }
+        },
+        "mega_image_4Bmjfd": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Wash & Wear",
+            "image": "shopify://shop_images/MC-05_3.jpg",
+            "link": "",
+            "heading": "",
+            "caption": ""
+          }
+        }
+      },
+      "block_order": [
+        "mega_menu_LgbCg6",
+        "mega_image_x9WHrK",
+        "mega_image_4Bmjfd"
+      ],
       "settings": {
         "logo_position": "middle-left",
         "mobile_logo_position": "center",
         "menu": "main-menu",
         "menu_type_desktop": "mega",
+        "enable_hover_menus": true,
+        "hover_open_delay": 80,
+        "parent_link_clickable": true,
         "sticky_header_type": "always",
         "show_line_separator": true,
         "color_scheme": "scheme-1",
