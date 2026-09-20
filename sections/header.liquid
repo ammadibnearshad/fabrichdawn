@@ -234,8 +234,7 @@
           when 'dropdown'
             render 'header-dropdown-menu'
           when 'mega-custom'
-            render 'header-mega-menu-custom',
-              parent_link_clickable: section.settings.parent_link_clickable
+            render 'header-mega-menu-custom', parent_link_clickable: section.settings.parent_link_clickable
           else
             render 'header-mega-menu'
         endcase
