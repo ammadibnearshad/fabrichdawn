@@ -83,23 +83,23 @@
         "mega_image_4Bmjfd"
       ],
       "settings": {
-        "logo_position": "middle-left",
+        "logo_position": "top-center",
         "mobile_logo_position": "center",
         "menu": "main-menu",
-        "menu_type_desktop": "mega-custom",
+        "menu_type_desktop": "drawer",
         "enable_hover_menus": true,
         "hover_open_delay": 80,
-        "show_menu_caret": false,
+        "show_menu_caret": true,
         "menu_item_hover_color": "",
         "sticky_header_type": "always",
-        "show_line_separator": true,
+        "show_line_separator": false,
         "color_scheme": "scheme-1",
         "menu_color_scheme": "scheme-1",
         "enable_country_selector": true,
         "enable_language_selector": true,
         "margin_bottom": 0,
-        "padding_top": 20,
-        "padding_bottom": 20
+        "padding_top": 0,
+        "padding_bottom": 0
       }
     }
   },
