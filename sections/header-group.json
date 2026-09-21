@@ -83,7 +83,7 @@
         "mega_image_4Bmjfd"
       ],
       "settings": {
-        "logo_position": "top-center",
+        "logo_position": "top-left",
         "mobile_logo_position": "center",
         "menu": "main-menu",
         "menu_type_desktop": "drawer",
