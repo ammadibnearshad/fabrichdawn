@@ -86,7 +86,7 @@
         "logo_position": "middle-left",
         "mobile_logo_position": "center",
         "menu": "fabrich-optimized-nav",
-        "menu_type_desktop": "mega",
+        "menu_type_desktop": "mega-custom",
         "enable_hover_menus": true,
         "hover_open_delay": 80,
         "show_menu_caret": true,
