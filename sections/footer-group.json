@@ -68,7 +68,7 @@
           "type": "menu",
           "settings": {
             "heading": "Help",
-            "menu": ""
+            "menu": "optimize-fabrich-footer-help"
           }
         },
         "column_newsletter": {
