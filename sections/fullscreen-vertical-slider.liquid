@@ -62,7 +62,7 @@
 
 <fullscreen-vertical-slider
   id="FVS-{{ section.id }}"
-  class="fvs color-{{ section.settings.color_scheme }} gradient fvs--height-{{ section.settings.slider_height }} fvs--transition-{{ section.settings.transition_style }}{% unless section.settings.full_width %} fvs--contained{% endunless %}{% if section.settings.overlap_header %} fvs--overlap-header{% endif %}{% if section.settings.dots_hide_on_mobile %} fvs--dots-hidden-mobile{% endif %}"
+  class="fvs color-{{ section.settings.color_scheme }} gradient fvs--height-{{ section.settings.slider_height }} fvs--transition-{{ section.settings.transition_style }}{% unless section.settings.full_width %} fvs--contained{% endunless %}{% if section.settings.overlap_header %} fvs--overlap-header{% endif %}{% if section.settings.dots_hide_on_mobile %} fvs--dots-hidden-mobile{% endif %}{% if section.settings.dots_titles_hide_mobile %} fvs--dot-titles-hidden-mobile{% endif %}"
   data-section-id="{{ section.id }}"
   data-speed="{{ section.settings.transition_speed }}"
   data-lock="{{ section.settings.scroll_lock_delay }}"
@@ -255,6 +255,22 @@
             </div>
           </div>
         {%- endif -%}
+
+        {%- if block.settings.side_link_label != blank and block.settings.side_link != blank -%}
+          <a
+            class="fvs__side-link fvs__side-link--{{ block.settings.side_link_position }}"
+            href="{{ block.settings.side_link }}"
+            {% if block.settings.open_new_tab %}
+              target="_blank"
+              rel="noopener"
+            {% endif %}
+          >
+            <span class="fvs__side-link-label">{{ block.settings.side_link_label | escape }}</span>
+            <span class="fvs__side-link-icon" aria-hidden="true">
+              {{- 'icon-caret.svg' | inline_asset_content -}}
+            </span>
+          </a>
+        {%- endif -%}
       </div>
     {%- endfor -%}
   </div>
@@ -267,7 +283,7 @@
 
   {%- if section.settings.show_dots and section.blocks.size > 1 -%}
     <nav
-      class="fvs__dots fvs__dots--{{ section.settings.dots_position }} fvs__dots--{{ section.settings.dots_style }}"
+      class="fvs__dots fvs__dots--{{ section.settings.dots_position }} fvs__dots--{{ section.settings.dots_style }} fvs__dots--titles-{{ section.settings.dots_titles }}"
       aria-label="Slide navigation"
     >
       {%- if section.settings.show_slide_counter -%}
@@ -279,18 +295,32 @@
       {%- endif -%}
       <ul class="fvs__dots-list list-unstyled" role="list">
         {%- for block in section.blocks -%}
+          {%- liquid
+            assign dot_title = block.settings.dot_title | strip
+            if dot_title == blank
+              assign dot_title = block.settings.heading | strip_html | strip
+            endif
+
+            assign dot_aria = 'Go to slide ' | append: forloop.index
+            if dot_title != blank
+              assign dot_aria = dot_aria | append: ': ' | append: dot_title
+            endif
+          -%}
           <li class="fvs__dots-item">
             <button
               type="button"
               class="fvs__dot{% if forloop.first %} is-active{% endif %}"
               data-index="{{ forloop.index0 }}"
-              aria-label="Go to slide {{ forloop.index }}"
+              aria-label="{{ dot_aria | escape }}"
               {% if forloop.first %}
                 aria-current="true"
               {% endif %}
             >
               {%- if section.settings.dots_style == 'number' -%}
                 <span class="fvs__dot-number">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+              {%- endif -%}
+              {%- if section.settings.dots_titles != 'none' and dot_title != blank -%}
+                <span class="fvs__dot-title" aria-hidden="true">{{ dot_title | escape }}</span>
               {%- endif -%}
             </button>
           </li>
@@ -510,6 +540,24 @@
       "default": "dot"
     },
     {
+      "type": "select",
+      "id": "dots_titles",
+      "label": "Slide titles on pagination",
+      "info": "Uses each slide's \"Pagination title\", or its heading if that's empty.",
+      "options": [
+        { "value": "none", "label": "Hidden" },
+        { "value": "active", "label": "Active slide only" },
+        { "value": "all", "label": "All slides" }
+      ],
+      "default": "active"
+    },
+    {
+      "type": "checkbox",
+      "id": "dots_titles_hide_mobile",
+      "label": "Hide pagination titles on mobile",
+      "default": true
+    },
+    {
       "type": "color",
       "id": "dots_color",
       "label": "Pagination color",
@@ -687,6 +735,37 @@
           "id": "link_label",
           "label": "Accessible link label",
           "info": "Read by screen readers, e.g. \"Shop the Fall collection\". Not visible. Falls back to the image alt text."
+        },
+        {
+          "type": "text",
+          "id": "dot_title",
+          "label": "Pagination title",
+          "info": "Shown next to this slide's dot, e.g. \"Polos\". Falls back to the heading."
+        },
+        {
+          "type": "header",
+          "content": "Side link"
+        },
+        {
+          "type": "text",
+          "id": "side_link_label",
+          "label": "Side link label",
+          "info": "Small text link on the edge of the slide, e.g. \"Mashriq\"."
+        },
+        {
+          "type": "url",
+          "id": "side_link",
+          "label": "Side link"
+        },
+        {
+          "type": "select",
+          "id": "side_link_position",
+          "label": "Side link position",
+          "options": [
+            { "value": "right", "label": "Middle right" },
+            { "value": "left", "label": "Middle left" }
+          ],
+          "default": "right"
         },
         {
           "type": "header",
