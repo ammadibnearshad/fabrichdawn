@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "name": "t:sections.footer.name",
   "type": "footer",
@@ -45,14 +54,14 @@
           "type": "text",
           "settings": {
             "heading": "Contact Us",
-            "content": "<p><strong>UAN:<\/strong> 021-111-119-336<\/p><p><strong>Email:<\/strong> cs@example.com<\/p>"
+            "content": "<p><strong>Call :</strong> <a href=\"tel:+92 3211 111 100\">+92 3211 111 100</a></p><p><strong>Email:</strong> <a href=\"mailto:fabrichstore@gmail.com\">fabrichstore@gmail.com</a></p>"
           }
         },
         "column_orders": {
           "type": "menu",
           "settings": {
             "heading": "Order Information",
-            "menu": ""
+            "menu": "fabrich-optimize-footer-menu"
           }
         },
         "column_help": {
@@ -66,6 +75,7 @@
           "type": "newsletter",
           "settings": {
             "heading": "Sign Up For Our Newsletter",
+            "subtext": "",
             "placeholder": "Your email address",
             "button_label": "Subscribe",
             "show_social": true
@@ -99,5 +109,7 @@
       }
     }
   },
-  "order": ["footer"]
+  "order": [
+    "footer"
+  ]
 }
