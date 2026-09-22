@@ -15,8 +15,8 @@
         "slide_MWtFKC": {
           "type": "slide",
           "settings": {
-            "image_desktop": "shopify://shop_images/ERA_Desktop.png",
-            "image_mobile": "shopify://shop_images/ERA_Mobile.png",
+            "image_desktop": "shopify://shop_images/KARIGARI_DESKTOP.png",
+            "image_mobile": "shopify://shop_images/KARIGARI_Mobile.png",
             "image_position_desktop": "center",
             "image_position_mobile": "center",
             "image_fit": "cover",
