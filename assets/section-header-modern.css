@@ -1,0 +1,116 @@
+/* Modern header layer on top of Dawn's header styles in base.css.
+   Everything is scoped to .header--modern / .section-header so Dawn core stays untouched. */
+
+/* ---------- Full width ---------- */
+
+.header.header--full-width {
+  max-width: none;
+}
+
+@media screen and (min-width: 750px) {
+  .header.header--full-width {
+    padding-right: 3.2rem;
+    padding-left: 3.2rem;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .header.header--full-width {
+    padding-right: 4.8rem;
+    padding-left: 4.8rem;
+  }
+
+  /* Logo hard left, menu in the true center, icons hard right. */
+  .header--modern.header--middle-left.header--menu-centered:not(.drawer-menu) {
+    grid-template-columns: 1fr auto 1fr;
+    column-gap: 3.2rem;
+  }
+
+  .header--modern.header--menu-centered .header__inline-menu {
+    justify-self: center;
+  }
+
+  .header--modern.header--menu-centered .header__inline-menu > .list-menu--inline {
+    justify-content: center;
+  }
+}
+
+/* ---------- Menu: solid text, no 75% fade ---------- */
+
+.header--modern .header__menu-item,
+.header--modern .header__submenu .header__menu-item,
+.section-header .mega-menu__link,
+.section-header .mega-custom__link,
+.section-header .mega-custom__card-caption {
+  color: rgb(var(--color-foreground));
+}
+
+/* Top-level items only; dropdown submenu items keep Dawn's spacing. */
+.header--modern .header__inline-menu .header__menu-item:not(.header__submenu .header__menu-item) {
+  padding: 1.2rem 0.6rem;
+  letter-spacing: 0.01em;
+}
+
+/* Dawn's dropdown / mega carets are absolutely positioned inside this padding. */
+.header--modern
+  .header__inline-menu
+  summary.header__menu-item:not(.mega-custom__item, .header__submenu .header__menu-item) {
+  padding-right: 2.4rem;
+}
+
+/* Thin, offset underline instead of Dawn's default text underline. */
+.header--modern .header__menu-item:hover span,
+.header--modern details[open] > .header__menu-item,
+.header--modern .header__active-menu-item {
+  text-decoration-line: underline;
+  text-decoration-thickness: 0.1rem;
+  text-underline-offset: 0.6rem;
+}
+
+.header--modern details[open]:hover > .header__menu-item,
+.header--modern .header__menu-item:hover .header__active-menu-item {
+  text-decoration-thickness: 0.1rem;
+}
+
+/* ---------- Icons ---------- */
+
+.header--modern .header__icon .icon,
+.header--modern .header__icon--cart .icon {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+/* Swap Dawn's scale-on-hover for a quieter fade. */
+.header--modern .header__icon:not(.header__icon--menu):hover .icon {
+  transform: none;
+}
+
+.header--modern .header__icon .svg-wrapper {
+  transition: opacity var(--duration-short, 100ms) ease;
+}
+
+.header--modern .header__icon:hover .svg-wrapper {
+  opacity: 0.6;
+}
+
+.header--modern .header__icon--cart .cart-count-bubble {
+  top: 0.6rem;
+  right: 0.4rem;
+  bottom: auto;
+  left: auto;
+  min-width: 1.6rem;
+  width: auto;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border-radius: 1rem;
+  background-color: rgb(var(--color-foreground));
+  color: rgb(var(--color-background));
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header--modern .header__icon .svg-wrapper {
+    transition: none;
+  }
+}
