@@ -85,7 +85,7 @@
       "settings": {
         "logo_position": "middle-left",
         "mobile_logo_position": "center",
-        "menu": "main-menu",
+        "menu": "fabrich-optimized-nav",
         "menu_type_desktop": "mega",
         "enable_hover_menus": true,
         "hover_open_delay": 80,
