@@ -83,10 +83,10 @@
         "mega_image_4Bmjfd"
       ],
       "settings": {
-        "logo_position": "top-left",
+        "logo_position": "middle-left",
         "mobile_logo_position": "center",
         "menu": "main-menu",
-        "menu_type_desktop": "drawer",
+        "menu_type_desktop": "mega",
         "enable_hover_menus": true,
         "hover_open_delay": 80,
         "show_menu_caret": true,
