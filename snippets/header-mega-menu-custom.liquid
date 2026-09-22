@@ -2,8 +2,10 @@
   Renders the desktop header navigation with a fully customizable mega menu.
 
   Each top-level item of the header menu renders as one of three things:
-    1. Mega menu   - a "Mega menu" block is assigned to it and it has content
-    2. Dropdown    - it has sub-links but no mega menu block (child + grandchild)
+    1. Mega menu   - a "Mega menu" block is assigned to it and it has at least one
+                     image. Two-level menus list their links in a single column;
+                     three-level menus use headed columns.
+    2. Dropdown    - it has sub-links but no images (child + grandchild)
     3. Plain link  - it has no sub-links
 
   Panels are built from header section blocks, matched to a top-level link on
@@ -60,11 +62,18 @@
           assign child_links = config.settings.menu.links
         endif
 
-        assign is_mega = false
-        if config and config.settings.enable_mega
-          if child_links != blank or image_count > 0
-            assign is_mega = true
+        assign has_grandchildren = false
+        for childlink in child_links
+          if childlink.links != blank
+            assign has_grandchildren = true
+            break
           endif
+        endfor
+
+        # A mega panel needs at least one image; without one the item falls back to a dropdown.
+        assign is_mega = false
+        if config and config.settings.enable_mega and image_count > 0
+          assign is_mega = true
         endif
 
         assign has_panel = false
@@ -111,9 +120,6 @@
             endif
 
             assign media_position = config.settings.image_position
-            if image_count == 0
-              assign media_position = 'left'
-            endif
           -%}
           <div
             id="MegaMenu-Content-{{ forloop.index }}"
@@ -179,7 +185,24 @@
                 </div>
               {%- endif -%}
 
-              {%- if child_links != blank -%}
+              {%- if child_links != blank and has_grandchildren == false -%}
+                <ul class="mega-custom__list list-unstyled" role="list">
+                  {%- for childlink in child_links -%}
+                    <li>
+                      <a
+                        id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                        href="{{ childlink.url }}"
+                        class="mega-custom__link{% if childlink.current %} mega-custom__link--active{% endif %}"
+                        {% if childlink.current %}
+                          aria-current="page"
+                        {% endif %}
+                      >
+                        {{ childlink.title | escape }}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- elsif child_links != blank -%}
                 <ul class="mega-custom__columns list-unstyled" role="list" style="--mega-columns: {{ columns }};">
                   {%- for childlink in child_links -%}
                     <li class="mega-custom__col">
@@ -294,7 +317,7 @@
           </a>
 
         {%- elsif hover_mode -%}
-          <mega-menu-item class="mega-custom" data-open-delay="{{ open_delay | default: 80 }}" data-close-delay="240">
+          <mega-menu-item class="mega-custom{% unless is_mega %} mega-custom--dropdown{% endunless %}" data-open-delay="{{ open_delay | default: 80 }}" data-close-delay="240">
             <a
               id="HeaderMenu-{{ link.handle }}"
               href="{{ link.url }}"
@@ -315,7 +338,7 @@
 
         {%- else -%}
           <header-menu>
-            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-custom">
+            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-custom{% unless is_mega %} mega-custom--dropdown{% endunless %}">
               <summary
                 id="HeaderMenu-{{ link.handle }}"
                 class="header__menu-item list-menu__item link focus-inset mega-custom__item"

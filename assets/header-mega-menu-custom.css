@@ -139,6 +139,20 @@ mega-menu-item[open] > .mega-custom__item::after,
 
 /* Standard dropdown inside a hover item (no mega menu block assigned) ----- */
 
+/* Anchor dropdowns to their own item. Without this the submenu's
+   `min-width: 100%` resolves against the whole header and runs off-screen. */
+mega-menu-item.mega-custom--dropdown,
+.mega-custom.mega-custom--dropdown {
+  position: relative;
+}
+
+.mega-custom--dropdown > .header__submenu {
+  left: 0;
+  width: max-content;
+  min-width: 20rem;
+  max-width: 32rem;
+}
+
 mega-menu-item > .header__submenu {
   opacity: 0;
   visibility: hidden;
@@ -243,6 +257,17 @@ mega-menu-item[open] > .header__submenu {
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
+}
+
+/* Two-level menu: plain single column of links beside the images. */
+.mega-custom__list {
+  flex: 0 1 auto;
+  min-width: 20rem;
+  margin: 0;
+}
+
+.mega-custom__list .mega-custom__link {
+  padding: 0.6rem 0;
 }
 
 .mega-custom__panel--content .mega-custom__columns {
