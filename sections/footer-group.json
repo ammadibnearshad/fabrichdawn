@@ -54,7 +54,7 @@
           "type": "text",
           "settings": {
             "heading": "Contact Us",
-            "content": "<p><strong>Call :</strong> <a href=\"tel:+92 3211 111 100\">+92 3211 111 100</a></p><p><strong>Email:</strong> <a href=\"mailto:fabrichstore@gmail.com\">fabrichstore@gmail.com</a></p>"
+            "content": "<p><strong>Call :</strong> <a href=\"tel:+92 3211 111 100\">+92 3211 111 100</a><strong><br/>Email:</strong><a href=\"mailto:fabrichstore@gmail.com\">fabrichstore@gmail.com</a></p>"
           }
         },
         "column_orders": {
