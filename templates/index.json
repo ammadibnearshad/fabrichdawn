@@ -45,7 +45,7 @@
         "slide_yBc4BP": {
           "type": "slide",
           "settings": {
-            "image_desktop": "shopify://shop_images/ERA_Desktop.png",
+            "image_desktop": "shopify://shop_images/KARIGARI_6.png",
             "image_mobile": "shopify://shop_images/ERA_Mobile.png",
             "image_position_desktop": "center",
             "image_position_mobile": "center",
@@ -109,7 +109,7 @@
       "name": "Fullscreen slider",
       "settings": {
         "slider_height": "full",
-        "overlap_header": true,
+        "overlap_header": false,
         "pin_header": true,
         "transparent_header": false,
         "header_text_color": "#ffffff",
