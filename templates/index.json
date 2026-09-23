@@ -122,7 +122,7 @@
         "transition_speed": 800,
         "scroll_lock_delay": 600,
         "release_to_footer": true,
-        "loop": false,
+        "loop": true,
         "enable_keyboard": true,
         "mobile_scroll_snap": true,
         "autoplay": false,
