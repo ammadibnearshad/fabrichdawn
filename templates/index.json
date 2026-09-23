@@ -108,7 +108,7 @@
       ],
       "name": "Fullscreen slider",
       "settings": {
-        "slider_height": "full_minus_header",
+        "slider_height": "full",
         "overlap_header": false,
         "pin_header": true,
         "transparent_header": false,
