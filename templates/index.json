@@ -46,7 +46,7 @@
           "type": "slide",
           "settings": {
             "image_desktop": "shopify://shop_images/KARIGARI_8.png",
-            "image_mobile": "shopify://shop_images/KARIGARI_9.png",
+            "image_mobile": "shopify://shop_images/KARIGARI_11.png",
             "image_position_desktop": "center",
             "image_position_mobile": "center",
             "image_fit": "cover",
@@ -74,6 +74,7 @@
         },
         "slide_nerfpm": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image_position_desktop": "center",
             "image_position_mobile": "center",
