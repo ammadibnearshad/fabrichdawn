@@ -108,8 +108,8 @@
       ],
       "name": "Fullscreen slider",
       "settings": {
-        "slider_height": "full",
-        "overlap_header": false,
+        "slider_height": "adapt_first_image",
+        "overlap_header": true,
         "pin_header": true,
         "transparent_header": false,
         "header_text_color": "#ffffff",
