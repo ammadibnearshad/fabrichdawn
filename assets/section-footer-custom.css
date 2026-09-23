@@ -111,6 +111,24 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
   padding: 0;
 }
 
+/* Accordion (menu columns) --------------------------------------------------
+   Desktop keeps the summary as a plain heading; the mobile block below turns
+   it back into a control. */
+
+.footer-custom__summary {
+  display: block;
+  list-style: none;
+  pointer-events: none;
+}
+
+.footer-custom__summary::-webkit-details-marker {
+  display: none;
+}
+
+.footer-custom__summary-icon {
+  display: none;
+}
+
 .footer-custom__link {
   display: block;
   padding: 0.6rem 0;
@@ -330,19 +348,89 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
 /* Responsive ------------------------------------------------------------- */
 
 @media screen and (max-width: 749px) {
+  /* The utility items duplicate the Contact us column on small screens. */
   .footer-custom__utility {
-    justify-content: flex-start;
-    gap: 1.6rem;
-    padding-bottom: 2.4rem;
+    display: none;
   }
 
-  .footer-custom__utility-group--end {
-    margin-left: 0;
-    justify-content: flex-start;
+  /* Fill the viewport, with the slack collecting above the columns. */
+  .footer-custom {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100svh;
   }
 
   .footer-custom__main {
-    padding-top: 3.2rem;
+    margin-top: auto;
+    gap: 0;
+    padding-top: 6.4rem;
+  }
+
+  .footer-custom__block--menu {
+    border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.12);
+  }
+
+  .footer-custom__block--text {
+    padding-bottom: 2.4rem;
+  }
+
+  .footer-custom__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6rem;
+    min-height: 4.4rem;
+    padding: 1rem 0;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .footer-custom__summary:focus-visible {
+    outline: 0.2rem solid rgba(var(--color-foreground), 0.6);
+    outline-offset: 0.2rem;
+  }
+
+  .footer-custom__summary:focus:not(:focus-visible) {
+    outline: 0;
+    box-shadow: none;
+  }
+
+  .footer-custom__summary .footer-custom__heading {
+    margin-bottom: 0;
+  }
+
+  .footer-custom__summary-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: rgb(var(--color-foreground));
+    transition: transform var(--duration-short, 100ms) ease;
+  }
+
+  .footer-custom__summary-icon svg {
+    display: block;
+    width: 1.2rem;
+    height: auto;
+  }
+
+  .footer-custom__details[open] .footer-custom__summary-icon {
+    transform: rotate(180deg);
+  }
+
+  .footer-custom__details-content {
+    padding-bottom: 1.6rem;
+  }
+
+  /* Newsletter + social centred on mobile. */
+  .footer-custom__block--newsletter {
+    margin-top: 4rem;
+    text-align: center;
+  }
+
+  .footer-custom__social-row {
+    justify-content: center;
   }
 
   .footer-custom__newsletter-button {
@@ -351,7 +439,17 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
 
   .footer-custom__bottom {
     margin-top: 3.2rem;
-    justify-content: flex-start;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .footer-custom__bottom-start,
+  .footer-custom__bottom-end {
+    justify-content: center;
+  }
+
+  .footer-custom__payment .list-payment {
+    justify-content: center;
   }
 }
 
@@ -372,7 +470,8 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
 
 @media (prefers-reduced-motion: reduce) {
   .footer-custom__newsletter-field,
-  .footer-custom__newsletter-button {
+  .footer-custom__newsletter-button,
+  .footer-custom__summary-icon {
     transition: none;
   }
 }

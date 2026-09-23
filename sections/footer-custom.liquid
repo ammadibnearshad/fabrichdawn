@@ -1,6 +1,7 @@
 {{ 'section-footer-custom.css' | asset_url | stylesheet_tag }}
 {{ 'component-list-social.css' | asset_url | stylesheet_tag }}
 {{ 'component-list-payment.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'section-footer-custom.js' | asset_url }}" defer="defer"></script>
 
 {%- style -%}
   .section-{{ section.id }} {
@@ -95,14 +96,11 @@
   {%- endif -%}
 
   {%- if column_count > 0 -%}
-    <div class="footer-custom__main page-width" style="--footer-columns: {{ section.settings.columns_desktop }};">
+    <footer-accordions class="footer-custom__main page-width" style="--footer-columns: {{ section.settings.columns_desktop }};">
       {%- for block in section.blocks -%}
         {%- case block.type -%}
           {%- when 'menu' -%}
-            <div class="footer-custom__block footer-custom__block--menu" {{ block.shopify_attributes }}>
-              {%- if block.settings.heading != blank -%}
-                <h2 class="footer-custom__heading inline-richtext">{{ block.settings.heading }}</h2>
-              {%- endif -%}
+            {%- capture menu_links -%}
               {%- if block.settings.menu != blank -%}
                 <ul class="footer-custom__list list-unstyled" role="list">
                   {%- for link in block.settings.menu.links -%}
@@ -119,6 +117,27 @@
                     </li>
                   {%- endfor -%}
                 </ul>
+              {%- endif -%}
+            {%- endcapture -%}
+            <div class="footer-custom__block footer-custom__block--menu" {{ block.shopify_attributes }}>
+              {%- if block.settings.heading != blank -%}
+                {%- comment -%}
+                  Open by default so the menu is readable without JS; footer-accordions
+                  collapses it below 750px and re-opens it above.
+                {%- endcomment -%}
+                <details class="footer-custom__details" open>
+                  <summary class="footer-custom__summary">
+                    <h2 class="footer-custom__heading inline-richtext">{{ block.settings.heading }}</h2>
+                    <span class="footer-custom__summary-icon" aria-hidden="true">
+                      {{- 'icon-caret.svg' | inline_asset_content -}}
+                    </span>
+                  </summary>
+                  <div class="footer-custom__details-content">
+                    {{ menu_links }}
+                  </div>
+                </details>
+              {%- else -%}
+                {{ menu_links }}
               {%- endif -%}
             </div>
 
@@ -209,7 +228,7 @@
             </div>
         {%- endcase -%}
       {%- endfor -%}
-    </div>
+    </footer-accordions>
   {%- endif -%}
 
   {%- liquid
