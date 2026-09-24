@@ -12,36 +12,6 @@
     "fullscreen_vertical_slider_fYXQEf": {
       "type": "fullscreen-vertical-slider",
       "blocks": {
-        "slide_nerfpm": {
-          "type": "slide",
-          "settings": {
-            "image_desktop": "shopify://shop_images/KARIGARI_15.png",
-            "image_mobile": "shopify://shop_images/KARIGARI_14.png",
-            "image_position_desktop": "center",
-            "image_position_mobile": "center",
-            "image_fit": "cover",
-            "link": "",
-            "open_new_tab": false,
-            "link_label": "",
-            "dot_title": "",
-            "side_link_label": "",
-            "side_link": "",
-            "side_link_position": "right",
-            "overlay_color": "#000000",
-            "overlay_opacity": 0,
-            "show_content": false,
-            "subheading": "",
-            "heading": "",
-            "heading_size": "h1",
-            "text": "",
-            "button_label": "",
-            "button_style_secondary": false,
-            "content_position_desktop": "middle-center",
-            "content_position_mobile": "bottom-center",
-            "content_alignment": "center",
-            "content_color_scheme": ""
-          }
-        },
         "slide_yBc4BP": {
           "type": "slide",
           "settings": {
@@ -72,11 +42,11 @@
             "content_color_scheme": ""
           }
         },
-        "slide_kppiRH": {
+        "slide_nerfpm": {
           "type": "slide",
           "settings": {
-            "image_desktop": "shopify://shop_images/KARIGARI_17.png",
-            "image_mobile": "shopify://shop_images/KARIGARI_16.png",
+            "image_desktop": "shopify://shop_images/KARIGARI_15.png",
+            "image_mobile": "shopify://shop_images/KARIGARI_14.png",
             "image_position_desktop": "center",
             "image_position_mobile": "center",
             "image_fit": "cover",
@@ -131,13 +101,43 @@
             "content_alignment": "center",
             "content_color_scheme": ""
           }
+        },
+        "slide_kppiRH": {
+          "type": "slide",
+          "settings": {
+            "image_desktop": "shopify://shop_images/KARIGARI_17.png",
+            "image_mobile": "shopify://shop_images/KARIGARI_16.png",
+            "image_position_desktop": "center",
+            "image_position_mobile": "center",
+            "image_fit": "cover",
+            "link": "",
+            "open_new_tab": false,
+            "link_label": "",
+            "dot_title": "",
+            "side_link_label": "",
+            "side_link": "",
+            "side_link_position": "right",
+            "overlay_color": "#000000",
+            "overlay_opacity": 0,
+            "show_content": false,
+            "subheading": "",
+            "heading": "",
+            "heading_size": "h1",
+            "text": "",
+            "button_label": "",
+            "button_style_secondary": false,
+            "content_position_desktop": "middle-center",
+            "content_position_mobile": "bottom-center",
+            "content_alignment": "center",
+            "content_color_scheme": ""
+          }
         }
       },
       "block_order": [
-        "slide_nerfpm",
         "slide_yBc4BP",
-        "slide_kppiRH",
-        "slide_MWtFKC"
+        "slide_nerfpm",
+        "slide_MWtFKC",
+        "slide_kppiRH"
       ],
       "name": "Fullscreen slider",
       "settings": {
