@@ -76,6 +76,8 @@
           "type": "slide",
           "disabled": true,
           "settings": {
+            "image_desktop": "shopify://shop_images/KARIGARI_15.png",
+            "image_mobile": "shopify://shop_images/KARIGARI_14.png",
             "image_position_desktop": "center",
             "image_position_mobile": "center",
             "image_fit": "cover",
