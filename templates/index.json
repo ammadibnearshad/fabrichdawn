@@ -144,26 +144,9 @@
         "show_slide_counter": false,
         "show_scroll_hint": false
       }
-    },
-    "video_fmf4nn": {
-      "type": "video",
-      "name": "t:sections.video.presets.name",
-      "settings": {
-        "heading": "Video",
-        "heading_size": "h1",
-        "enable_video_looping": false,
-        "video": "shopify://files/videos/My Video-2.mp4",
-        "video_url": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
-        "description": "",
-        "full_width": false,
-        "color_scheme": "",
-        "padding_top": 36,
-        "padding_bottom": 36
-      }
     }
   },
   "order": [
-    "fullscreen_vertical_slider_fYXQEf",
-    "video_fmf4nn"
+    "fullscreen_vertical_slider_fYXQEf"
   ]
 }
