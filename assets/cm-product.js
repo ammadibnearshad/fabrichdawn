@@ -10,6 +10,7 @@
   - cm-sticky-atc   sticky add to cart bar, driven by Dawn's pub/sub
   - cm-size-guard   requires an explicit size choice before add to cart
   - cm-native-share device share sheet, shown only where supported
+  - cm-gallery-dots  mobile gallery pagination, driven by Dawn's slider-component
 
   Every registration is guarded so theme-editor re-renders and Dawn's product
   swap (which replaces the whole <product-info>) never double-define anything.
@@ -254,6 +255,83 @@
             .catch(() => {
               /* Shopper dismissed the sheet. */
             });
+        }
+      }
+    );
+  }
+
+  /* ---------------------------------------------------------- Gallery dots */
+
+  // Sits inside Dawn's <slider-component> and mirrors its `slideChanged` event.
+  // Dots are rebuilt from the live slide list, because a variant change adds,
+  // removes and reorders gallery items in place (product-info.js updateMedia).
+  if (!customElements.get('cm-gallery-dots')) {
+    customElements.define(
+      'cm-gallery-dots',
+      class CmGalleryDots extends HTMLElement {
+        connectedCallback() {
+          this.slider = this.closest('slider-component');
+          this.list = this.slider && this.slider.querySelector('.product__media-list');
+          if (!this.list) return;
+
+          this.onSlideChanged = (event) => this.setActive(event.detail.currentPage - 1);
+          this.onClick = (event) => {
+            const dot = event.target.closest('[data-index]');
+            if (dot) this.goTo(Number(dot.dataset.index));
+          };
+
+          this.slider.addEventListener('slideChanged', this.onSlideChanged);
+          this.addEventListener('click', this.onClick);
+          this.mutationObserver = new MutationObserver(() => this.render());
+          this.mutationObserver.observe(this.list, { childList: true });
+          this.render();
+        }
+
+        disconnectedCallback() {
+          if (this.slider) this.slider.removeEventListener('slideChanged', this.onSlideChanged);
+          this.removeEventListener('click', this.onClick);
+          if (this.mutationObserver) this.mutationObserver.disconnect();
+        }
+
+        getSlides() {
+          return Array.from(this.list.querySelectorAll(':scope > .product__media-item'));
+        }
+
+        render() {
+          const slides = this.getSlides();
+          this.hidden = slides.length < 2;
+          const template = this.dataset.label || '[index]';
+
+          this.replaceChildren(
+            ...slides.map((_, index) => {
+              const dot = document.createElement('button');
+              dot.type = 'button';
+              dot.className = 'cm-gallery-dots__dot';
+              dot.dataset.index = index;
+              dot.setAttribute('aria-label', template.replace('[index]', index + 1));
+              return dot;
+            })
+          );
+
+          const index = this.slider.slider ? Math.round(this.slider.slider.scrollLeft / (slides[0]?.clientWidth || 1)) : 0;
+          this.setActive(index);
+        }
+
+        setActive(index) {
+          Array.from(this.children).forEach((dot, i) => {
+            if (i === index) {
+              dot.setAttribute('aria-current', 'true');
+            } else {
+              dot.removeAttribute('aria-current');
+            }
+          });
+        }
+
+        goTo(index) {
+          const slides = this.getSlides();
+          if (!slides[index] || !this.slider.slider) return;
+          this.slider.slider.scrollTo({ left: slides[index].offsetLeft - slides[0].offsetLeft });
+          this.setActive(index);
         }
       }
     );

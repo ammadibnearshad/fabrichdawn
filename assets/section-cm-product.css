@@ -89,6 +89,100 @@
   }
 }
 
+/* ------------------------------------------------------ Full-width container */
+
+.cm-product .cm-product__container--full {
+  max-width: none;
+}
+
+@media screen and (min-width: 750px) {
+  .cm-product .cm-product__container--full {
+    padding-inline: 3rem;
+  }
+}
+
+/* ------------------------------------------------------------------- Gallery */
+
+/* Columns layout: Dawn's 2-up grid, with its own gap instead of the theme grid spacing.
+   The item max-width reads the same variable, so both columns stay equal. */
+@media screen and (min-width: 750px) {
+  .cm-product .product--columns .product__media-list {
+    --grid-desktop-horizontal-spacing: var(--cm-media-gap);
+    --grid-desktop-vertical-spacing: var(--cm-media-gap);
+  }
+}
+
+/* Mobile: one full-bleed slide per view, no peek of the next image. */
+@media screen and (max-width: 749px) {
+  .cm-product .product:not(.product--mobile-columns) .product__media-list.slider--mobile {
+    column-gap: 0;
+    margin: 0;
+    width: 100%;
+    scroll-padding-left: 0;
+  }
+
+  .cm-product .product:not(.product--mobile-columns) .product__media-list.slider--mobile::after {
+    content: none;
+  }
+
+  .cm-product .product:not(.product--mobile-columns) .product__media-list .product__media-item {
+    width: 100%;
+    min-width: 100%;
+    margin: 0;
+  }
+}
+
+.cm-gallery-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+
+.cm-gallery-dots[hidden] {
+  display: none;
+}
+
+/* 24px hit area around an 8px dot. */
+.cm-gallery-dots__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.cm-gallery-dots__dot::before {
+  content: '';
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background-color: var(--cm-hairline-strong);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.cm-gallery-dots__dot[aria-current='true']::before {
+  background-color: rgb(var(--color-foreground));
+  transform: scale(1.25);
+}
+
+.cm-gallery-dots__dot:focus-visible {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: -0.2rem;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-gallery-dots__dot::before {
+    transition: none;
+  }
+}
+
 /* One consistent rhythm between info blocks, driven by the section setting. */
 .cm-product .product__info-container > * + * {
   margin-block: var(--cm-info-gap) 0;

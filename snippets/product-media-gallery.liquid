@@ -40,6 +40,17 @@
   elsif section.settings.media_size == 'small'
     assign media_width = 0.45
   endif
+
+  # Cambridge layout: the gallery column follows the split setting and the page
+  # may run full width, so image sizes and mobile controls follow suit.
+  if section.settings.cm_style
+    assign media_width = section.settings.cm_media_split | default: 58 | divided_by: 100.0
+    assign cm_full_width = section.settings.cm_full_width
+    assign cm_mobile_full_bleed = true
+    if section.settings.mobile_thumbnails != 'columns'
+      assign cm_gallery_dots = section.settings.cm_mobile_dots
+    endif
+  endif
 -%}
 
 <media-gallery
@@ -81,7 +92,9 @@
             media_width: media_width,
             media_fit: section.settings.media_fit,
             constrain_to_viewport: section.settings.constrain_to_viewport,
-            lazy_load: false
+            lazy_load: false,
+            full_width: cm_full_width,
+            mobile_full_bleed: cm_mobile_full_bleed
           %}
         </li>
       {%- endif -%}
@@ -119,13 +132,15 @@
               media_width: media_width,
               media_fit: section.settings.media_fit,
               constrain_to_viewport: section.settings.constrain_to_viewport,
-              lazy_load: lazy_load
+              lazy_load: lazy_load,
+              full_width: cm_full_width,
+              mobile_full_bleed: cm_mobile_full_bleed
             %}
           </li>
         {%- endunless -%}
       {%- endfor -%}
     </ul>
-    <div class="slider-buttons quick-add-hidden{% if hide_mobile_slider %} small-hide{% endif %}">
+    <div class="slider-buttons quick-add-hidden{% if hide_mobile_slider or cm_gallery_dots %} small-hide{% endif %}">
       <button
         type="button"
         class="slider-button slider-button--prev"
@@ -153,6 +168,15 @@
         </span>
       </button>
     </div>
+    {%- if cm_gallery_dots and hide_mobile_slider != true -%}
+      {%- comment -%} Buttons are built by cm-product.js from the live slide list, so they stay in sync after a variant swaps media. {%- endcomment -%}
+      <cm-gallery-dots
+        class="cm-gallery-dots quick-add-hidden medium-hide large-up-hide"
+        role="group"
+        aria-label="{{ 'products.product.media.gallery_viewer' | t }}"
+        data-label="{{ 'products.product.media.load_image' | t: index: '[index]' | escape }}"
+      ></cm-gallery-dots>
+    {%- endif -%}
   </slider-component>
   {%- if first_3d_model -%}
     <button

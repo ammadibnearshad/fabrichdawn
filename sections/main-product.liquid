@@ -86,6 +86,9 @@
   if cm_share_block.settings.native_share_mobile or cm_share_block.settings.copy_link
     assign cm_needs_js = true
   endif
+  if cm_style and section.settings.cm_mobile_dots and section.settings.mobile_thumbnails != 'columns'
+    assign cm_needs_js = true
+  endif
 
   # The Cambridge blocks carry their own styling, so the stylesheet is needed
   # whenever one of them is in play, not only when cm_style is on.
@@ -141,6 +144,7 @@
       #MainProduct-{{ section.id }} {
         --cm-info-gap: {{ section.settings.cm_info_gap | default: 16 }}px;
         --cm-media-split: {{ section.settings.cm_media_split | default: 58 }}%;
+        --cm-media-gap: {{ section.settings.cm_media_gap | default: 0 }}px;
         {%- if cm_zoom_hint -%}
           --cm-zoom-hint: '{{ section.settings.zoom_hint_text | replace: "'", '' | strip }}';
         {%- endif -%}
@@ -196,7 +200,7 @@
 
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
   <product-component view-event-payload="{{ product | standard_event_data: 'view', context: 'page' | escape }}">
-    <div class="page-width">
+    <div class="page-width{% if cm_style and section.settings.cm_full_width %} cm-product__container--full{% endif %}">
       {%- if cm_breadcrumb_block and cm_breadcrumb_block.settings.position == 'above_columns' -%}
         <div class="cm-product__breadcrumb quick-add-hidden" {{ cm_breadcrumb_block.shopify_attributes }}>
           {%- render 'cm-breadcrumb',
@@ -2986,6 +2990,31 @@
       "default": 58,
       "label": "Gallery column width",
       "info": "Desktop only. The reference store uses 58%."
+    },
+    {
+      "type": "checkbox",
+      "id": "cm_full_width",
+      "default": true,
+      "label": "Full-width layout",
+      "info": "Stretches the gallery and info columns edge to edge instead of the theme page width."
+    },
+    {
+      "type": "range",
+      "id": "cm_media_gap",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10,
+      "label": "Gap between gallery images",
+      "info": "Tablet and desktop, with the Columns gallery layout."
+    },
+    {
+      "type": "checkbox",
+      "id": "cm_mobile_dots",
+      "default": true,
+      "label": "Show dots under the mobile gallery",
+      "info": "Replaces the image counter and arrows on mobile."
     },
     {
       "type": "checkbox",

@@ -15,6 +15,8 @@
   - media_fit: {String} Method ("contain" or "cover") to fit image into container
   - media_width: {Float} The width percentage that the media column occupies on desktop.
   - lazy_load: {Boolean} Image should be lazy loaded. Default: true (optional)
+  - full_width: {Boolean} Page container is full width, so sizes skip the page_width cap (optional)
+  - mobile_full_bleed: {Boolean} Mobile slides span the full viewport (optional)
 
   Usage:
   {% render 'product-thumbnail',
@@ -45,8 +47,16 @@
   endif
 -%}
 
+{%- comment -%}
+  full_width: the page container has no max-width, so the page_width cap would
+  under-request on wide screens. mobile_full_bleed: slides span the viewport.
+{%- endcomment -%}
 {%- capture sizes -%}
-  (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | divided_by: desktop_columns | round }}px, (min-width: 990px) calc({{ media_width | times: 100 | divided_by: desktop_columns }}vw - 10rem), (min-width: 750px) calc((100vw - 11.5rem) / 2), calc(100vw / {{ mobile_columns }} - 4rem)
+  {%- if full_width -%}
+    (min-width: 990px) calc({{ media_width | times: 100 | divided_by: desktop_columns }}vw - 4rem),
+  {%- else -%}
+    (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | times: media_width | divided_by: desktop_columns | round }}px, (min-width: 990px) calc({{ media_width | times: 100 | divided_by: desktop_columns }}vw - 10rem),
+  {%- endif %} (min-width: 750px) calc((100vw - 11.5rem) / 2), {% if mobile_full_bleed %}calc(100vw / {{ mobile_columns }}){% else %}calc(100vw / {{ mobile_columns }} - 4rem){% endif %}
 {%- endcapture -%}
 
 <div
