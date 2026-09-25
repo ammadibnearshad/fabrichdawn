@@ -2,6 +2,9 @@
 
 {%- liquid
   assign cm_image = collection.image
+  if section.settings.image_source == 'metafield' and collection.metafields.custom.collection_banner != blank
+    assign cm_image = collection.metafields.custom.collection_banner.value
+  endif
   assign cm_mobile_image = cm_image
   if section.settings.mobile_image_source == 'metafield' and collection.metafields.custom.mobile_banner != blank
     assign cm_mobile_image = collection.metafields.custom.mobile_banner.value
@@ -144,7 +147,18 @@
       "type": "checkbox",
       "id": "show_image",
       "default": true,
-      "label": "Show collection image"
+      "label": "Show banner image"
+    },
+    {
+      "type": "select",
+      "id": "image_source",
+      "options": [
+        { "value": "metafield", "label": "Collection metafield (custom.collection_banner)" },
+        { "value": "collection_image", "label": "Collection image" }
+      ],
+      "default": "metafield",
+      "label": "Desktop image source",
+      "info": "Metafield must be a collection File (image) metafield with key custom.collection_banner. Falls back to the collection image when empty."
     },
     {
       "type": "select",
