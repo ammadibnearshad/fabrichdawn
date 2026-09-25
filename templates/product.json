@@ -1,145 +1,77 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
       "type": "main-product",
       "blocks": {
-        "cm_breadcrumb": {
-          "type": "cm_breadcrumb",
+        "vendor": {
+          "type": "text",
           "settings": {
-            "position": "above_columns",
-            "separator": "›",
-            "show_collection": true,
-            "use_metafield_collection": false,
-            "uppercase_last": false
-          }
-        },
-        "sku": {
-          "type": "sku",
-          "settings": {
-            "text_style": "body",
-            "sku_label": "SKU:",
-            "strip_suffix": false,
-            "strip_separator": "-"
+            "text": "{{ product.vendor }}",
+            "text_style": "uppercase"
           }
         },
         "title": {
           "type": "title",
-          "settings": {
-            "uppercase": true,
-            "heading_size": "h2"
-          }
+          "settings": {}
         },
         "price": {
           "type": "price",
-          "settings": {
-            "show_currency_code": true,
-            "show_tax_note": false,
-            "show_payment_terms": false
-          }
-        },
-        "cm_size_chart": {
-          "type": "cm_size_chart",
-          "settings": {
-            "label": "Size Chart",
-            "icon": "ruler",
-            "display": "modal",
-            "metafield_key": "custom.size_chart",
-            "tag_prefix": "",
-            "source": "page"
-          }
-        },
-        "cm_sibling_swatches": {
-          "type": "cm_sibling_swatches",
-          "settings": {
-            "heading": "Color",
-            "show_selected_name": true,
-            "swatch_style": "pill",
-            "swatch_size": 44,
-            "max_swatches": 20,
-            "hide_color_option_in_picker": true,
-            "source": "metafield",
-            "group_tag_prefix": "group:"
-          }
+          "settings": {}
         },
         "variant_picker": {
           "type": "variant_picker",
           "settings": {
             "picker_type": "button",
-            "swatch_shape": "square"
+            "swatch_shape": "circle"
           }
+        },
+        "quantity_selector": {
+          "type": "quantity_selector",
+          "settings": {}
         },
         "buy_buttons": {
           "type": "buy_buttons",
           "settings": {
-            "show_dynamic_checkout": false,
-            "show_gift_card_recipient": true,
-            "show_pickup_availability": true,
-            "require_size_selection": false
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
           }
         },
         "description": {
           "type": "description",
-          "settings": {
-            "description_display": "inline",
-            "collapsible_heading": "Description",
-            "spec_source": "description",
-            "spec_heading": "Specifications",
-            "spec_metafields": "custom.fabric_type: Fabric Type\ncustom.sleeves: Sleeves\ncustom.neck: Neck\ncustom.fit: Fit\ncustom.fabric: Fabric\ncustom.occasion: Occasion"
-          }
+          "disabled": true,
+          "settings": {}
         },
-        "cm_note": {
-          "type": "cm_note",
+        "share": {
+          "type": "share",
           "settings": {
-            "label": "Note:",
-            "text": "Actual product may vary from the picture due to the lights being used in photography",
-            "use_global": true,
-            "metafield_override": "custom.product_note"
-          }
-        },
-        "cm_share": {
-          "type": "cm_share",
-          "settings": {
-            "label": "Share:",
-            "facebook": true,
-            "twitter": true,
-            "pinterest": true,
-            "whatsapp": true,
-            "email": false,
-            "copy_link": false,
-            "native_share_mobile": false,
-            "style": "icon",
-            "icon_size": 20
+            "share_label": "Share"
           }
         }
       },
       "block_order": [
-        "cm_breadcrumb",
-        "sku",
+        "vendor",
         "title",
         "price",
-        "cm_size_chart",
-        "cm_sibling_swatches",
         "variant_picker",
+        "quantity_selector",
         "buy_buttons",
         "description",
-        "cm_note",
-        "cm_share"
+        "share"
       ],
       "settings": {
-        "cm_style": true,
-        "cm_info_gap": 16,
-        "cm_media_split": 58,
-        "cm_full_width": true,
-        "cm_media_gap": 10,
-        "cm_mobile_dots": true,
-        "show_zoom_hint": true,
-        "zoom_hint_text": "Click to enlarge",
-        "sticky_atc": "none",
-        "cm_sticky_show_currency": false,
         "enable_sticky_info": true,
         "color_scheme": "scheme-1",
-        "media_size": "medium",
-        "constrain_to_viewport": false,
+        "media_size": "large",
+        "constrain_to_viewport": true,
         "media_fit": "contain",
         "gallery_layout": "columns",
         "mobile_thumbnails": "hide",
@@ -147,13 +79,17 @@
         "image_zoom": "lightbox",
         "hide_variants": true,
         "enable_video_looping": false,
-        "padding_top": 24,
+        "padding_top": 36,
         "padding_bottom": 12
       }
     },
     "disclosures": {
       "type": "disclosures",
       "settings": {
+        "heading": "Disclosures",
+        "heading_size": "h2",
+        "open_by_default": false,
+        "color_scheme": "",
         "padding_top": 36,
         "padding_bottom": 0
       }
