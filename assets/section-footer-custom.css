@@ -8,6 +8,13 @@
   border-top: 0.1rem solid rgba(var(--color-foreground), 0.12);
 }
 
+/* Full width ------------------------------------------------------------- */
+/* Gutters match .header--full-width so the footer lines up with the header. */
+
+.footer-custom--full-width .page-width {
+  max-width: none;
+}
+
 /* Utility bar ------------------------------------------------------------ */
 
 .footer-custom__utility {
@@ -95,6 +102,10 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
   grid-template-columns: minmax(0, 1fr);
   gap: 4rem 3.2rem;
   padding-top: 5.6rem;
+}
+
+.footer-custom__block {
+  min-width: 0;
 }
 
 .footer-custom__heading {
@@ -353,18 +364,9 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
     display: none;
   }
 
-  /* Fill the viewport, with the slack collecting above the columns. */
-  .footer-custom {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    min-height: 100svh;
-  }
-
   .footer-custom__main {
-    margin-top: auto;
     gap: 0;
-    padding-top: 6.4rem;
+    padding-top: 2.4rem;
   }
 
   .footer-custom__block--menu {
@@ -425,7 +427,7 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
 
   /* Newsletter + social centred on mobile. */
   .footer-custom__block--newsletter {
-    margin-top: 4rem;
+    margin-top: 3.2rem;
     text-align: center;
   }
 
@@ -438,7 +440,7 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
   }
 
   .footer-custom__bottom {
-    margin-top: 3.2rem;
+    margin-top: 2.4rem;
     justify-content: center;
     text-align: center;
   }
@@ -454,6 +456,11 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
 }
 
 @media screen and (min-width: 750px) {
+  .footer-custom--full-width .page-width {
+    padding-right: 3.2rem;
+    padding-left: 3.2rem;
+  }
+
   .footer-custom__main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4.8rem 3.2rem;
@@ -461,6 +468,11 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
 }
 
 @media screen and (min-width: 990px) {
+  .footer-custom--full-width .page-width {
+    padding-right: 4.8rem;
+    padding-left: 4.8rem;
+  }
+
   .footer-custom__main {
     grid-template-columns: repeat(var(--footer-columns, 4), minmax(0, 1fr));
     gap: 4rem;

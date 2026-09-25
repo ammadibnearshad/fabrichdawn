@@ -31,7 +31,7 @@
   endfor
 -%}
 
-<footer class="footer-custom color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}{% if section.settings.show_top_border %} footer-custom--top-border{% endif %}">
+<footer class="footer-custom color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}{% if section.settings.full_width %} footer-custom--full-width{% endif %}{% if section.settings.show_top_border %} footer-custom--top-border{% endif %}">
   {%- if utility_blocks.size > 0 -%}
     <div class="footer-custom__utility page-width" style="--utility-icon-size: {{ section.settings.utility_icon_size }}px;">
       {%- assign positions = 'start,end' | split: ',' -%}
@@ -322,6 +322,13 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": true,
+      "label": "Make footer full width",
+      "info": "Matches the header. Turn off to constrain the footer to the page width."
     },
     {
       "type": "checkbox",

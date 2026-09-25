@@ -94,6 +94,7 @@
       ],
       "settings": {
         "color_scheme": "scheme-1",
+        "full_width": true,
         "show_top_border": true,
         "utility_icon_size": 56,
         "columns_desktop": 4,
