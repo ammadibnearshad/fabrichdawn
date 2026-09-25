@@ -417,9 +417,7 @@ a.footer-custom__utility-item:focus:not(:focus-visible) {
     height: auto;
   }
 
-  .footer-custom__details[open] .footer-custom__summary-icon {
-    transform: rotate(180deg);
-  }
+ 
 
   .footer-custom__details-content {
     padding-bottom: 1.6rem;
