@@ -217,16 +217,25 @@
   }
 }
 
+/* Full width: grid runs edge to edge; toolbar keeps a slim gutter so text never touches the viewport edge. */
 .cm-collection--full-width .collection {
   max-width: none;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.cm-collection--full-width .cm-collection__meta-row,
+.cm-collection--full-width .facets-wrapper {
+  max-width: none;
+  padding-left: 1.2rem;
+  padding-right: 1.2rem;
 }
 
 @media screen and (min-width: 750px) {
-  .cm-collection--full-width .collection {
-    padding-left: 5rem;
-    padding-right: 5rem;
+  .cm-collection--full-width .cm-collection__meta-row,
+  .cm-collection--full-width .facets-wrapper {
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
