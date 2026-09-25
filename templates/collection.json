@@ -51,7 +51,7 @@
         "show_product_count": true,
         "product_count_label": "Products :",
         "full_width_grid": true,
-        "enable_column_switcher": false,
+        "enable_column_switcher": true,
         "grid_gap_desktop": 8,
         "grid_gap_mobile": 4,
         "row_gap_desktop": 40,
