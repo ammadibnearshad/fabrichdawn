@@ -48,7 +48,7 @@
         "enable_sorting": true,
         "padding_top": 0,
         "padding_bottom": 36,
-        "show_product_count": true,
+        "show_product_count": false,
         "product_count_label": "Products :",
         "full_width_grid": true,
         "enable_column_switcher": false,
