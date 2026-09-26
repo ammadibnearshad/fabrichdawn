@@ -38,6 +38,34 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_PDTwak": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Wool Suiting",
+            "image": "shopify://shop_images/FAB-30_2.jpg",
+            "link": "",
+            "heading": "",
+            "caption": ""
+          }
+        },
+        "mega_menu_Ght9E7": {
+          "type": "mega_menu",
+          "settings": {
+            "menu_item": "Wool Suiting",
+            "item_color": "",
+            "badge_text": "",
+            "badge_background": "",
+            "badge_text_color": "",
+            "enable_mega": true,
+            "menu": "",
+            "columns": 4,
+            "panel_width": "content",
+            "color_scheme": "scheme-1",
+            "image_position": "left",
+            "image_width": 180,
+            "image_ratio": "0.75"
+          }
+        },
         "mega_menu_LgbCg6": {
           "type": "mega_menu",
           "settings": {
@@ -78,6 +106,8 @@
         }
       },
       "block_order": [
+        "mega_image_PDTwak",
+        "mega_menu_Ght9E7",
         "mega_menu_LgbCg6",
         "mega_image_x9WHrK",
         "mega_image_4Bmjfd"
