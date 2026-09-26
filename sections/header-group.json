@@ -41,7 +41,7 @@
         "mega_menu_LgbCg6": {
           "type": "mega_menu",
           "settings": {
-            "menu_item": "Unstitched Fabric",
+            "menu_item": "Winter'26",
             "item_color": "",
             "badge_text": "",
             "badge_background": "",
@@ -51,7 +51,7 @@
             "columns": 4,
             "panel_width": "content",
             "color_scheme": "scheme-1",
-            "image_position": "left",
+            "image_position": "right",
             "image_width": 180,
             "image_ratio": "0.75"
           }
@@ -59,7 +59,7 @@
         "mega_image_x9WHrK": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "Unstitched Fabric",
+            "menu_item": "Winter'26",
             "image": "shopify://shop_images/FAB-SH-001_1.jpg",
             "link": "",
             "heading": "",
@@ -69,7 +69,7 @@
         "mega_image_4Bmjfd": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "Unstitched Fabric",
+            "menu_item": "Winter'26",
             "image": "shopify://shop_images/MC-05_3.jpg",
             "link": "",
             "heading": "",
@@ -85,6 +85,9 @@
       "settings": {
         "logo_position": "middle-left",
         "mobile_logo_position": "center",
+        "full_width": true,
+        "center_menu": true,
+        "header_text_color": "",
         "menu": "fabrich-optimized-nav",
         "menu_type_desktop": "mega-custom",
         "enable_hover_menus": true,
