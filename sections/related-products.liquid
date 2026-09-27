@@ -18,11 +18,23 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+  {%- comment -%} Matches the full-width product page above: no max-width, 3rem gutters from tablet up. {%- endcomment -%}
+  .section-{{ section.id }}-padding.related-products--full-width {
+    max-width: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding.related-products--full-width {
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+  }
 {%- endstyle -%}
 
 <div class="color-{{ section.settings.color_scheme }} gradient">
   <product-recommendations
-    class="related-products page-width section-{{ section.id }}-padding isolate{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+    class="related-products page-width{% if section.settings.full_width %} related-products--full-width{% endif %} section-{{ section.id }}-padding isolate{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
     data-url="{{ routes.product_recommendations_url }}?limit={{ section.settings.products_to_show }}"
     data-section-id="{{ section.id }}"
     data-product-id="{{ product.id }}"
@@ -228,6 +240,13 @@
       "default": false,
       "label": "t:sections.related-products.settings.show_rating.label",
       "info": "t:sections.related-products.settings.show_rating.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": false,
+      "label": "Full-width layout",
+      "info": "Stretches the product grid edge to edge, matching a full-width product page."
     },
     {
       "type": "header",

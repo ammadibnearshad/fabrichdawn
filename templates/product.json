@@ -185,6 +185,7 @@
         "show_secondary_image": true,
         "show_vendor": false,
         "show_rating": false,
+        "full_width": true,
         "padding_top": 36,
         "padding_bottom": 28
       }
