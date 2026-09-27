@@ -101,7 +101,7 @@
             "columns": 4,
             "panel_width": "content",
             "color_scheme": "scheme-1",
-            "image_position": "left",
+            "image_position": "right",
             "image_width": 180,
             "image_ratio": "0.75"
           }
