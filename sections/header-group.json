@@ -105,13 +105,30 @@
             "image_width": 180,
             "image_ratio": "0.75"
           }
+        },
+        "mega_image_nFHDHQ": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Plain Fabric",
+            "menu_level": "child",
+            "sub_item": "Wool Suiting",
+            "image": "shopify://shop_images/FAB-SH-001_1.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/FAB-34_3.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
         }
       },
       "block_order": [
         "mega_menu_LgbCg6",
         "mega_image_x9WHrK",
         "mega_image_4Bmjfd",
-        "mega_menu_phbPb6"
+        "mega_menu_phbPb6",
+        "mega_image_nFHDHQ"
       ],
       "settings": {
         "logo_position": "middle-left",
