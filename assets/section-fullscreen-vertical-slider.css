@@ -116,18 +116,30 @@ body.fvs-header-pinned .section-header.shopify-section-header-hidden.menu-open {
 }
 
 /* Footer as a full-viewport panel: content sits at the bottom, the empty space
-   falls above it. Sized in svh, not dvh, because the footer scrolls normally
-   and dvh would resize it while a mobile browser toolbar collapses. */
-body.fvs-footer-full .footer {
+   falls above it. Targets any <footer> in the footer group, so it works for
+   Dawn's .footer and the custom .footer-custom alike.
+
+   Sized in lvh (the largest viewport), not svh or dvh: the slider scrolls to
+   the footer's top edge, and that is only reachable when the footer is at
+   least as tall as the viewport. With svh the page runs out of scroll by the
+   height of the collapsed mobile toolbar, leaving a strip of the last slide
+   showing above the footer; dvh would resize it while the toolbar moves. */
+body.fvs-footer-full .shopify-section-group-footer-group footer {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   min-height: 100vh;
 }
 
-@supports (min-height: 100svh) {
-  body.fvs-footer-full .footer {
-    min-height: 100svh;
+/* Flex items with auto side margins shrink to fit their content, so
+   .page-width rows need an explicit width to keep their full layout. */
+body.fvs-footer-full .shopify-section-group-footer-group footer > * {
+  width: 100%;
+}
+
+@supports (min-height: 100lvh) {
+  body.fvs-footer-full .shopify-section-group-footer-group footer {
+    min-height: 100lvh;
   }
 }
 
