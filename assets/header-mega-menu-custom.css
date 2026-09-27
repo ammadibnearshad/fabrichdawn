@@ -190,10 +190,24 @@ mega-menu-item[open] > .header__submenu {
   flex-direction: column-reverse;
 }
 
+/* Image groups share one grid cell so the panel keeps the size of the largest
+   group while <mega-menu-panel> swaps between them — no layout shift. */
 .mega-custom__media {
+  display: grid;
+}
+
+.mega-custom__media-group {
+  grid-area: 1 / 1;
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: 1.6rem;
+  transition: opacity var(--duration-default, 200ms) ease, visibility var(--duration-default, 200ms) ease;
+}
+
+.mega-custom__media-group[inert] {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .mega-custom__inner--top .mega-custom__media,
@@ -325,6 +339,7 @@ mega-menu-item[open] > .header__submenu {
 
 @media (prefers-reduced-motion: reduce) {
   .mega-custom__panel,
+  .mega-custom__media-group,
   mega-menu-item > .header__submenu,
   .mega-custom__card-media img,
   .mega-custom__caret .icon-caret {

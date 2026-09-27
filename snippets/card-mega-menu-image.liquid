@@ -1,0 +1,58 @@
+{% comment %}
+  Renders one image card inside the custom mega menu panel.
+
+  Accepts:
+  - image: {Object} image_picker value. Nothing renders when blank.
+  - link: {String} optional URL; the card becomes an <a> when set
+  - heading: {String} optional heading under the image
+  - caption: {String} optional caption under the heading
+  - ratio: {String} 'adapt' or a numeric aspect ratio
+  - sizes: {String} sizes attribute for the image
+  - fallback_alt: {String} alt text when the image has none and no heading is set
+  - attributes: {String} optional extra attributes, e.g. block.shopify_attributes
+
+  Usage:
+  {% render 'card-mega-menu-image', image: block.settings.image, link: block.settings.link, ratio: '0.75', sizes: '180px' %}
+{% endcomment %}
+
+{%- if image != blank -%}
+  {%- liquid
+    assign card_ratio = ratio
+    if card_ratio == 'adapt' or card_ratio == blank
+      assign card_ratio = image.aspect_ratio
+    endif
+
+    assign card_tag = 'div'
+    if link != blank
+      assign card_tag = 'a'
+    endif
+
+    assign card_alt = image.alt | default: heading | default: fallback_alt
+  -%}
+  <{{ card_tag }}
+    class="mega-custom__card"
+    {% if card_tag == 'a' %}
+      href="{{ link }}"
+    {% endif %}
+    style="--mega-ratio: {{ card_ratio }};"
+    {{ attributes }}
+  >
+    <span class="mega-custom__card-media">
+      {{
+        image
+        | image_url: width: 880
+        | image_tag:
+          loading: 'lazy',
+          widths: '165, 220, 275, 330, 440, 550, 660, 880',
+          sizes: sizes,
+          alt: card_alt
+      }}
+    </span>
+    {%- if heading != blank -%}
+      <span class="mega-custom__card-heading">{{ heading | escape }}</span>
+    {%- endif -%}
+    {%- if caption != blank -%}
+      <span class="mega-custom__card-caption">{{ caption | escape }}</span>
+    {%- endif -%}
+  </{{ card_tag }}>
+{%- endif -%}

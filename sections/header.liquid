@@ -20,9 +20,7 @@
 
 {%- if section.settings.menu_type_desktop == 'mega-custom' -%}
   {{ 'header-mega-menu-custom.css' | asset_url | stylesheet_tag }}
-  {%- if section.settings.enable_hover_menus -%}
-    <script src="{{ 'header-mega-menu-custom.js' | asset_url }}" defer="defer"></script>
-  {%- endif -%}
+  <script src="{{ 'header-mega-menu-custom.js' | asset_url }}" defer="defer"></script>
 {%- elsif section.settings.enable_hover_menus and section.settings.menu_type_desktop != 'drawer' -%}
   <script src="{{ 'header-hover-menu.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
@@ -379,6 +377,12 @@
       } else {
         item.open = isOpen;
       }
+
+      // Show the image group that holds the selected "Mega menu image" block.
+      const group = event.target.closest('[data-mega-media-group]');
+      const panel = group?.closest('mega-menu-panel');
+      if (!panel?.show) return;
+      isOpen ? panel.show(group.dataset.megaMediaGroup) : panel.reset();
     };
 
     document.addEventListener('shopify:block:select', (event) => toggleMegaMenu(event, true));
@@ -968,6 +972,36 @@
           "info": "Must match the \"Top-level menu item\" of the Mega menu block this image belongs to."
         },
         {
+          "type": "select",
+          "id": "menu_level",
+          "options": [
+            {
+              "value": "main",
+              "label": "Top-level item (default images)"
+            },
+            {
+              "value": "child",
+              "label": "2nd-level item (on hover)"
+            },
+            {
+              "value": "grandchild",
+              "label": "3rd-level item (on hover)"
+            }
+          ],
+          "default": "main",
+          "label": "Show images for"
+        },
+        {
+          "type": "text",
+          "id": "sub_item",
+          "label": "Sub-menu item",
+          "info": "2nd / 3rd-level only. Exact title of the link, e.g. Shorts. If the same 3rd-level title exists under several columns, use Parent / Child, e.g. Men / Shorts. 3rd-level links without images show their column's images."
+        },
+        {
+          "type": "header",
+          "content": "Image 1"
+        },
+        {
           "type": "image_picker",
           "id": "image",
           "label": "Image"
@@ -985,6 +1019,30 @@
         {
           "type": "text",
           "id": "caption",
+          "label": "Caption"
+        },
+        {
+          "type": "header",
+          "content": "Image 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link_2",
+          "label": "Image link"
+        },
+        {
+          "type": "text",
+          "id": "heading_2",
+          "label": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "caption_2",
           "label": "Caption"
         }
       ]
