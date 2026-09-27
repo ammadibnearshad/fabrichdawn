@@ -1740,7 +1740,6 @@
       {
         "type": "textarea",
         "id": "cm_swatch_color_map",
-        "default": "",
         "label": "Colour name to hex map",
         "info": "One NAME: #hex per line, for example LIGHT BROWN: #A9825C. Used only by the colour circle swatch style, and only when no swatch metafield or Shopify swatch is set."
       }
