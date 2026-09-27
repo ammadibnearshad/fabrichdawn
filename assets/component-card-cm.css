@@ -38,6 +38,9 @@
   aspect-ratio: var(--cm-ratio);
   background: rgba(var(--color-foreground), 0.04);
   border-radius: var(--card-corner-radius);
+  color: inherit;
+  cursor: pointer;
+  display: block;
   overflow: hidden;
   position: relative;
   width: 100%;

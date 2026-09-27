@@ -166,7 +166,12 @@
         "
         style="--cm-ratio: {{ cm_ratio }}; --cm-title-lines: {{ cm_title_lines }}; --cm-info-spacing: {{ cm_info_spacing }}px;"
       >
-        <div class="cm-card__media">
+        <a
+          href="{{ card_product.url }}"
+          class="cm-card__media"
+          tabindex="-1"
+          aria-hidden="true"
+        >
           {%- if cm_featured_image -%}
             {{
               cm_featured_image
@@ -233,7 +238,7 @@
               {%- endif -%}
             </div>
           {%- endif -%}
-        </div>
+        </a>
         <div class="cm-card__info">
           <h3
             class="cm-card__title{% if settings.cm_card_title_uppercase %} cm-card__title--uppercase{% endif %}"
