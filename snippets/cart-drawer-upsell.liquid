@@ -1,0 +1,197 @@
+{% comment %}
+  Cart drawer upsell slider — rendered inside <cart-drawer-items>, after the
+  items form, so every cart refresh path (cart-drawer.js renderContents and
+  cart.js onCartUpdate) re-renders it.
+
+  Source, in priority order — first cart item (newest first) that has either:
+    custom.upsell_collection (collection_reference) — rotating picks from it
+    custom.upsell_products (list.product_reference) — shown in admin order
+  Fallback: Theme settings → Cart → Fallback collection.
+
+  Products already in the cart or unavailable are skipped. The rotation seed is
+  derived from the cart state (not the clock) so the two back-to-back renders
+  after an add show the same picks — no flicker.
+
+  Usage: {% render 'cart-drawer-upsell' %}
+{% endcomment %}
+
+{%- liquid
+  assign upsell_list = null
+  assign upsell_rotate = false
+  for item in cart.items
+    assign upsell_collection = item.product.metafields.custom.upsell_collection.value
+    if upsell_collection != blank and upsell_collection.products_count > 0
+      assign upsell_list = upsell_collection.products
+      assign upsell_rotate = true
+      break
+    endif
+    assign candidate = item.product.metafields.custom.upsell_products.value
+    if candidate.size > 0
+      assign upsell_list = candidate
+      break
+    endif
+  endfor
+
+  if upsell_list == null and settings.cart_upsell_fallback_collection != blank
+    assign upsell_list = settings.cart_upsell_fallback_collection.products
+    assign upsell_rotate = true
+  endif
+-%}
+
+{%- if upsell_list and upsell_list.size > 0 -%}
+  {%- liquid
+    assign cart_product_ids = cart.items | map: 'product_id'
+    assign source_size = upsell_list.size
+    assign loop_end = source_size | minus: 1
+    assign max_slides = settings.cart_upsell_max | default: 6
+
+    assign start_offset = 0
+    if upsell_rotate
+      assign seed = cart.item_count | plus: cart.total_price
+      assign start_offset = seed | modulo: source_size
+    endif
+
+    # first pass: count renderable slides for "n of total" slide labels
+    assign slide_total = 0
+    for up in upsell_list
+      if up == blank or up.available == false
+        continue
+      endif
+      if cart_product_ids contains up.id
+        continue
+      endif
+      assign slide_total = slide_total | plus: 1
+    endfor
+    if slide_total > max_slides
+      assign slide_total = max_slides
+    endif
+  -%}
+
+  {%- if slide_total > 0 -%}
+    <cart-upsell-slider
+      class="dcart-upsell"
+      role="region"
+      aria-roledescription="carousel"
+      aria-labelledby="CartUpsellHeading"
+    >
+      <div class="dcart-upsell__header">
+        <h3 class="dcart-upsell__heading" id="CartUpsellHeading">{{ settings.cart_upsell_heading | escape }}</h3>
+        {%- if slide_total > 1 -%}
+          <div class="dcart-upsell__nav">
+            <button type="button" class="dcart-upsell__arrow" data-upsell-prev aria-label="Previous" disabled>
+              <svg viewBox="0 0 10 10" fill="none" aria-hidden="true" focusable="false">
+                <path d="M6.5 1.5L3 5l3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button type="button" class="dcart-upsell__arrow" data-upsell-next aria-label="Next">
+              <svg viewBox="0 0 10 10" fill="none" aria-hidden="true" focusable="false">
+                <path d="M3.5 1.5L7 5 3.5 8.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <ul class="dcart-upsell__track{% if slide_total == 1 %} dcart-upsell__track--single{% endif %}" data-upsell-track role="list">
+        {%- assign slide_index = 0 -%}
+        {%- for i in (0..loop_end) -%}
+          {%- liquid
+            assign idx = i | plus: start_offset | modulo: source_size
+            assign up = upsell_list[idx]
+            if up == blank or up.available == false
+              continue
+            endif
+            if cart_product_ids contains up.id
+              continue
+            endif
+            if slide_index >= max_slides
+              break
+            endif
+            assign slide_index = slide_index | plus: 1
+            assign current_variant = up.selected_or_first_available_variant
+          -%}
+          <li
+            class="dcart-upsell__slide"
+            role="group"
+            aria-roledescription="slide"
+            aria-label="{{ slide_index }} / {{ slide_total }}"
+          >
+            <form method="post" action="{{ routes.cart_add_url }}" class="dcart-upsell__card" data-upsell-form>
+              <a href="{{ up.url }}" class="dcart-upsell__media" tabindex="-1" aria-hidden="true">
+                {%- if up.featured_image -%}
+                  <img
+                    src="{{ up.featured_image | image_url: width: 160 }}"
+                    srcset="{{ up.featured_image | image_url: width: 160 }} 1x, {{ up.featured_image | image_url: width: 320 }} 2x"
+                    alt=""
+                    width="80"
+                    height="80"
+                    loading="lazy"
+                    class="dcart-upsell__image"
+                  >
+                {%- endif -%}
+              </a>
+
+              <div class="dcart-upsell__info">
+                <a href="{{ up.url }}" class="dcart-upsell__title">{{ up.title | escape }}</a>
+
+                <div class="dcart-upsell__price">
+                  <span class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+                  <span class="dcart-upsell__final" data-upsell-price>
+                    {{- current_variant.price | money | replace: '.00', '' -}}
+                  </span>
+                  <s
+                    class="dcart-upsell__compare"
+                    data-upsell-compare
+                    {% unless current_variant.compare_at_price > current_variant.price %}hidden{% endunless %}
+                  >
+                    <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                    <span data-upsell-compare-amount>{{ current_variant.compare_at_price | money | replace: '.00', '' }}</span>
+                  </s>
+                </div>
+
+                <div class="dcart-upsell__actions">
+                  {%- if up.has_only_default_variant -%}
+                    <input type="hidden" name="id" value="{{ current_variant.id }}">
+                  {%- else -%}
+                    <label class="visually-hidden" for="CartUpsell-Variant-{{ up.id }}">
+                      {{ 'products.product.product_variants' | t }} — {{ up.title | escape }}
+                    </label>
+                    <select id="CartUpsell-Variant-{{ up.id }}" class="dcart-upsell__select" name="id" data-upsell-variant>
+                      {%- for variant in up.variants -%}
+                        <option
+                          value="{{ variant.id }}"
+                          data-price="{{ variant.price | money | replace: '.00', '' }}"
+                          {% if variant.compare_at_price > variant.price %}
+                            data-compare="{{ variant.compare_at_price | money | replace: '.00', '' }}"
+                          {% endif %}
+                          {% unless variant.available %}disabled{% endunless %}
+                          {% if variant.id == current_variant.id %}selected{% endif %}
+                        >
+                          {{- variant.title | escape -}}
+                          {%- unless variant.available %} — {{ 'products.product.sold_out' | t }}{% endunless -%}
+                        </option>
+                      {%- endfor -%}
+                    </select>
+                  {%- endif -%}
+                  <input type="hidden" name="quantity" value="1">
+
+                  <button
+                    type="submit"
+                    class="dcart-upsell__add button button--secondary"
+                    data-upsell-add
+                    aria-label="{{ 'products.product.add_to_cart' | t }}: {{ up.title | escape }}"
+                  >
+                    <span class="dcart-upsell__add-label">+ {{ 'products.product.add_to_cart' | t }}</span>
+                    {%- render 'loading-spinner' -%}
+                  </button>
+                </div>
+
+                <p class="dcart-upsell__error" data-upsell-error role="alert" hidden></p>
+              </div>
+            </form>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </cart-upsell-slider>
+  {%- endif -%}
+{%- endif -%}

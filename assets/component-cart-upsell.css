@@ -1,0 +1,264 @@
+/* Cart drawer upsell slider — scoped to the drawer; tokens come from the
+   --dcart-* custom properties in component-cart-drawer-custom.css. */
+
+.cart-drawer .dcart-upsell {
+  display: block;
+  margin: 1.6rem 0 0;
+  padding: 1.4rem 0 1.6rem;
+  border-top: 0.1rem solid var(--dcart-line);
+}
+
+cart-drawer.is-empty .dcart-upsell {
+  display: none;
+}
+
+/* ---- Header: heading left, arrows right ---- */
+.cart-drawer .dcart-upsell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.cart-drawer .dcart-upsell__heading {
+  font-family: var(--font-heading-family);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 0.06rem;
+  text-transform: uppercase;
+  color: var(--dcart-ink);
+  margin: 0;
+}
+
+.cart-drawer .dcart-upsell__nav {
+  display: none;
+  gap: 0.4rem;
+}
+
+.cart-drawer .dcart-upsell__arrow {
+  width: 3.6rem;
+  height: 3.6rem;
+  min-width: 3.6rem;
+  border: 0.1rem solid var(--dcart-line);
+  border-radius: 50%;
+  background: rgb(var(--color-background));
+  color: var(--dcart-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.cart-drawer .dcart-upsell__arrow svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.cart-drawer .dcart-upsell__arrow[disabled] {
+  color: var(--dcart-muted-3);
+  cursor: default;
+}
+
+.cart-drawer .dcart-upsell__arrow:focus-visible {
+  outline: 0.2rem solid var(--dcart-ink);
+  outline-offset: 0.2rem;
+}
+
+/* Arrows only where there is a pointer; touch users swipe the peeking track */
+@media (hover: hover) and (pointer: fine) {
+  .cart-drawer .dcart-upsell__nav {
+    display: flex;
+  }
+}
+
+/* ---- Track ---- */
+.cart-drawer .dcart-upsell__track {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.cart-drawer .dcart-upsell__track::-webkit-scrollbar {
+  display: none;
+}
+
+.cart-drawer .dcart-upsell__slide {
+  flex: 0 0 88%;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.cart-drawer .dcart-upsell__track--single .dcart-upsell__slide {
+  flex-basis: 100%;
+}
+
+/* ---- Card ---- */
+.cart-drawer .dcart-upsell__card {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+  height: 100%;
+  margin: 0;
+  padding: 1rem;
+  box-sizing: border-box;
+  border: 0.1rem solid var(--dcart-line);
+  background: rgb(var(--color-background));
+}
+
+.cart-drawer .dcart-upsell__media {
+  display: block;
+}
+
+.cart-drawer .dcart-upsell__image {
+  width: 8rem;
+  height: 8rem;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  background: var(--dcart-tint);
+}
+
+.cart-drawer .dcart-upsell__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.cart-drawer .dcart-upsell__title {
+  font-family: var(--font-body-family);
+  font-size: 1.35rem;
+  line-height: 1.3;
+  color: var(--dcart-ink);
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.cart-drawer .dcart-upsell__title:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.cart-drawer .dcart-upsell__price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-size: 1.4rem;
+}
+
+.cart-drawer .dcart-upsell__final {
+  font-weight: 600;
+  color: var(--dcart-ink);
+}
+
+.cart-drawer .dcart-upsell__compare {
+  color: var(--dcart-muted-3);
+  font-size: 1.25rem;
+}
+
+/* ---- Actions: variant select + add ---- */
+.cart-drawer .dcart-upsell__actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.cart-drawer .dcart-upsell__select {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 4.4rem;
+  border: 0.1rem solid var(--dcart-line);
+  border-radius: var(--inputs-radius);
+  background: rgb(var(--color-background));
+  color: var(--dcart-ink);
+  font-family: var(--font-body-family);
+  font-size: 1.6rem;
+  padding: 0 0.8rem;
+  cursor: pointer;
+}
+
+.cart-drawer .dcart-upsell__select:focus-visible {
+  outline: 0.2rem solid var(--dcart-ink);
+  outline-offset: 0;
+}
+
+.cart-drawer .dcart-upsell__add.button {
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 4.4rem;
+  padding: 0 1.4rem;
+  font-size: 1.3rem;
+  letter-spacing: 0.04rem;
+  white-space: nowrap;
+  position: relative;
+}
+
+/* single-variant products: button fills the row */
+.cart-drawer .dcart-upsell__actions > input[name='id'][type='hidden'] ~ .dcart-upsell__add {
+  flex: 1 1 auto;
+}
+
+.cart-drawer .dcart-upsell__add.loading .dcart-upsell__add-label {
+  visibility: hidden;
+}
+
+.cart-drawer .dcart-upsell__add .loading__spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-drawer .dcart-upsell__add .loading__spinner.hidden {
+  display: none;
+}
+
+.cart-drawer .dcart-upsell__add .loading__spinner .spinner {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.cart-drawer .dcart-upsell__add[aria-disabled='true'] {
+  cursor: default;
+}
+
+.cart-drawer .dcart-upsell__error {
+  margin: 0.2rem 0 0;
+  font-size: 1.2rem;
+  line-height: 1.35;
+  color: var(--dcart-ink);
+}
+
+@media screen and (min-width: 750px) {
+  .cart-drawer .dcart-upsell__select {
+    height: 3.6rem;
+    font-size: 1.3rem;
+  }
+
+  .cart-drawer .dcart-upsell__add.button {
+    min-height: 3.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-drawer .dcart-upsell__track {
+    scroll-behavior: auto;
+  }
+}

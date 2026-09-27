@@ -1,0 +1,80 @@
+{% comment %}
+  Renders the free shipping progress bar.
+
+  Pure Liquid: the cart drawer and cart page re-render this snippet server-side
+  on every cart change (add, quantity change, remove, upsell add), so the
+  message and progress are always in sync with the cart. The companion
+  `free-shipping-bar` custom element only animates the fill from its previous
+  value.
+
+  Threshold comes from Theme settings → Cart → Free shipping bar (store
+  currency). The bar is hidden when the cart is shown in a different
+  presentment currency, because Liquid can't convert the threshold.
+
+  Accepts:
+  - class: {String} Extra modifier class (optional)
+
+  Usage:
+  {% render 'free-shipping-bar', class: 'free-shipping-bar--drawer' %}
+{% endcomment %}
+
+{%- liquid
+  assign fsb_threshold = settings.free_shipping_threshold | default: 0 | times: 100 | round
+  assign fsb_show = false
+  if settings.free_shipping_enable and fsb_threshold > 0 and cart != empty and cart.currency.iso_code == shop.currency
+    assign fsb_show = true
+    if settings.free_shipping_bar_show_below == false and cart.total_price < fsb_threshold
+      assign fsb_show = false
+    endif
+  endif
+-%}
+
+{%- if fsb_show -%}
+  {%- liquid
+    assign fsb_total = cart.total_price
+    assign fsb_reached = false
+    if fsb_total >= fsb_threshold
+      assign fsb_reached = true
+      assign fsb_progress = 100
+    else
+      assign fsb_progress = fsb_total | times: 100 | divided_by: fsb_threshold
+      assign fsb_remaining = fsb_threshold | minus: fsb_total
+      assign fsb_amount = fsb_remaining | money | replace: '.00', ''
+      assign fsb_amount_html = '<strong>' | append: fsb_amount | append: '</strong>'
+    endif
+  -%}
+
+  <free-shipping-bar
+    class="free-shipping-bar{% if fsb_reached %} free-shipping-bar--success{% endif %}{% if class != blank %} {{ class }}{% endif %}"
+    data-progress="{{ fsb_progress }}"
+    style="--fsb-progress: {{ fsb_progress }};"
+  >
+    <p class="free-shipping-bar__message">
+      {%- if fsb_reached -%}
+        <svg class="free-shipping-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M7.5 12.5l3 3 6-6.5"/>
+        </svg>
+        <span>{{ settings.free_shipping_success_text | escape }}</span>
+      {%- else -%}
+        <svg class="free-shipping-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M1 4h13v12H1z"/>
+          <path d="M14 8h4l4 4v4h-8z"/>
+          <circle cx="5.5" cy="18.5" r="2"/>
+          <circle cx="18.5" cy="18.5" r="2"/>
+        </svg>
+        <span>{{ settings.free_shipping_progress_text | escape | replace: '[amount]', fsb_amount_html }}</span>
+      {%- endif -%}
+    </p>
+    <div
+      class="free-shipping-bar__track"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="{{ fsb_progress }}"
+      aria-valuetext="{% if fsb_reached %}{{ settings.free_shipping_success_text | escape }}{% else %}{{ settings.free_shipping_progress_text | escape | replace: '[amount]', fsb_amount }}{% endif %}"
+    >
+      <span class="free-shipping-bar__fill"></span>
+    </div>
+  </free-shipping-bar>
+{%- endif -%}

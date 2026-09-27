@@ -1449,6 +1449,134 @@
         "id": "cart_color_scheme",
         "label": "t:sections.all.colors.label",
         "default": "scheme-1"
+      },
+      {
+        "type": "header",
+        "content": "Cart drawer upsells"
+      },
+      {
+        "type": "paragraph",
+        "content": "Uses the newest cart item's product metafields: custom.upsell_collection (collection) wins over custom.upsell_products (list of products). Falls back to the collection below when no cart item has either."
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_upsell_enable",
+        "label": "Show upsells",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "cart_upsell_heading",
+        "label": "Heading",
+        "default": "Complete your order"
+      },
+      {
+        "type": "collection",
+        "id": "cart_upsell_fallback_collection",
+        "label": "Fallback collection",
+        "info": "Shown when no cart item has upsell metafields. Leave empty to hide upsells in that case."
+      },
+      {
+        "type": "range",
+        "id": "cart_upsell_max",
+        "label": "Maximum products",
+        "min": 2,
+        "max": 10,
+        "step": 1,
+        "default": 6
+      },
+      {
+        "type": "header",
+        "content": "Free shipping bar"
+      },
+      {
+        "type": "paragraph",
+        "content": "Display only. Checkout charges are set in Settings → Shipping and delivery — keep the threshold there identical to the one below."
+      },
+      {
+        "type": "checkbox",
+        "id": "free_shipping_enable",
+        "label": "Show free shipping progress bar",
+        "default": true
+      },
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Free shipping threshold",
+        "info": "Order amount in store currency without decimals, e.g. 3000 or 5000. Compared against the cart total after discounts.",
+        "default": 3000
+      },
+      {
+        "type": "checkbox",
+        "id": "free_shipping_bar_show_below",
+        "label": "Show bar before threshold is reached",
+        "info": "Turn off to show the bar only once free shipping is unlocked.",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_progress_text",
+        "label": "Progress message",
+        "info": "Use [amount] for the remaining amount.",
+        "default": "You're [amount] away from FREE shipping"
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_success_text",
+        "label": "Success message",
+        "default": "Congrats! You've unlocked FREE shipping"
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_free_label",
+        "label": "Shipping row when threshold is reached",
+        "default": "Free"
+      },
+      {
+        "type": "number",
+        "id": "free_shipping_rate",
+        "label": "Shipping rate below threshold",
+        "info": "Store currency without decimals, e.g. 250. Added to the estimated total until the threshold is reached. Must match your paid rate in Settings → Shipping and delivery. Leave empty to add no fee."
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_rate_text",
+        "label": "Shipping row text when no rate is set",
+        "default": "Calculated at checkout"
+      },
+      {
+        "type": "header",
+        "content": "Cart drawer extras"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_show_savings",
+        "label": "Show total savings row",
+        "info": "Sum of compare-at and discount savings across the cart.",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_timer_enable",
+        "label": "Show cart reservation timer",
+        "info": "Carts don't actually expire — the timer restarts when it runs out. Check local consumer-protection rules before enabling.",
+        "default": false
+      },
+      {
+        "type": "text",
+        "id": "cart_timer_text",
+        "label": "Timer message",
+        "default": "Your cart is reserved for"
+      },
+      {
+        "type": "range",
+        "id": "cart_timer_minutes",
+        "label": "Timer length",
+        "min": 5,
+        "max": 30,
+        "step": 5,
+        "unit": "min",
+        "default": 10
       }
     ]
   },
