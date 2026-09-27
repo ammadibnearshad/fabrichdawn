@@ -77,21 +77,31 @@
         "mega_image_x9WHrK": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "Winter'26",
+            "menu_item": "Wool Suiting",
+            "menu_level": "child",
+            "sub_item": "",
             "image": "shopify://shop_images/FAB-SH-001_1.jpg",
             "link": "",
             "heading": "",
-            "caption": ""
+            "caption": "",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
           }
         },
         "mega_image_4Bmjfd": {
           "type": "mega_image",
           "settings": {
             "menu_item": "Winter'26",
+            "menu_level": "main",
+            "sub_item": "",
             "image": "shopify://shop_images/MC-05_3.jpg",
             "link": "",
             "heading": "",
-            "caption": ""
+            "caption": "",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
           }
         }
       },
