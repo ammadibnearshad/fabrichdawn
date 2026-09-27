@@ -38,6 +38,22 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_PeHagr": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Plain Fabric",
+            "menu_level": "grandchild",
+            "sub_item": "Melange Cotton",
+            "image": "shopify://shop_images/MC-03_1.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/MC-01_1.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
         "mega_menu_LgbCg6": {
           "type": "mega_menu",
           "settings": {
@@ -112,11 +128,9 @@
             "menu_item": "Plain Fabric",
             "menu_level": "child",
             "sub_item": "Cotton",
-            "image": "shopify://shop_images/MC-03_3.jpg",
             "link": "",
             "heading": "",
             "caption": "",
-            "image_2": "shopify://shop_images/FAB-34_3.jpg",
             "link_2": "",
             "heading_2": "",
             "caption_2": ""
@@ -124,6 +138,7 @@
         }
       },
       "block_order": [
+        "mega_image_PeHagr",
         "mega_menu_LgbCg6",
         "mega_image_x9WHrK",
         "mega_image_4Bmjfd",
