@@ -109,10 +109,10 @@
         "mega_image_nFHDHQ": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "Plain Fabric",
-            "menu_level": "main",
-            "sub_item": "",
-            "image": "shopify://shop_images/FAB-SH-001_1.jpg",
+            "menu_item": "Cotton",
+            "menu_level": "grandchild",
+            "sub_item": "Melange Cotton",
+            "image": "shopify://shop_images/MC-03_3.jpg",
             "link": "",
             "heading": "",
             "caption": "",
