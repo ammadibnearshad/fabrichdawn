@@ -38,6 +38,22 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_U43ccE": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Plain Fabric",
+            "menu_level": "grandchild",
+            "sub_item": "Zouq Cotton",
+            "image": "shopify://shop_images/ZC-010_2.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/ZC-015_2.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
         "mega_image_PeHagr": {
           "type": "mega_image",
           "settings": {
@@ -138,6 +154,7 @@
         }
       },
       "block_order": [
+        "mega_image_U43ccE",
         "mega_image_PeHagr",
         "mega_menu_LgbCg6",
         "mega_image_x9WHrK",
