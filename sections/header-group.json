@@ -38,6 +38,20 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_mfm6wR": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "VIRSA BY FABRICH",
+            "menu_level": "child",
+            "sub_item": "",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
         "mega_image_ehk99q": {
           "type": "mega_image",
           "settings": {
@@ -334,6 +348,7 @@
         }
       },
       "block_order": [
+        "mega_image_mfm6wR",
         "mega_image_ehk99q",
         "mega_image_9Y68Kk",
         "mega_image_jQhbbe",
