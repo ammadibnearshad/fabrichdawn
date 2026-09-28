@@ -38,6 +38,54 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_ehk99q": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Embroidere",
+            "menu_level": "child",
+            "sub_item": "Monochrome Edit-26",
+            "image": "shopify://shop_images/GTS-FE-003_2.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/GTS-FE-017_1.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
+        "mega_image_9Y68Kk": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Embroidere",
+            "menu_level": "child",
+            "sub_item": "Kashmiri- Unstitch",
+            "image": "shopify://shop_images/FAB-2790_2.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/GTS-WK-005_2.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
+        "mega_image_jQhbbe": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Embroidere",
+            "menu_level": "child",
+            "sub_item": "Tilla Kaari By Fabrich",
+            "image": "shopify://shop_images/FAB-9924_1_2_1.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/FAB-9852_1_1_1.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
         "mega_image_miNHhb": {
           "type": "mega_image",
           "settings": {
@@ -286,6 +334,9 @@
         }
       },
       "block_order": [
+        "mega_image_ehk99q",
+        "mega_image_9Y68Kk",
+        "mega_image_jQhbbe",
         "mega_image_miNHhb",
         "mega_menu_iUyeMi",
         "mega_image_7ecYw3",
