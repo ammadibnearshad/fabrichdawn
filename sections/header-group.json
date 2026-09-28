@@ -38,6 +38,22 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_4HN4wx": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Plain Fabric",
+            "menu_level": "grandchild",
+            "sub_item": "Mizaaj Latha",
+            "image": "shopify://shop_images/ML-040_1_f3157d0d-5729-4b48-a252-8024b7c78b71.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/ML-027_1.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
         "mega_image_U43ccE": {
           "type": "mega_image",
           "settings": {
@@ -154,6 +170,7 @@
         }
       },
       "block_order": [
+        "mega_image_4HN4wx",
         "mega_image_U43ccE",
         "mega_image_PeHagr",
         "mega_menu_LgbCg6",
