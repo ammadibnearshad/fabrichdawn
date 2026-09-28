@@ -38,6 +38,38 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_PdFAb4": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Plain Fabric",
+            "menu_level": "grandchild",
+            "sub_item": "1-million-cotton-lawn",
+            "image": "shopify://shop_images/CL-053_2.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/CL-057_1.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
+        "mega_image_DYKXRi": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Plain Fabric",
+            "menu_level": "grandchild",
+            "sub_item": "Fine Cotton",
+            "image": "shopify://shop_images/FC-003_1.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/FC-002_1.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
         "mega_image_4HN4wx": {
           "type": "mega_image",
           "settings": {
@@ -170,6 +202,8 @@
         }
       },
       "block_order": [
+        "mega_image_PdFAb4",
+        "mega_image_DYKXRi",
         "mega_image_4HN4wx",
         "mega_image_U43ccE",
         "mega_image_PeHagr",
