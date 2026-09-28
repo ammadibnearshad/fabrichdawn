@@ -41,7 +41,7 @@
         "mega_image_ehk99q": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "Embroidere",
+            "menu_item": "Embroidery",
             "menu_level": "child",
             "sub_item": "Monochrome Edit-26",
             "image": "shopify://shop_images/GTS-FE-003_2.jpg",
@@ -57,7 +57,7 @@
         "mega_image_9Y68Kk": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "Embroidere",
+            "menu_item": "Embroidery",
             "menu_level": "child",
             "sub_item": "Kashmiri- Unstitch",
             "image": "shopify://shop_images/FAB-2790_2.jpg",
@@ -73,7 +73,7 @@
         "mega_image_jQhbbe": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "Embroidere",
+            "menu_item": "Embroidery",
             "menu_level": "child",
             "sub_item": "Tilla Kaari By Fabrich",
             "image": "shopify://shop_images/FAB-9924_1_2_1.jpg",
@@ -89,7 +89,7 @@
         "mega_image_miNHhb": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "Embroidere",
+            "menu_item": "Embroidery",
             "menu_level": "child",
             "sub_item": "Kari-Gari By Fabrich",
             "image": "shopify://shop_images/Karigari-1.jpg",
@@ -105,7 +105,7 @@
         "mega_menu_iUyeMi": {
           "type": "mega_menu",
           "settings": {
-            "menu_item": "Embroidere",
+            "menu_item": "Embroidery",
             "item_color": "",
             "badge_text": "",
             "badge_background": "",
