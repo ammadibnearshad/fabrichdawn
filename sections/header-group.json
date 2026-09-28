@@ -38,15 +38,49 @@
     "header": {
       "type": "header",
       "blocks": {
-        "mega_image_mfm6wR": {
+        "mega_image_H8X7QH": {
           "type": "mega_image",
           "settings": {
-            "menu_item": "VIRSA BY FABRICH",
+            "menu_item": "Embroidery",
             "menu_level": "child",
-            "sub_item": "",
+            "sub_item": "Cotton Valley By Fabrich",
+            "image": "shopify://shop_images/FAB-9705_1.jpg",
             "link": "",
             "heading": "",
             "caption": "",
+            "image_2": "shopify://shop_images/FAB-745_1.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
+        "mega_image_MRVY6t": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Embroidery",
+            "menu_level": "child",
+            "sub_item": "Bespoke by Fabrich",
+            "image": "shopify://shop_images/GTS-MCE-037_4.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/MCE-008_2.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
+        "mega_image_mfm6wR": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Embroidery",
+            "menu_level": "child",
+            "sub_item": "VIRSA BY FABRICH",
+            "image": "shopify://shop_images/GTS-VC-005_3_da4ad892-9f47-4560-b810-136a8eb5ef3a.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/FAB-8813_1.jpg",
             "link_2": "",
             "heading_2": "",
             "caption_2": ""
@@ -348,6 +382,8 @@
         }
       },
       "block_order": [
+        "mega_image_H8X7QH",
+        "mega_image_MRVY6t",
         "mega_image_mfm6wR",
         "mega_image_ehk99q",
         "mega_image_9Y68Kk",
