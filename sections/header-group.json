@@ -38,6 +38,22 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_gWrzkK": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Winter'26",
+            "menu_level": "child",
+            "sub_item": "Melange Cotton",
+            "image": "shopify://shop_images/MC-03_1.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/MC-04_1.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
         "mega_image_H8X7QH": {
           "type": "mega_image",
           "settings": {
@@ -382,6 +398,7 @@
         }
       },
       "block_order": [
+        "mega_image_gWrzkK",
         "mega_image_H8X7QH",
         "mega_image_MRVY6t",
         "mega_image_mfm6wR",
