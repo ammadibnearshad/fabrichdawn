@@ -38,6 +38,40 @@
     "header": {
       "type": "header",
       "blocks": {
+        "mega_image_miNHhb": {
+          "type": "mega_image",
+          "settings": {
+            "menu_item": "Embroidere",
+            "menu_level": "child",
+            "sub_item": "Kari-Gari By Fabrich",
+            "image": "shopify://shop_images/Karigari-1.jpg",
+            "link": "",
+            "heading": "",
+            "caption": "",
+            "image_2": "shopify://shop_images/Karigari-3.jpg",
+            "link_2": "",
+            "heading_2": "",
+            "caption_2": ""
+          }
+        },
+        "mega_menu_iUyeMi": {
+          "type": "mega_menu",
+          "settings": {
+            "menu_item": "Embroidere",
+            "item_color": "",
+            "badge_text": "",
+            "badge_background": "",
+            "badge_text_color": "",
+            "enable_mega": true,
+            "menu": "",
+            "columns": 4,
+            "panel_width": "content",
+            "color_scheme": "scheme-1",
+            "image_position": "right",
+            "image_width": 180,
+            "image_ratio": "0.75"
+          }
+        },
         "mega_image_7ecYw3": {
           "type": "mega_image",
           "settings": {
@@ -252,6 +286,8 @@
         }
       },
       "block_order": [
+        "mega_image_miNHhb",
+        "mega_menu_iUyeMi",
         "mega_image_7ecYw3",
         "mega_image_bQVLmJ",
         "mega_image_H8ba4x",
