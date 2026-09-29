@@ -72,26 +72,11 @@
         "description": {
           "type": "description",
           "settings": {
-            "description_display": "inline",
+            "description_display": "collapsible",
             "collapsible_heading": "Description",
             "spec_source": "description",
             "spec_heading": "Specifications",
-            "spec_metafields": "custom.fabric_type: Fabric Type\ncustom.sleeves: Sleeves\ncustom.neck: Neck\ncustom.fit: Fit\ncustom.fabric: Fabric\ncustom.occasion: Occasion"
-          }
-        },
-        "cm_share": {
-          "type": "cm_share",
-          "settings": {
-            "label": "Share:",
-            "facebook": true,
-            "twitter": true,
-            "pinterest": true,
-            "whatsapp": true,
-            "email": false,
-            "copy_link": false,
-            "native_share_mobile": false,
-            "style": "icon",
-            "icon_size": 20
+            "spec_metafields": ""
           }
         }
       },
@@ -102,8 +87,7 @@
         "cm_sibling_swatches",
         "variant_picker",
         "buy_buttons",
-        "description",
-        "cm_share"
+        "description"
       ],
       "settings": {
         "cm_style": true,
