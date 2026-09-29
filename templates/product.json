@@ -27,6 +27,29 @@
             "show_payment_terms": false
           }
         },
+        "cm_stock_indicator": {
+          "type": "cm_stock_indicator",
+          "settings": {
+            "display_mode": "low_only",
+            "threshold": 20,
+            "hide_when_untracked": true,
+            "show_quantity": true,
+            "highlight_quantity": true,
+            "text_low": "Only [quantity] pieces left at this price",
+            "text_low_generic": "Low stock — order soon",
+            "text_in_stock": "In stock, ready to ship",
+            "show_out_of_stock": false,
+            "text_out_of_stock": "Currently sold out",
+            "show_progress_bar": false,
+            "bar_max": 20,
+            "icon": "warning",
+            "layout": "box",
+            "accent_color": "",
+            "tint": 8,
+            "show_border": true,
+            "border_opacity": 30
+          }
+        },
         "cm_size_chart": {
           "type": "cm_size_chart",
           "settings": {
@@ -41,6 +64,7 @@
         },
         "cm_sibling_swatches": {
           "type": "cm_sibling_swatches",
+          "disabled": true,
           "settings": {
             "heading": "Color",
             "show_selected_name": true,
@@ -60,47 +84,6 @@
             "swatch_shape": "square"
           }
         },
-        "buy_buttons": {
-          "type": "buy_buttons",
-          "settings": {
-            "show_dynamic_checkout": true,
-            "show_gift_card_recipient": true,
-            "show_pickup_availability": true,
-            "require_size_selection": false
-          }
-        },
-        "description": {
-          "type": "description",
-          "settings": {
-            "description_display": "collapsible",
-            "collapsible_heading": "Description",
-            "spec_source": "description",
-            "spec_heading": "Specifications",
-            "spec_metafields": ""
-          }
-        },
-        "cm_stock_indicator": {
-          "type": "cm_stock_indicator",
-          "settings": {
-            "display_mode": "low_only",
-            "threshold": 20,
-            "hide_when_untracked": true,
-            "show_quantity": true,
-            "highlight_quantity": true,
-            "text_low": "Only [quantity] pieces left at this price",
-            "text_low_generic": "Low stock — order soon",
-            "text_in_stock": "In stock, ready to ship",
-            "show_out_of_stock": false,
-            "text_out_of_stock": "Currently sold out",
-            "show_progress_bar": false,
-            "bar_max": 20,
-            "icon": "warning",
-            "layout": "box",
-            "accent_color": "",
-            "show_border": true,
-            "border_opacity": 30
-          }
-        },
         "cm_callout": {
           "type": "cm_callout",
           "settings": {
@@ -113,8 +96,18 @@
             "icon_size": 22,
             "layout": "box",
             "accent_color": "",
+            "tint": 8,
             "show_border": true,
             "border_opacity": 30
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true,
+            "show_pickup_availability": true,
+            "require_size_selection": false
           }
         },
         "cm_trust_icons": {
@@ -145,6 +138,7 @@
             "link_6": "",
             "layout": "box",
             "accent_color": "",
+            "tint": 0,
             "show_border": true,
             "border_opacity": 20
           }
@@ -161,8 +155,19 @@
             "icon_size": 18,
             "layout": "plain",
             "accent_color": "",
+            "tint": 0,
             "show_border": false,
             "border_opacity": 30
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "description_display": "collapsible",
+            "collapsible_heading": "Description",
+            "spec_source": "description",
+            "spec_heading": "Specifications",
+            "spec_metafields": ""
           }
         }
       },
