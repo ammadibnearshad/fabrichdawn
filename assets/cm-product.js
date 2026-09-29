@@ -137,6 +137,46 @@
     );
   }
 
+  /* ------------------------------------------------------- Stock indicator */
+
+  if (!customElements.get('cm-stock-indicator')) {
+    customElements.define(
+      'cm-stock-indicator',
+      class CmStockIndicator extends HTMLElement {
+        constructor() {
+          super();
+          this.unsubscribe = null;
+        }
+
+        connectedCallback() {
+          this.sectionId = this.dataset.section;
+          this.unsubscribe =
+            typeof window.subscribe === 'function'
+              ? window.subscribe(VARIANT_CHANGE, this.onVariantChange.bind(this))
+              : null;
+        }
+
+        disconnectedCallback() {
+          this.unsubscribe?.();
+        }
+
+        onVariantChange(event) {
+          const { sectionId, html } = event.data || {};
+          if (sectionId !== this.sectionId) return;
+
+          // Liquid already worked out the message and the state for the new
+          // variant, so take both rather than recomputing stock rules here.
+          const source = html?.getElementById(`CmStock-${sectionId}`);
+          if (!source) return;
+
+          this.innerHTML = source.innerHTML;
+          this.className = source.className;
+          this.hidden = source.hasAttribute('hidden');
+        }
+      }
+    );
+  }
+
   /* ------------------------------------------------------------ Size guard */
 
   if (!customElements.get('cm-size-guard')) {

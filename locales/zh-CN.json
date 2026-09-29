@@ -115,7 +115,8 @@
         "share_by_email": "Share by email",
         "share_native": "Share",
         "copy_link": "Copy link",
-        "select_size": "Please choose a {{ option }}"
+        "select_size": "Please choose a {{ option }}",
+        "stock_bar_label": "{{ quantity }} left in stock"
       },
       "add_to_cart": "添加到购物车",
       "description": "描述",

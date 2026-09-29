@@ -1,0 +1,54 @@
+{% comment %}
+  Renders a Cambridge callout: an icon with a bold heading and a supporting
+  line, on a tinted, optionally bordered surface.
+
+  Deliberately generic. It ships configured as a Cash on Delivery notice, but
+  every part is a setting, so the same block covers delivery promises, bulk
+  order notes, care warnings, stockist info and so on. The block has no limit,
+  so several can sit in one product page.
+
+  Accepts:
+  - block: {Object} The `cm_callout` block. Required.
+
+  Usage:
+  {% render 'cm-callout', block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign cm_co_has_content = false
+  if block.settings.heading != blank or block.settings.text != blank
+    assign cm_co_has_content = true
+  endif
+-%}
+
+{%- if cm_co_has_content -%}
+  {%- capture cm_co_surface -%}{%- render 'cm-surface-style', block: block -%}{%- endcapture -%}
+
+  <div
+    class="cm-callout cm-surface cm-surface--{{ block.settings.layout }} cm-callout--icon-{{ block.settings.icon_position }} quick-add-hidden"
+    style="{{ cm_co_surface }}"
+    {{ block.shopify_attributes }}
+  >
+    {%- if block.settings.icon != 'none' -%}
+      <span class="cm-callout__icon cm-icon" style="--cm-icon-size: {{ block.settings.icon_size | default: 22 }}px;">
+        {%- render 'icon-accordion', icon: block.settings.icon -%}
+      </span>
+    {%- endif -%}
+
+    <div class="cm-callout__body">
+      {%- if block.settings.heading != blank -%}
+        <p class="cm-callout__heading">{{ block.settings.heading }}</p>
+      {%- endif -%}
+
+      {%- if block.settings.text != blank -%}
+        <p class="cm-callout__text">{{ block.settings.text }}</p>
+      {%- endif -%}
+
+      {%- if block.settings.link != blank and block.settings.link_text != blank -%}
+        <a class="cm-callout__link link" href="{{ block.settings.link }}">
+          {{- block.settings.link_text | escape -}}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}

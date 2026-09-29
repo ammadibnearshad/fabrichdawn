@@ -1,0 +1,81 @@
+{% comment %}
+  Renders the Cambridge trust bar: a row of icon + label reassurance items
+  (free shipping, cash on delivery, easy returns, verified quality).
+
+  Six slots are available; empty ones are skipped, so the merchant sets the
+  count by filling in as many as they want. Dawn's schema-defined section
+  blocks cannot nest child blocks, so fixed slots are the upgrade-safe way to
+  do a repeating row here.
+
+  Accepts:
+  - block: {Object} The `cm_trust_icons` block. Required.
+
+  Usage:
+  {% render 'cm-trust-icons', block: block %}
+{% endcomment %}
+
+{%- capture cm_tr_items -%}
+  {%- for cm_tr_i in (1..6) -%}
+    {%- liquid
+      assign cm_tr_icon_key = 'icon_' | append: cm_tr_i
+      assign cm_tr_label_key = 'label_' | append: cm_tr_i
+      assign cm_tr_link_key = 'link_' | append: cm_tr_i
+
+      assign cm_tr_icon = block.settings[cm_tr_icon_key] | default: 'none'
+      assign cm_tr_label = block.settings[cm_tr_label_key]
+      assign cm_tr_link = block.settings[cm_tr_link_key]
+
+      assign cm_tr_render = false
+      if cm_tr_label != blank
+        assign cm_tr_render = true
+      endif
+      if cm_tr_icon != 'none' and cm_tr_icon != blank
+        assign cm_tr_render = true
+      endif
+    -%}
+    {%- if cm_tr_render -%}
+      <li class="cm-trust__item">
+        {%- if cm_tr_link != blank -%}
+          <a class="cm-trust__cell" href="{{ cm_tr_link }}">
+        {%- else -%}
+          <div class="cm-trust__cell">
+        {%- endif -%}
+
+        {%- if cm_tr_icon != 'none' and cm_tr_icon != blank -%}
+          <span class="cm-trust__icon cm-icon">
+            {%- render 'icon-accordion', icon: cm_tr_icon -%}
+          </span>
+        {%- endif -%}
+
+        {%- if cm_tr_label != blank -%}
+          <span class="cm-trust__label">{{ cm_tr_label | escape }}</span>
+        {%- endif -%}
+
+        {%- if cm_tr_link != blank -%}
+          </a>
+        {%- else -%}
+          </div>
+        {%- endif -%}
+      </li>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- assign cm_tr_items_trimmed = cm_tr_items | strip -%}
+{%- if cm_tr_items_trimmed != blank -%}
+  {%- capture cm_tr_surface -%}{%- render 'cm-surface-style', block: block -%}{%- endcapture -%}
+
+  <div
+    class="cm-trust cm-surface cm-surface--{{ block.settings.layout }}{% if block.settings.show_dividers %} cm-trust--dividers{% endif %} quick-add-hidden"
+    style="{{ cm_tr_surface }} --cm-trust-columns: {{ block.settings.columns_desktop | default: 4 }}; --cm-trust-columns-mobile: {{ block.settings.columns_mobile | default: 2 }}; --cm-icon-size: {{ block.settings.icon_size | default: 24 }}px;"
+    {{ block.shopify_attributes }}
+  >
+    {%- if block.settings.heading != blank -%}
+      <h2 class="cm-block__heading">{{ block.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    <ul class="cm-trust__list list-unstyled" role="list">
+      {{ cm_tr_items }}
+    </ul>
+  </div>
+{%- endif -%}

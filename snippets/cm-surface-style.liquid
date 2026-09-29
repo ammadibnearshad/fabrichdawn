@@ -1,0 +1,32 @@
+{% comment %}
+  Emits the inline custom properties every Cambridge "surface" block shares:
+  accent colour, background tint and border opacity.
+
+  Nothing is hardcoded here. When the block's accent_color setting is empty the
+  accent falls back to the active colour scheme's foreground, so a block always
+  looks correct in every scheme.
+
+  Accepts:
+  - block: {Object} A block with accent_color / tint / show_border settings.
+
+  Usage:
+  {%- capture cm_surface_style -%}{%- render 'cm-surface-style', block: block -%}{%- endcapture -%}
+  <div class="cm-surface" style="{{ cm_surface_style }}">
+{% endcomment %}
+
+{%- liquid
+  assign cm_su_rgb = block.settings.accent_color.rgb
+  if cm_su_rgb == blank
+    assign cm_su_accent = 'var(--color-foreground)'
+  else
+    assign cm_su_accent = cm_su_rgb
+  endif
+
+  assign cm_su_tint = block.settings.tint | default: 0 | divided_by: 100.0
+
+  assign cm_su_border = 0
+  if block.settings.show_border
+    assign cm_su_border = block.settings.border_opacity | default: 30 | divided_by: 100.0
+  endif
+-%}
+--cm-accent: {{ cm_su_accent }}; --cm-surface-tint: {{ cm_su_tint }}; --cm-surface-border: {{ cm_su_border }};

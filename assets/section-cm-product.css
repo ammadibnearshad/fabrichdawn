@@ -888,3 +888,263 @@
     transition: none;
   }
 }
+
+/* ==========================================================================
+   Cambridge PDP surface blocks
+   Stock indicator, callout, trust icons and checklist share one surface and
+   one icon treatment. Colour comes from --cm-accent, which each block sets
+   inline from its accent_color setting and which falls back to the active
+   colour scheme's foreground when that setting is empty. Nothing here is a
+   fixed colour.
+   ========================================================================== */
+
+.cm-surface {
+  --cm-accent: var(--color-foreground);
+  --cm-surface-tint: 0;
+  --cm-surface-border: 0;
+
+  display: block;
+}
+
+.cm-surface--box {
+  padding: 1.2rem 1.4rem;
+  background-color: rgba(var(--cm-accent), var(--cm-surface-tint));
+  border: var(--text-boxes-border-width, 1px) solid rgba(var(--cm-accent), var(--cm-surface-border));
+  border-radius: var(--text-boxes-radius, 0);
+}
+
+.cm-surface[hidden] {
+  display: none;
+}
+
+/* Icons -------------------------------------------------------------------- */
+
+.cm-icon {
+  --icon-stroke-width: 1.4;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--cm-icon-size, 20px);
+  height: var(--cm-icon-size, 20px);
+  color: rgb(var(--cm-accent, var(--color-foreground)));
+}
+
+/* Dawn's .svg-wrapper is a fixed 20px box; let the block decide the size. */
+.cm-icon .svg-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+/*
+  Dawn's accordion icons carry no fill attribute, so they need currentColor to
+  pick up the accent. Icons drawn with strokes declare fill="none" and must be
+  left alone.
+*/
+.cm-icon svg:not([fill='none']) {
+  fill: currentColor;
+}
+
+.cm-block__heading--uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Stock indicator ---------------------------------------------------------- */
+
+.cm-stock__row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.cm-stock__text {
+  color: rgb(var(--cm-accent, var(--color-foreground)));
+  font-size: calc(var(--font-body-scale) * 1.4rem);
+  line-height: 1.4;
+}
+
+.cm-stock__quantity {
+  font-weight: 600;
+}
+
+.cm-stock__bar {
+  overflow: hidden;
+  height: 0.4rem;
+  margin-top: 0.8rem;
+  border-radius: 0.4rem;
+  background-color: rgba(var(--cm-accent, var(--color-foreground)), 0.18);
+}
+
+.cm-stock__bar-value {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background-color: rgb(var(--cm-accent, var(--color-foreground)));
+  transition: width var(--duration-default) ease;
+}
+
+/* Callout ------------------------------------------------------------------ */
+
+.cm-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+
+.cm-callout--icon-top {
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.cm-callout__icon {
+  margin-top: 0.1rem;
+}
+
+.cm-callout__body {
+  min-width: 0;
+}
+
+.cm-callout__heading {
+  margin: 0;
+  color: rgb(var(--cm-accent, var(--color-foreground)));
+  font-size: calc(var(--font-body-scale) * 1.4rem);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.cm-callout__text {
+  margin: 0.2rem 0 0;
+  color: rgba(var(--cm-accent, var(--color-foreground)), 0.82);
+  font-size: calc(var(--font-body-scale) * 1.3rem);
+  line-height: 1.5;
+}
+
+.cm-callout__link {
+  display: inline-block;
+  margin-top: 0.6rem;
+  color: rgb(var(--cm-accent, var(--color-foreground)));
+  font-size: calc(var(--font-body-scale) * 1.3rem);
+}
+
+/* Trust icons -------------------------------------------------------------- */
+
+.cm-trust.cm-surface--box {
+  padding: 0;
+}
+
+.cm-trust.cm-surface--box .cm-block__heading {
+  padding: 1.2rem 1.4rem 0;
+}
+
+.cm-trust__list {
+  display: grid;
+  grid-template-columns: repeat(var(--cm-trust-columns-mobile, 2), minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .cm-trust__list {
+    grid-template-columns: repeat(var(--cm-trust-columns, 4), minmax(0, 1fr));
+  }
+}
+
+.cm-trust__item {
+  position: relative;
+}
+
+.cm-trust__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  height: 100%;
+  padding: 1.4rem 1rem;
+  color: rgb(var(--color-foreground));
+  text-align: center;
+  text-decoration: none;
+}
+
+a.cm-trust__cell:hover .cm-trust__label {
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+}
+
+a.cm-trust__cell:focus-visible {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: -0.2rem;
+}
+
+.cm-trust__label {
+  font-size: calc(var(--font-body-scale) * 1.2rem);
+  line-height: 1.4;
+}
+
+/*
+  Dividers sit on each cell's leading edge. Pulling the list back by 1px and
+  clipping means the first cell in every row loses its line, which keeps the
+  grid correct at any column count and on wrap, without nth-child maths.
+*/
+.cm-trust--dividers .cm-trust__list {
+  overflow: hidden;
+}
+
+.cm-trust--dividers .cm-trust__item::before,
+.cm-trust--dividers .cm-trust__item::after {
+  content: '';
+  position: absolute;
+  background-color: rgba(var(--cm-accent, var(--color-foreground)), var(--cm-divider-opacity, 0.16));
+}
+
+.cm-trust--dividers .cm-trust__item::before {
+  top: 0;
+  bottom: 0;
+  left: -1px;
+  width: 1px;
+}
+
+.cm-trust--dividers .cm-trust__item::after {
+  top: -1px;
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+/* Checklist ---------------------------------------------------------------- */
+
+.cm-checklist__list {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.9rem 2.4rem;
+  margin: 0;
+  padding: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .cm-checklist__list {
+    grid-template-columns: repeat(var(--cm-checklist-columns, 1), minmax(0, 1fr));
+  }
+}
+
+.cm-checklist__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.cm-checklist__icon {
+  margin-top: 0.25rem;
+}
+
+.cm-checklist__text {
+  font-size: calc(var(--font-body-scale) * 1.4rem);
+  line-height: 1.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-stock__bar-value {
+    transition: none;
+  }
+}

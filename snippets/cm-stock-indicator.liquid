@@ -1,0 +1,119 @@
+{% comment %}
+  Renders the Cambridge stock indicator: "Only 15 pieces left at this price".
+
+  The wrapper is always rendered, even when there is nothing to say, so
+  cm-product.js can swap its contents on every variant change without the
+  element disappearing from the DOM.
+
+  Messages are plain text settings with a [quantity] placeholder, so the
+  merchant controls the wording without touching a locale file.
+
+  Accepts:
+  - product: {Object} Product Liquid object. Required.
+  - block: {Object} The `cm_stock_indicator` block. Required.
+  - section_id: {String} The section id, used for the swap target. Required.
+
+  Usage:
+  {% render 'cm-stock-indicator', product: product, block: block, section_id: section.id %}
+{% endcomment %}
+
+{%- liquid
+  assign cm_si_variant = product.selected_or_first_available_variant
+  assign cm_si_tracked = false
+  if cm_si_variant.inventory_management == 'shopify'
+    assign cm_si_tracked = true
+  endif
+
+  assign cm_si_qty = cm_si_variant.inventory_quantity | default: 0
+  assign cm_si_threshold = block.settings.threshold | default: 20
+
+  # state: out -> low -> in
+  assign cm_si_state = ''
+  if cm_si_variant == null or cm_si_variant.available == false
+    assign cm_si_state = 'out'
+  elsif cm_si_tracked and cm_si_qty > 0 and cm_si_qty <= cm_si_threshold
+    assign cm_si_state = 'low'
+  else
+    assign cm_si_state = 'in'
+  endif
+
+  # Untracked inventory has no number to report.
+  if cm_si_tracked == false and block.settings.hide_when_untracked and cm_si_state != 'out'
+    assign cm_si_state = ''
+  endif
+
+  assign cm_si_message = ''
+  case cm_si_state
+    when 'low'
+      if block.settings.show_quantity
+        assign cm_si_message = block.settings.text_low
+      else
+        assign cm_si_message = block.settings.text_low_generic
+      endif
+    when 'in'
+      if block.settings.display_mode == 'always'
+        assign cm_si_message = block.settings.text_in_stock
+      endif
+    when 'out'
+      if block.settings.show_out_of_stock
+        assign cm_si_message = block.settings.text_out_of_stock
+      endif
+  endcase
+
+  if cm_si_message != blank and cm_si_state == 'low'
+    if block.settings.highlight_quantity
+      assign cm_si_qty_markup = cm_si_qty | prepend: '<strong class="cm-stock__quantity">' | append: '</strong>'
+    else
+      assign cm_si_qty_markup = cm_si_qty
+    endif
+    assign cm_si_message = cm_si_message | replace: '[quantity]', cm_si_qty_markup
+  endif
+
+  assign cm_si_show_bar = false
+  if block.settings.show_progress_bar and cm_si_state == 'low'
+    assign cm_si_show_bar = true
+    assign cm_si_bar_max = block.settings.bar_max | default: 20
+    assign cm_si_percent = cm_si_qty | times: 100 | divided_by: cm_si_bar_max
+    if cm_si_percent > 100
+      assign cm_si_percent = 100
+    endif
+    if cm_si_percent < 4
+      assign cm_si_percent = 4
+    endif
+  endif
+-%}
+
+{%- capture cm_si_surface -%}{%- render 'cm-surface-style', block: block -%}{%- endcapture -%}
+
+<cm-stock-indicator
+  id="CmStock-{{ section_id }}"
+  class="cm-stock cm-surface cm-surface--{{ block.settings.layout }} cm-stock--{{ cm_si_state | default: 'none' }} quick-add-hidden"
+  style="{{ cm_si_surface }}"
+  data-section="{{ section_id }}"
+  role="status"
+  {% if cm_si_message == blank %}
+    hidden
+  {% endif %}
+  {{ block.shopify_attributes }}
+>
+  {%- if cm_si_message != blank -%}
+    <div class="cm-stock__row">
+      {%- if block.settings.icon != 'none' -%}
+        <span class="cm-stock__icon cm-icon">
+          {%- render 'icon-accordion', icon: block.settings.icon -%}
+        </span>
+      {%- endif -%}
+      <span class="cm-stock__text">{{ cm_si_message }}</span>
+    </div>
+
+    {%- if cm_si_show_bar -%}
+      <div
+        class="cm-stock__bar"
+        role="img"
+        aria-label="{{ 'products.product.cm.stock_bar_label' | t: quantity: cm_si_qty }}"
+      >
+        <span class="cm-stock__bar-value" style="width: {{ cm_si_percent }}%;"></span>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</cm-stock-indicator>

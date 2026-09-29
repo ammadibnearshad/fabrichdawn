@@ -93,15 +93,109 @@
             "style": "icon",
             "icon_size": 20
           }
+        },
+        "cm_stock_indicator": {
+          "type": "cm_stock_indicator",
+          "settings": {
+            "display_mode": "low_only",
+            "threshold": 20,
+            "hide_when_untracked": true,
+            "show_quantity": true,
+            "highlight_quantity": true,
+            "text_low": "Only [quantity] pieces left at this price",
+            "text_low_generic": "Low stock — order soon",
+            "text_in_stock": "In stock, ready to ship",
+            "show_out_of_stock": false,
+            "text_out_of_stock": "Currently sold out",
+            "show_progress_bar": false,
+            "bar_max": 20,
+            "icon": "warning",
+            "layout": "box",
+            "accent_color": "",
+            "tint": 8,
+            "show_border": true,
+            "border_opacity": 30
+          }
+        },
+        "cm_callout": {
+          "type": "cm_callout",
+          "settings": {
+            "heading": "Cash on Delivery — pay when you receive",
+            "text": "No advance payment needed. Pay the delivery person.",
+            "link": "",
+            "link_text": "",
+            "icon": "cm_money",
+            "icon_position": "left",
+            "icon_size": 22,
+            "layout": "box",
+            "accent_color": "",
+            "tint": 8,
+            "show_border": true,
+            "border_opacity": 30
+          }
+        },
+        "cm_trust_icons": {
+          "type": "cm_trust_icons",
+          "settings": {
+            "heading": "",
+            "columns_desktop": 4,
+            "columns_mobile": "2",
+            "show_dividers": true,
+            "icon_size": 24,
+            "icon_1": "truck",
+            "label_1": "Free shipping all Pakistan",
+            "link_1": "",
+            "icon_2": "cm_money",
+            "label_2": "Cash on Delivery",
+            "link_2": "",
+            "icon_3": "cm_refresh",
+            "label_3": "15-day easy returns",
+            "link_3": "",
+            "icon_4": "cm_shield_check",
+            "label_4": "Verified quality",
+            "link_4": "",
+            "icon_5": "none",
+            "label_5": "",
+            "link_5": "",
+            "icon_6": "none",
+            "label_6": "",
+            "link_6": "",
+            "layout": "box",
+            "accent_color": "",
+            "tint": 3,
+            "show_border": true,
+            "border_opacity": 20
+          }
+        },
+        "cm_checklist": {
+          "type": "cm_checklist",
+          "settings": {
+            "heading": "Why customers love it",
+            "uppercase_heading": true,
+            "items": "Premium Quality Wash & Wear Fabric\nSoft & Comfortable Feel\nBreathable for All-Day Comfort\nIdeal for Formal & Casual Wear\nApprox. 4 Meters Length | 56 Inches Width\nLong-Lasting Color & Finish",
+            "metafield_key": "custom.key_features",
+            "columns": "1",
+            "icon": "checkmark",
+            "icon_size": 18,
+            "layout": "plain",
+            "accent_color": "",
+            "tint": 0,
+            "show_border": false,
+            "border_opacity": 30
+          }
         }
       },
       "block_order": [
         "title",
         "price",
+        "cm_stock_indicator",
         "cm_size_chart",
         "cm_sibling_swatches",
         "variant_picker",
+        "cm_callout",
         "buy_buttons",
+        "cm_trust_icons",
+        "cm_checklist",
         "description",
         "cm_share"
       ],

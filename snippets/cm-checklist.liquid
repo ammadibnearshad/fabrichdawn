@@ -1,0 +1,76 @@
+{% comment %}
+  Renders the Cambridge benefit checklist: a small uppercase heading over a
+  ticked list of selling points.
+
+  Items come from a product metafield when one is set (so every product can
+  carry its own bullets), otherwise from the block's textarea. One item per
+  line either way.
+
+  Accepts:
+  - product: {Object} Product Liquid object. Required.
+  - block: {Object} The `cm_checklist` block. Required.
+
+  Usage:
+  {% render 'cm-checklist', product: product, block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign cm_cl_items = null
+
+  # 1. Product metafield: a list of single line text, or one item per line.
+  assign cm_cl_parts = block.settings.metafield_key | split: '.'
+  assign cm_cl_ns = cm_cl_parts[0] | strip
+  assign cm_cl_key = cm_cl_parts[1] | strip
+  if cm_cl_ns != blank and cm_cl_key != blank
+    assign cm_cl_mf = product.metafields[cm_cl_ns][cm_cl_key]
+    if cm_cl_mf != blank
+      if cm_cl_mf.type contains 'list.'
+        assign cm_cl_items = cm_cl_mf.value
+      elsif cm_cl_mf.value != blank
+        assign cm_cl_items = cm_cl_mf.value | newline_to_br | split: '<br />'
+      endif
+    endif
+  endif
+
+  # 2. Block textarea. An empty metafield list counts as no items.
+  if cm_cl_items == blank and block.settings.items != blank
+    assign cm_cl_items = block.settings.items | newline_to_br | split: '<br />'
+  endif
+-%}
+
+{%- capture cm_cl_rows -%}
+  {%- for cm_cl_item in cm_cl_items -%}
+    {%- assign cm_cl_text = cm_cl_item | strip -%}
+    {%- if cm_cl_text != blank -%}
+      <li class="cm-checklist__item">
+        {%- if block.settings.icon != 'none' -%}
+          <span class="cm-checklist__icon cm-icon" aria-hidden="true">
+            {%- render 'icon-accordion', icon: block.settings.icon -%}
+          </span>
+        {%- endif -%}
+        <span class="cm-checklist__text">{{ cm_cl_text }}</span>
+      </li>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- assign cm_cl_rows_trimmed = cm_cl_rows | strip -%}
+{%- if cm_cl_rows_trimmed != blank -%}
+  {%- capture cm_cl_surface -%}{%- render 'cm-surface-style', block: block -%}{%- endcapture -%}
+
+  <div
+    class="cm-checklist cm-surface cm-surface--{{ block.settings.layout }} quick-add-hidden"
+    style="{{ cm_cl_surface }} --cm-checklist-columns: {{ block.settings.columns | default: 1 }}; --cm-icon-size: {{ block.settings.icon_size | default: 18 }}px;"
+    {{ block.shopify_attributes }}
+  >
+    {%- if block.settings.heading != blank -%}
+      <h2 class="cm-block__heading{% if block.settings.uppercase_heading %} cm-block__heading--uppercase{% endif %}">
+        {{- block.settings.heading | escape -}}
+      </h2>
+    {%- endif -%}
+
+    <ul class="cm-checklist__list list-unstyled" role="list">
+      {{ cm_cl_rows }}
+    </ul>
+  </div>
+{%- endif -%}
