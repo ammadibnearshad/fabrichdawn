@@ -79,15 +79,6 @@
             "spec_metafields": "custom.fabric_type: Fabric Type\ncustom.sleeves: Sleeves\ncustom.neck: Neck\ncustom.fit: Fit\ncustom.fabric: Fabric\ncustom.occasion: Occasion"
           }
         },
-        "cm_note": {
-          "type": "cm_note",
-          "settings": {
-            "label": "Note:",
-            "text": "Actual product may vary from the picture due to the lights being used in photography",
-            "use_global": true,
-            "metafield_override": "custom.product_note"
-          }
-        },
         "cm_share": {
           "type": "cm_share",
           "settings": {
@@ -112,7 +103,6 @@
         "variant_picker",
         "buy_buttons",
         "description",
-        "cm_note",
         "cm_share"
       ],
       "settings": {
