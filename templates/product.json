@@ -97,7 +97,6 @@
             "icon": "warning",
             "layout": "box",
             "accent_color": "",
-            "tint": 8,
             "show_border": true,
             "border_opacity": 30
           }
@@ -114,7 +113,6 @@
             "icon_size": 22,
             "layout": "box",
             "accent_color": "",
-            "tint": 8,
             "show_border": true,
             "border_opacity": 30
           }
@@ -147,7 +145,6 @@
             "link_6": "",
             "layout": "box",
             "accent_color": "",
-            "tint": 3,
             "show_border": true,
             "border_opacity": 20
           }
@@ -164,7 +161,6 @@
             "icon_size": 18,
             "layout": "plain",
             "accent_color": "",
-            "tint": 0,
             "show_border": false,
             "border_opacity": 30
           }
@@ -179,14 +175,9 @@
         "variant_picker",
         "cm_callout",
         "buy_buttons",
-<<<<<<< HEAD
         "cm_trust_icons",
         "cm_checklist",
-        "description",
-        "cm_share"
-=======
         "description"
->>>>>>> 77486ab5baa4f6229e0518a827adc7e14412b577
       ],
       "settings": {
         "cm_style": true,
