@@ -27,8 +27,26 @@
             "show_payment_terms": false
           }
         },
+        "cm_checklist": {
+          "type": "cm_checklist",
+          "settings": {
+            "heading": "Why customers love it",
+            "uppercase_heading": true,
+            "items": "Premium Quality Wash & Wear Fabric\nSoft & Comfortable Feel\nBreathable for All-Day Comfort\nIdeal for Formal & Casual Wear\nApprox. 4 Meters Length | 56 Inches Width\nLong-Lasting Color & Finish",
+            "metafield_key": "custom.key_features",
+            "columns": "1",
+            "icon": "checkmark",
+            "icon_size": 18,
+            "layout": "plain",
+            "accent_color": "",
+            "tint": 0,
+            "show_border": false,
+            "border_opacity": 30
+          }
+        },
         "cm_stock_indicator": {
           "type": "cm_stock_indicator",
+          "disabled": true,
           "settings": {
             "display_mode": "low_only",
             "threshold": 20,
@@ -79,9 +97,19 @@
         },
         "variant_picker": {
           "type": "variant_picker",
+          "disabled": true,
           "settings": {
             "picker_type": "button",
             "swatch_shape": "square"
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true,
+            "show_pickup_availability": true,
+            "require_size_selection": false
           }
         },
         "cm_callout": {
@@ -99,15 +127,6 @@
             "tint": 8,
             "show_border": true,
             "border_opacity": 30
-          }
-        },
-        "buy_buttons": {
-          "type": "buy_buttons",
-          "settings": {
-            "show_dynamic_checkout": true,
-            "show_gift_card_recipient": true,
-            "show_pickup_availability": true,
-            "require_size_selection": false
           }
         },
         "cm_trust_icons": {
@@ -143,23 +162,6 @@
             "border_opacity": 20
           }
         },
-        "cm_checklist": {
-          "type": "cm_checklist",
-          "settings": {
-            "heading": "Why customers love it",
-            "uppercase_heading": true,
-            "items": "Premium Quality Wash & Wear Fabric\nSoft & Comfortable Feel\nBreathable for All-Day Comfort\nIdeal for Formal & Casual Wear\nApprox. 4 Meters Length | 56 Inches Width\nLong-Lasting Color & Finish",
-            "metafield_key": "custom.key_features",
-            "columns": "1",
-            "icon": "checkmark",
-            "icon_size": 18,
-            "layout": "plain",
-            "accent_color": "",
-            "tint": 0,
-            "show_border": false,
-            "border_opacity": 30
-          }
-        },
         "description": {
           "type": "description",
           "settings": {
@@ -174,14 +176,14 @@
       "block_order": [
         "title",
         "price",
+        "cm_checklist",
         "cm_stock_indicator",
         "cm_size_chart",
         "cm_sibling_swatches",
         "variant_picker",
-        "cm_callout",
         "buy_buttons",
+        "cm_callout",
         "cm_trust_icons",
-        "cm_checklist",
         "description"
       ],
       "settings": {
