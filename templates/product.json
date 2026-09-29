@@ -179,8 +179,14 @@
         "variant_picker",
         "cm_callout",
         "buy_buttons",
+<<<<<<< HEAD
+        "cm_trust_icons",
+        "cm_checklist",
         "description",
         "cm_share"
+=======
+        "description"
+>>>>>>> 77486ab5baa4f6229e0518a827adc7e14412b577
       ],
       "settings": {
         "cm_style": true,
