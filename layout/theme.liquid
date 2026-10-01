@@ -339,7 +339,27 @@
       tabindex="-1"
       data-template="{{ template.name }}"
     >
-      {{ content_for_layout }}
+      {%- comment -%}
+        SEO display-title test (backup theme only). On product pages, visible text nodes that
+        equal the original product title (>Title<) are swapped for the approved display title
+        from snippets/cm-display-title.liquid. JSON-LD, OG, <title>, alt/ARIA and data attributes
+        are quoted/attribute values, so they are NOT matched. Products with no approved mapping
+        render exactly as before.
+      {%- endcomment -%}
+      {%- if template.name == 'product' and product != blank -%}
+        {%- capture cm_dt_text -%}{% render 'cm-display-title', product: product %}{%- endcapture -%}
+        {%- assign cm_orig_text = product.title | escape -%}
+        {%- if cm_dt_text != cm_orig_text -%}
+          {%- capture cm_layout_html -%}{{ content_for_layout }}{%- endcapture -%}
+          {%- assign cm_from_text = '>' | append: cm_orig_text | append: '<' -%}
+          {%- assign cm_to_text = '>' | append: cm_dt_text | append: '<' -%}
+          {{ cm_layout_html | replace: cm_from_text, cm_to_text }}
+        {%- else -%}
+          {{ content_for_layout }}
+        {%- endif -%}
+      {%- else -%}
+        {{ content_for_layout }}
+      {%- endif -%}
     </main>
 
     {% sections 'footer-group' %}
