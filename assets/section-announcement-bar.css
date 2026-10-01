@@ -1,0 +1,113 @@
+/* Announcement typography — scoped to override base.css without editing it */
+.announcement-bar-section .announcement-bar__message {
+  font-size: 1.4rem;
+  font-weight: 300;
+  letter-spacing: 0;
+  line-height: normal;
+  min-height: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .announcement-bar-section .announcement-bar__message {
+    font-size: 1.3rem;
+  }
+}
+
+/* Optional arrow-less slider (only applied when auto-rotate is on) */
+.announcement-bar-slider--no-arrows .slider-button {
+  display: none;
+}
+
+/* Contact / social icon cluster — announcement / utility bar */
+
+/* Below 990px the utility bar is a single 'announcements' column.
+   Add a right-hand column so the icons can sit flush right. */
+@media screen and (max-width: 989px) {
+  .utility-bar .utility-bar__grid--contact {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 'announcements language-currency';
+    align-items: center;
+  }
+}
+
+.utility-bar__grid--contact .localization-wrapper {
+  align-self: stretch;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.utility-bar__contact {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 0.4rem;
+  padding-left: 0.8rem;
+  border-left: 0.1rem solid rgba(var(--color-foreground), 0.15);
+}
+
+.utility-bar__contact-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.2rem;
+  min-height: 3.2rem;
+  padding: 0.4rem;
+  color: rgb(var(--color-foreground));
+  text-decoration: none;
+  transition: opacity var(--duration-short) ease;
+}
+
+.utility-bar__contact-link:hover {
+  opacity: 0.7;
+}
+
+.utility-bar__contact-link:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.6);
+  outline-offset: -0.3rem;
+}
+
+.utility-bar__contact-link .svg-wrapper {
+  display: inline-flex;
+}
+
+.utility-bar__contact-link .icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  flex-shrink: 0;
+}
+
+/* The WhatsApp glyph fills its viewBox edge to edge, unlike Dawn's icons
+   which sit inside ~10% padding. Scale it down so all three match optically. */
+.utility-bar__contact-link .icon-whatsapp {
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+@media screen and (min-width: 990px) {
+  .utility-bar__contact {
+    gap: 0.2rem;
+    padding-left: 1.2rem;
+  }
+
+  .utility-bar__contact-link {
+    min-width: 0;
+    min-height: 0;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .utility-bar__contact-link .icon {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+
+  .utility-bar__contact-link .icon-whatsapp {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .utility-bar__contact-link {
+    transition: none;
+  }
+}

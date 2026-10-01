@@ -12,16 +12,43 @@
   if section.blocks.size > 0
     assign announcement_bar = true
   endif
+
+  assign wa_digits = section.settings.whatsapp_number | strip | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '.' | remove: '+'
+  if section.settings.enable_whatsapp and wa_digits != blank
+    assign show_whatsapp = true
+  endif
+
+  assign ig_link = section.settings.instagram_link | default: settings.social_instagram_link
+  if section.settings.enable_instagram and ig_link != blank
+    assign show_instagram = true
+  endif
+
+  assign fb_link = section.settings.facebook_link | default: settings.social_facebook_link
+  if section.settings.enable_facebook and fb_link != blank
+    assign show_facebook = true
+  endif
+
+  assign utility_contact = false
+  if show_whatsapp or show_instagram or show_facebook
+    assign utility_contact = true
+  endif
+
+  assign utility_right = false
+  if language_country_selector or utility_contact
+    assign utility_right = true
+  endif
 -%}
 
 {% if social_icons %}
   {{ 'component-list-social.css' | asset_url | stylesheet_tag }}
 {% endif %}
 
+{{ 'section-announcement-bar.css' | asset_url | stylesheet_tag }}
+
 <div
   class="utility-bar color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator and section.blocks.size > 0 %} utility-bar--bottom-border{% elsif section.settings.show_line_separator and section.settings.show_social and social_icons%} utility-bar--bottom-border-social-only{% endif %}{% if section.settings.enable_country_selector or section.settings.enable_language_selector %} header-localization{% endif %}"
 >
-  <div class="page-width utility-bar__grid{% if announcement_bar and language_country_selector or section.settings.show_social and social_icons %} utility-bar__grid--3-col{% elsif language_country_selector or section.settings.show_social and social_icons %} utility-bar__grid--2-col{% endif %}">
+  <div class="page-width utility-bar__grid{% if announcement_bar and utility_right or section.settings.show_social and social_icons %} utility-bar__grid--3-col{% elsif utility_right or section.settings.show_social and social_icons %} utility-bar__grid--2-col{% endif %}{% if utility_contact %} utility-bar__grid--contact{% endif %}">
     {%- if section.settings.show_social and social_icons -%}
       {%- render 'social-icons' -%}
     {%- endif -%}
@@ -57,7 +84,7 @@
         aria-roledescription="{{ 'sections.announcements.carousel' | t }}"
         aria-label="{{ 'sections.announcements.announcement_bar' | t }}"
       >
-        <div class="announcement-bar-slider slider-buttons">
+        <div class="announcement-bar-slider slider-buttons{% if section.settings.auto_rotate and section.settings.show_arrows == false %} announcement-bar-slider--no-arrows{% endif %}">
           <button
             type="button"
             class="slider-button slider-button--prev"
@@ -158,6 +185,54 @@
           {%- endform -%}
         </localization-form>
       {%- endif -%}
+
+      {%- if utility_contact -%}
+        <div class="utility-bar__contact">
+          {%- if show_whatsapp -%}
+            {%- liquid
+              assign wa_label = section.settings.whatsapp_text | default: 'Chat on WhatsApp'
+              assign wa_href = 'https://wa.me/' | append: wa_digits
+              if section.settings.whatsapp_message != blank
+                assign wa_message = section.settings.whatsapp_message | url_encode
+                assign wa_href = wa_href | append: '?text=' | append: wa_message
+              endif
+            -%}
+            <a
+              class="utility-bar__contact-link"
+              href="{{ wa_href }}"
+              target="_blank"
+              rel="noopener"
+            >
+              <span class="svg-wrapper" aria-hidden="true">{{- 'icon-whatsapp.svg' | inline_asset_content -}}</span>
+              <span class="visually-hidden">{{ wa_label | escape }}</span>
+            </a>
+          {%- endif -%}
+
+          {%- if show_instagram -%}
+            <a
+              class="utility-bar__contact-link"
+              href="{{ ig_link }}"
+              target="_blank"
+              rel="noopener"
+            >
+              <span class="svg-wrapper" aria-hidden="true">{{- 'icon-instagram.svg' | inline_asset_content -}}</span>
+              <span class="visually-hidden">{{ 'general.social.links.instagram' | t }}</span>
+            </a>
+          {%- endif -%}
+
+          {%- if show_facebook -%}
+            <a
+              class="utility-bar__contact-link"
+              href="{{ fb_link }}"
+              target="_blank"
+              rel="noopener"
+            >
+              <span class="svg-wrapper" aria-hidden="true">{{- 'icon-facebook.svg' | inline_asset_content -}}</span>
+              <span class="visually-hidden">{{ 'general.social.links.facebook' | t }}</span>
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
     </div>
   </div>
 </div>
@@ -186,7 +261,14 @@
       "unit": "s",
       "label": "t:sections.announcement-bar.settings.change_slides_speed.label",
       "default": 5
-    },    
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "default": true,
+      "label": "Show navigation arrows",
+      "info": "Arrows only hide when auto-rotate is on, so shoppers can always reach every announcement."
+    },
     {
       "type": "color_scheme",
       "id": "color_scheme",
@@ -227,6 +309,60 @@
       "default": false,
       "label": "t:sections.announcement-bar.settings.enable_language_selector.label",
       "info": "t:sections.announcement-bar.settings.enable_language_selector.info"
+    },
+    {
+      "type": "header",
+      "content": "Contact icons",
+      "info": "Icon-only links pinned to the far right of the bar. Keep \"Show social icons\" above turned off to avoid duplicating Facebook and Instagram."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_whatsapp",
+      "default": false,
+      "label": "Show WhatsApp"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_number",
+      "label": "WhatsApp number",
+      "info": "Include the country code. Spaces and symbols are stripped automatically. e.g. +92 300 1234567"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_message",
+      "label": "Pre-filled message",
+      "info": "Optional. Pre-fills the chat box when the customer opens WhatsApp."
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_text",
+      "label": "WhatsApp screen reader label",
+      "default": "Chat on WhatsApp",
+      "info": "Not shown on screen. Read out by assistive tech."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_instagram",
+      "default": false,
+      "label": "Show Instagram"
+    },
+    {
+      "type": "url",
+      "id": "instagram_link",
+      "label": "Instagram link",
+      "info": "Leave blank to use the store's Instagram link from Theme settings > Social media."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_facebook",
+      "default": false,
+      "label": "Show Facebook"
+    },
+    {
+      "type": "url",
+      "id": "facebook_link",
+      "label": "Facebook link",
+      "info": "Leave blank to use the store's Facebook link from Theme settings > Social media."
     }
   ],
   "blocks": [
