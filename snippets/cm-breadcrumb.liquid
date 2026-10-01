@@ -12,6 +12,8 @@
   - cm_uppercase_last: {Boolean} Uppercase the last crumb. Default: false (optional).
   - cm_emit_jsonld: {Boolean} Output BreadcrumbList JSON-LD. Default: true (optional).
   - cm_class: {String} Extra class on the <nav>. (optional)
+  - cm_current_schema: {String} Text for the last crumb inside BreadcrumbList JSON-LD only.
+      Defaults to cm_current. Lets visible text differ from structured data. (optional)
 
   Usage:
   {% render 'cm-breadcrumb',
@@ -23,6 +25,7 @@
 
 {%- liquid
   assign cm_bc_current = cm_current | default: page_title
+  assign cm_bc_schema_current = cm_current_schema | default: cm_bc_current
   assign cm_bc_separator = cm_separator | default: '›'
   assign cm_bc_home = 'sections.cm_collection.home' | t
 
@@ -80,13 +83,13 @@
             {
               "@type": "ListItem",
               "position": 3,
-              "name": {{ cm_bc_current | json }}
+              "name": {{ cm_bc_schema_current | json }}
             }
           {%- else -%}
             ,{
               "@type": "ListItem",
               "position": 2,
-              "name": {{ cm_bc_current | json }}
+              "name": {{ cm_bc_schema_current | json }}
             }
           {%- endif -%}
         ]
