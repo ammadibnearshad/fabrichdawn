@@ -115,6 +115,12 @@
   },
   "products": {
     "product": {
+      "bundle": {
+        "legend": "Choose a bundle",
+        "save_percent": "Save {{ percent }}%",
+        "save_amount": "Save {{ amount }}",
+        "selected": "{{ title }} selected, total {{ price }}"
+      },
       "cm": {
         "colors_count": "{{ count }} Colors",
         "colors_count_one": "{{ count }} Color",

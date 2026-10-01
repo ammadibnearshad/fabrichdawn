@@ -1,0 +1,270 @@
+{% comment %}
+  bundle-offers: quantity-break tier selector for the product form.
+
+  Each tier is a radio named "quantity" bound to the product form, so the checked
+  tier's quantity is what Add to Cart / Buy it now submit (works without JS).
+  Prices are rendered here for first paint; assets/bundle-offers.js recalculates
+  them on variant change. Discounts themselves must be set up in Shopify admin.
+
+  Accepts:
+  - block: {Object} The 'bundle_offers' block
+  - product: {Object} Product object
+  - section: {Object} The parent section (tiers are its 'bundle_tier' blocks)
+  - product_form_id: {String} ID of the product form
+
+  Usage:
+  {% render 'bundle-offers', block: block, product: product, section: section, product_form_id: product_form_id %}
+{% endcomment %}
+
+{%- liquid
+  assign bs = block.settings
+  assign tiers = section.blocks | where: 'type', 'bundle_tier'
+  assign variant = product.selected_or_first_available_variant
+
+  assign money_format = shop.money_format
+  if settings.currency_code_enabled
+    assign money_format = shop.money_with_currency_format
+  endif
+
+  assign unit_price = variant.price
+  assign compare_unit_price = variant.price
+  if bs.use_compare_at and variant.compare_at_price > variant.price
+    assign compare_unit_price = variant.compare_at_price
+  endif
+
+  assign selected_index = 0
+  for tier in tiers
+    if tier.settings.selected_default
+      assign selected_index = forloop.index0
+      break
+    endif
+  endfor
+
+  assign heading_id = 'BundleOffersHeading-' | append: block.id
+-%}
+
+{%- if tiers.size == 0 -%}
+  {%- if request.design_mode -%}
+    <p class="bundle-offers__empty" {{ block.shopify_attributes }}>
+      Bundle offers: add "Bundle tier" blocks to this section. They will appear here in the order they are listed.
+    </p>
+  {%- endif -%}
+{%- else -%}
+  {{ 'bundle-offers.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'bundle-offers.js' | asset_url }}" defer="defer"></script>
+
+  <bundle-offers
+    class="bundle-offers bundle-offers--{{ bs.layout }} bundle-offers--mobile-{{ bs.mobile_layout }}{% if bs.use_color_scheme %} bundle-offers--scheme color-{{ bs.color_scheme }} gradient{% endif %}"
+    style="
+      --bo-columns: {{ bs.columns_desktop }};
+      --bo-radius: {{ bs.card_radius }}px;
+      --bo-padding: {{ bs.card_padding | divided_by: 10.0 }}rem;
+      --bo-gap: {{ bs.card_gap | divided_by: 10.0 }}rem;
+      --bo-border-width: {{ bs.border_width }}px;
+      --bo-thumb: {{ bs.thumbnail_size | divided_by: 10.0 }}rem;
+      --bo-align: {{ bs.heading_alignment }};
+      {%- if bs.card_bg != blank %}--bo-card-bg: {{ bs.card_bg }};{% endif -%}
+      {%- if bs.card_border != blank %}--bo-card-border: {{ bs.card_border }};{% endif -%}
+      {%- if bs.selected_bg != blank %}--bo-selected-bg: {{ bs.selected_bg }};{% endif -%}
+      {%- if bs.selected_border != blank %}--bo-selected-border: {{ bs.selected_border }};{% endif -%}
+      {%- if bs.price_color != blank %}--bo-price: {{ bs.price_color }};{% endif -%}
+      {%- if bs.compare_color != blank %}--bo-compare: {{ bs.compare_color }};{% endif -%}
+      {%- if bs.pill_bg != blank %}--bo-pill-bg: {{ bs.pill_bg }};{% endif -%}
+      {%- if bs.pill_text != blank %}--bo-pill-text: {{ bs.pill_text }};{% endif -%}
+    "
+    {{ block.shopify_attributes }}
+  >
+    <fieldset class="bundle-offers__fieldset">
+      <legend class="bundle-offers__legend{% if bs.heading == blank %} visually-hidden{% endif %}" id="{{ heading_id }}">
+        <span class="bundle-offers__heading {{ bs.heading_size }}{% if bs.show_heading_lines %} bundle-offers__heading--lines{% endif %} bundle-offers__heading--{{ bs.heading_alignment }}">
+          {%- if bs.heading != blank -%}
+            {{- bs.heading | escape -}}
+          {%- else -%}
+            {{- 'products.product.bundle.legend' | t -}}
+          {%- endif -%}
+        </span>
+      </legend>
+
+      {%- if bs.subheading != blank -%}
+        <p class="bundle-offers__subheading">{{ bs.subheading }}</p>
+      {%- endif -%}
+
+      <div class="bundle-offers__list">
+        {%- for tier in tiers -%}
+          {%- liquid
+            assign ts = tier.settings
+            assign qty = ts.quantity | default: 1 | round | at_least: 1
+            assign value = ts.discount_value | default: 0 | at_least: 0
+            assign fixed_cents = value | times: 100 | round
+
+            assign total = unit_price | times: qty
+            case ts.discount_type
+              when 'percent'
+                assign pct_left = 100 | minus: value | at_least: 0
+                assign total = total | times: pct_left | divided_by: 100.0 | round
+              when 'fixed_total'
+                assign total = total | minus: fixed_cents
+              when 'fixed_item'
+                assign total = unit_price | minus: fixed_cents | at_least: 0 | times: qty
+              when 'bundle_price'
+                assign total = fixed_cents
+            endcase
+            assign total = total | at_least: 0
+
+            assign compare_total = compare_unit_price | times: qty
+            assign saved = compare_total | minus: total | at_least: 0
+            assign percent = 0
+            if compare_total > 0
+              assign percent = saved | times: 100.0 | divided_by: compare_total | round
+            endif
+
+            if settings.currency_code_enabled
+              assign total_money = total | money_with_currency
+              assign compare_money = compare_total | money_with_currency
+              assign saved_money = saved | money_with_currency
+            else
+              assign total_money = total | money
+              assign compare_money = compare_total | money
+              assign saved_money = saved | money
+            endif
+
+            assign title = ts.title | replace: '[quantity]', qty | replace: '[amount]', saved_money | replace: '[percent]', percent
+            assign subtitle = ts.subtitle | replace: '[quantity]', qty | replace: '[amount]', saved_money | replace: '[percent]', percent
+
+            if bs.savings_format == 'amount'
+              assign savings_text = 'products.product.bundle.save_amount' | t: amount: saved_money
+            else
+              assign savings_text = 'products.product.bundle.save_percent' | t: percent: percent
+            endif
+
+            assign thumb = ts.image
+            assign thumb_is_variant = false
+            if thumb == blank
+              assign thumb = variant.featured_image | default: product.featured_image
+              assign thumb_is_variant = true
+            endif
+            assign thumb_px = bs.thumbnail_size | times: 2
+            assign thumb_class = 'bundle-tier__img'
+            if thumb_is_variant
+              assign thumb_class = 'bundle-tier__img bundle-tier__img--variant'
+            endif
+          -%}
+          <label
+            class="bundle-tier{% if ts.badge_text != blank %} bundle-tier--badge-{{ ts.badge_style }}{% endif %}{% if ts.hide_on != 'none' %} bundle-tier--hide-{{ ts.hide_on }}{% endif %}"
+            data-block-id="{{ tier.id }}"
+            {%- if ts.badge_bg != blank or ts.badge_text_color != blank %}
+              style="{% if ts.badge_bg != blank %}--bt-badge-bg: {{ ts.badge_bg }};{% endif %}{% if ts.badge_text_color != blank %}--bt-badge-text: {{ ts.badge_text_color }};{% endif %}"
+            {%- endif %}
+            {{ tier.shopify_attributes }}
+          >
+            <input
+              type="radio"
+              class="bundle-tier__input"
+              name="quantity"
+              value="{{ qty }}"
+              form="{{ product_form_id }}"
+              {% if forloop.index0 == selected_index %}
+                checked
+              {% endif %}
+            >
+
+            {%- if ts.badge_text != blank and ts.badge_style != 'pill' -%}
+              <span class="bundle-tier__badge bundle-tier__badge--{{ ts.badge_style }}">{{ ts.badge_text | escape }}</span>
+            {%- endif -%}
+
+            {%- if bs.show_radio -%}
+              <span class="bundle-tier__radio" aria-hidden="true"></span>
+            {%- endif -%}
+
+            {%- if bs.show_thumbnails and thumb != blank -%}
+              <span class="bundle-tier__thumb">
+                {{
+                  thumb
+                  | image_url: width: thumb_px
+                  | image_tag:
+                    width: bs.thumbnail_size,
+                    height: bs.thumbnail_size,
+                    loading: 'lazy',
+                    alt: '',
+                    class: thumb_class
+                }}
+                {%- if qty > 1 -%}
+                  <span class="bundle-tier__thumb-qty" aria-hidden="true">&times;{{ qty }}</span>
+                {%- endif -%}
+              </span>
+            {%- endif -%}
+
+            <span class="bundle-tier__body">
+              <span class="bundle-tier__title-row">
+                <span class="bundle-tier__title" data-title>{{ title | escape }}</span>
+                {%- if ts.badge_text != blank and ts.badge_style == 'pill' -%}
+                  <span class="bundle-tier__badge bundle-tier__badge--pill">{{ ts.badge_text | escape }}</span>
+                {%- endif -%}
+                {%- if bs.show_savings -%}
+                  <span class="bundle-tier__savings" data-savings{% if saved == 0 %} hidden{% endif %}>
+                    {{- savings_text -}}
+                  </span>
+                {%- endif -%}
+              </span>
+              {%- if ts.subtitle != blank -%}
+                <span class="bundle-tier__subtitle" data-subtitle>{{ subtitle | escape }}</span>
+              {%- endif -%}
+              {%- if ts.perks_text != blank -%}
+                <span class="bundle-tier__perks">
+                  {%- if ts.perks_icon != 'none' -%}
+                    <span class="svg-wrapper" aria-hidden="true">
+                      {{- 'icon-' | append: ts.perks_icon | append: '.svg' | inline_asset_content -}}
+                    </span>
+                  {%- endif -%}
+                  {{ ts.perks_text | escape }}
+                </span>
+              {%- endif -%}
+            </span>
+
+            <span class="bundle-tier__prices">
+              <span class="bundle-tier__price" data-price>{{ total_money }}</span>
+              <s class="bundle-tier__compare" data-compare{% if compare_total <= total %} hidden{% endif %}>
+                <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+                <span data-compare-value>{{ compare_money }}</span>
+              </s>
+            </span>
+          </label>
+        {%- endfor -%}
+      </div>
+    </fieldset>
+
+    {%- if bs.footer_note != blank -%}
+      <p class="bundle-offers__note">{{ bs.footer_note | escape }}</p>
+    {%- endif -%}
+
+    <p class="visually-hidden" aria-live="polite" data-bundle-live></p>
+
+    <script type="application/json" data-bundle-config>
+      {
+        "format": {{ money_format | json }},
+        "compareAt": {{ bs.use_compare_at | json }},
+        "savingsFormat": {{ bs.savings_format | json }},
+        "variant": {
+          "price": {{ variant.price | json }},
+          "compare_at_price": {{ variant.compare_at_price | default: 0 | json }}
+        },
+        "tiers": [
+          {%- for tier in tiers -%}
+            {
+              "q": {{ tier.settings.quantity | default: 1 | round | at_least: 1 }},
+              "type": {{ tier.settings.discount_type | json }},
+              "value": {{ tier.settings.discount_value | default: 0 | at_least: 0 }},
+              "title": {{ tier.settings.title | json }},
+              "subtitle": {{ tier.settings.subtitle | json }}
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ],
+        "strings": {
+          "savePercent": {{ 'products.product.bundle.save_percent' | t: percent: '[percent]' | json }},
+          "saveAmount": {{ 'products.product.bundle.save_amount' | t: amount: '[amount]' | json }},
+          "selected": {{ 'products.product.bundle.selected' | t: title: '[title]', price: '[price]' | json }}
+        }
+      }
+    </script>
+  </bundle-offers>
+{%- endif -%}

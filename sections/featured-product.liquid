@@ -96,6 +96,15 @@
             data-url="{{ product.url }}"
           >
             {%- assign product_form_id = 'product-form-' | append: section.id -%}
+            {%- liquid
+              # bundle-offers: tiers replace Dawn's quantity selector when the block has tiers
+              assign bundle_offers_count = section.blocks | where: 'type', 'bundle_offers' | size
+              assign bundle_tier_count = section.blocks | where: 'type', 'bundle_tier' | size
+              assign bundle_offers_active = false
+              if bundle_offers_count > 0 and bundle_tier_count > 0
+                assign bundle_offers_active = true
+              endif
+            -%}
 
             {%- for block in section.blocks -%}
               {%- case block.type -%}
@@ -164,6 +173,7 @@
                     {{- product.selected_or_first_available_variant.sku -}}
                   </p>
                 {%- when 'quantity_selector' -%}
+                  {%- unless bundle_offers_active -%}{%- comment -%} bundle-offers {%- endcomment -%}
                   <div
                     id="Quantity-Form-{{ section.id }}"
                     class="product-form__input product-form__quantity{% if settings.inputs_shadow_vertical_offset != 0 and settings.inputs_shadow_vertical_offset < 0 %} product-form__quantity-top{% endif %}"
@@ -391,6 +401,16 @@
                       </volume-pricing>
                     {%- endif -%}
                   </div>
+                  {%- endunless -%}{%- comment -%} bundle-offers {%- endcomment -%}
+                {%- comment -%} bundle-offers: placement block renders all tiers; tier blocks render nothing here {%- endcomment -%}
+                {%- when 'bundle_offers' -%}
+                  {%- render 'bundle-offers',
+                    block: block,
+                    product: product,
+                    section: section,
+                    product_form_id: product_form_id
+                  -%}
+                {%- when 'bundle_tier' -%}
                 {%- when 'share' -%}
                   {% liquid
                     assign share_url = product.selected_variant.url | default: product.url | prepend: request.origin
@@ -623,6 +643,473 @@
       "type": "quantity_selector",
       "name": "t:sections.featured-product.blocks.quantity_selector.name",
       "limit": 1
+    },
+    {
+      "type": "bundle_offers",
+      "name": "Bundle offers",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Shows this section's \"Bundle tier\" blocks as the quantity selector (Dawn's Quantity selector block is hidden while tiers exist). Discounts are not created here: add an automatic \"Amount off products\" discount (or code) per tier in Shopify admin with a minimum quantity matching the tier."
+        },
+        {
+          "type": "paragraph",
+          "content": "Example: Buy 1 (no discount) / Buy 2, Percentage off 10, badge \"Most Popular\", selected by default / Buy 3, Percentage off 20, badge \"Best Value\", perk \"+ Free shipping\"."
+        },
+        {
+          "type": "header",
+          "content": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Bundle & save"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_heading_lines",
+          "label": "Show decorative lines",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "heading_alignment",
+          "label": "Alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "default": "h5",
+          "options": [
+            {
+              "value": "h5",
+              "label": "Extra small"
+            },
+            {
+              "value": "h4",
+              "label": "Small"
+            },
+            {
+              "value": "h3",
+              "label": "Medium"
+            },
+            {
+              "value": "h2",
+              "label": "Large"
+            }
+          ]
+        },
+        {
+          "type": "inline_richtext",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "header",
+          "content": "Layout"
+        },
+        {
+          "type": "select",
+          "id": "layout",
+          "label": "Layout",
+          "default": "list",
+          "options": [
+            {
+              "value": "list",
+              "label": "Vertical list"
+            },
+            {
+              "value": "grid",
+              "label": "Horizontal grid"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "columns_desktop",
+          "label": "Grid columns on desktop",
+          "min": 2,
+          "max": 4,
+          "step": 1,
+          "default": 3
+        },
+        {
+          "type": "select",
+          "id": "mobile_layout",
+          "label": "Grid on mobile",
+          "default": "stack",
+          "options": [
+            {
+              "value": "stack",
+              "label": "Stack"
+            },
+            {
+              "value": "swipe",
+              "label": "Swipe"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "card_radius",
+          "label": "Card corner radius",
+          "min": 0,
+          "max": 24,
+          "step": 2,
+          "unit": "px",
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "card_padding",
+          "label": "Card padding",
+          "min": 8,
+          "max": 32,
+          "step": 4,
+          "unit": "px",
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "card_gap",
+          "label": "Gap between cards",
+          "min": 0,
+          "max": 24,
+          "step": 2,
+          "unit": "px",
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "border_width",
+          "label": "Border width",
+          "min": 1,
+          "max": 4,
+          "step": 1,
+          "unit": "px",
+          "default": 1
+        },
+        {
+          "type": "header",
+          "content": "Colors"
+        },
+        {
+          "type": "checkbox",
+          "id": "use_color_scheme",
+          "label": "Use own color scheme",
+          "info": "Off = inherit the section's color scheme",
+          "default": false
+        },
+        {
+          "type": "color_scheme",
+          "id": "color_scheme",
+          "label": "Color scheme",
+          "default": "scheme-1"
+        },
+        {
+          "type": "paragraph",
+          "content": "Leave colors blank to use the color scheme."
+        },
+        {
+          "type": "color",
+          "id": "card_bg",
+          "label": "Card background"
+        },
+        {
+          "type": "color",
+          "id": "card_border",
+          "label": "Card border"
+        },
+        {
+          "type": "color",
+          "id": "selected_bg",
+          "label": "Selected card background"
+        },
+        {
+          "type": "color",
+          "id": "selected_border",
+          "label": "Selected card border"
+        },
+        {
+          "type": "color",
+          "id": "price_color",
+          "label": "Price"
+        },
+        {
+          "type": "color",
+          "id": "compare_color",
+          "label": "Compare-at price"
+        },
+        {
+          "type": "color",
+          "id": "pill_bg",
+          "label": "Savings pill background"
+        },
+        {
+          "type": "color",
+          "id": "pill_text",
+          "label": "Savings pill text"
+        },
+        {
+          "type": "header",
+          "content": "Card content"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_radio",
+          "label": "Show radio indicator",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_thumbnails",
+          "label": "Show thumbnails",
+          "info": "Uses the tier image, otherwise the selected variant image",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "thumbnail_size",
+          "label": "Thumbnail size",
+          "min": 40,
+          "max": 96,
+          "step": 4,
+          "unit": "px",
+          "default": 56
+        },
+        {
+          "type": "checkbox",
+          "id": "show_savings",
+          "label": "Show savings pill",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "savings_format",
+          "label": "Savings format",
+          "default": "percent",
+          "options": [
+            {
+              "value": "percent",
+              "label": "Percent"
+            },
+            {
+              "value": "amount",
+              "label": "Amount"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "use_compare_at",
+          "label": "Use compare-at price as reference",
+          "info": "Crossed-out price and savings use the variant's compare-at price when it is higher",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "footer_note",
+          "label": "Footer note",
+          "default": "Discount applied at checkout"
+        }
+      ]
+    },
+    {
+      "type": "bundle_tier",
+      "name": "Bundle tier",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Shown inside the \"Bundle offers\" block, in the order listed here. Renders nothing without that block."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "info": "Use [quantity], [amount], [percent]",
+          "default": "Buy [quantity]"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "info": "Use [quantity], [amount], [percent]"
+        },
+        {
+          "type": "number",
+          "id": "quantity",
+          "label": "Quantity",
+          "default": 1
+        },
+        {
+          "type": "select",
+          "id": "discount_type",
+          "label": "Discount type",
+          "info": "Display only; must match the discount set up in Shopify admin",
+          "default": "none",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "percent",
+              "label": "Percentage off"
+            },
+            {
+              "value": "fixed_total",
+              "label": "Fixed amount off total"
+            },
+            {
+              "value": "fixed_item",
+              "label": "Fixed amount off per item"
+            },
+            {
+              "value": "bundle_price",
+              "label": "Fixed bundle price"
+            }
+          ]
+        },
+        {
+          "type": "number",
+          "id": "discount_value",
+          "label": "Discount value",
+          "info": "Percent, or amount in store currency (10 = 10% or 10.00)",
+          "default": 0
+        },
+        {
+          "type": "checkbox",
+          "id": "selected_default",
+          "label": "Selected by default",
+          "info": "If several tiers are checked, the first wins",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Badge"
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge text"
+        },
+        {
+          "type": "select",
+          "id": "badge_style",
+          "label": "Badge style",
+          "default": "corner",
+          "options": [
+            {
+              "value": "corner",
+              "label": "Corner tag"
+            },
+            {
+              "value": "ribbon",
+              "label": "Top ribbon"
+            },
+            {
+              "value": "pill",
+              "label": "Inline pill"
+            }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "badge_bg",
+          "label": "Badge background"
+        },
+        {
+          "type": "color",
+          "id": "badge_text_color",
+          "label": "Badge text"
+        },
+        {
+          "type": "header",
+          "content": "Extras"
+        },
+        {
+          "type": "text",
+          "id": "perks_text",
+          "label": "Perks text",
+          "info": "e.g. + Free shipping"
+        },
+        {
+          "type": "select",
+          "id": "perks_icon",
+          "label": "Perks icon",
+          "default": "none",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "box",
+              "label": "Box"
+            },
+            {
+              "value": "check-mark",
+              "label": "Check mark"
+            },
+            {
+              "value": "star",
+              "label": "Star"
+            },
+            {
+              "value": "heart",
+              "label": "Heart"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Thumbnail image",
+          "info": "Optional; defaults to the variant image"
+        },
+        {
+          "type": "select",
+          "id": "hide_on",
+          "label": "Hide this tier on",
+          "default": "none",
+          "options": [
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "mobile",
+              "label": "Mobile"
+            },
+            {
+              "value": "desktop",
+              "label": "Desktop"
+            }
+          ]
+        }
+      ]
     },
     {
       "type": "variant_picker",
