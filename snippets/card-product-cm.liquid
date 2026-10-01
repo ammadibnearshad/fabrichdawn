@@ -250,7 +250,7 @@
               class="cm-card__title-link full-unstyled-link"
               aria-labelledby="CardLink-{{ section_id }}-{{ card_product.id }}{% if cm_show_soldout or cm_show_sale_badge %} Badge-{{ section_id }}-{{ card_product.id }}{% endif %}"
             >
-              {{ card_product.title | escape }}
+              {% render 'cm-display-title', product: card_product %}
             </a>
           </h3>
           <div class="cm-card__information card-information">
@@ -593,7 +593,7 @@
                         </div>
                         <div class="quick-add-modal__content-info--bulk-details large-up-hide">
                           <a href="{{ card_product.url }}" class="full-unstyled-link">
-                            <h3>{{ card_product.title | escape }}</h3>
+                            <h3>{% render 'cm-display-title', product: card_product %}</h3>
                           </a>
                           {% render 'price', product: card_product, price_class: '', show_compare_at_price: true %}
                           {%- if card_product.quantity_price_breaks_configured? -%}
@@ -607,7 +607,7 @@
                         <div class="quick-add-modal__content-info--bulk-details small-hide medium-hide">
                           <a href="{{ card_product.url }}" class="full-unstyled-link">
                             <h3 class="h2">
-                              {{ card_product.title | escape }}
+                              {% render 'cm-display-title', product: card_product %}
                             </h3>
                           </a>
                           {% render 'price', product: card_product, price_class: '', show_compare_at_price: true %}
