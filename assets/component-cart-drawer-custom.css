@@ -404,7 +404,7 @@ cart-drawer.is-empty .dcart-timer {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin: 0;
+  margin-bottom: 10px;
 }
 
 .cart-drawer .drawer__footer .totals__total,
