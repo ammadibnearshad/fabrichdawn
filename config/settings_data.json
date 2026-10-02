@@ -128,6 +128,7 @@
     "cart_drawer_collection": "",
     "cart_color_scheme": "scheme-1",
     "cart_upsell_fallback_collection": "cotton",
+    "free_shipping_threshold": 5000,
     "customer_account_menu": "customer-account-main-menu",
     "cm_card_image_ratio": "portrait_2_3",
     "cm_card_hover_image": true,
