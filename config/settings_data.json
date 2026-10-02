@@ -127,6 +127,7 @@
     "show_cart_note": false,
     "cart_drawer_collection": "",
     "cart_color_scheme": "scheme-1",
+    "cart_upsell_fallback_collection": "cotton",
     "customer_account_menu": "customer-account-main-menu",
     "cm_card_image_ratio": "portrait_2_3",
     "cm_card_hover_image": true,
