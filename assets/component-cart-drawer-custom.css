@@ -16,6 +16,15 @@
   border: 0;
 }
 
+/* Mobile: the drawer wrapper is a content-sized flex item, so give it the full
+   width explicitly. Otherwise wide content (the upsell row) stretches the whole
+   drawer past the screen. */
+@media screen and (max-width: 749px) {
+  .drawer > .cart-drawer {
+    width: 100%;
+  }
+}
+
 @media screen and (min-width: 750px) {
   .cart-drawer .drawer__inner {
     --dcart-img: 9.2rem;
