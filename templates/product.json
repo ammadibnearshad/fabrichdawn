@@ -200,6 +200,42 @@
             "require_size_selection": false
           }
         },
+        "add_on_products_jLrhAR": {
+          "type": "add_on_products",
+          "settings": {
+            "heading": "Complete the look",
+            "subheading": "",
+            "heading_size": "h5",
+            "heading_alignment": "left",
+            "products": [],
+            "metafield_namespace": "custom",
+            "metafield_key": "add_on_products",
+            "fallback_collection": "",
+            "max_products": 4,
+            "show_sold_out": false,
+            "layout": "cards",
+            "cards_desktop": 2,
+            "cards_mobile": "1.6",
+            "image_ratio": "square",
+            "show_hover_image": false,
+            "card_radius": 8,
+            "card_padding": 10,
+            "card_gap": 12,
+            "add_mode": "checkbox",
+            "preselect": false,
+            "quantity_mode": "one",
+            "picker_style": "separate",
+            "sync_option": true,
+            "show_total": true,
+            "add_property": true,
+            "card_bg": "",
+            "card_border": "",
+            "selected_border": "",
+            "image_bg": "",
+            "checkout_behavior": "hide",
+            "checkout_note": "Use Add to cart to include your extras"
+          }
+        },
         "cm_callout": {
           "type": "cm_callout",
           "settings": {
@@ -274,6 +310,7 @@
         "bundle_tier_nLCnfB",
         "bundle_tier_eftxxT",
         "buy_buttons",
+        "add_on_products_jLrhAR",
         "cm_callout",
         "cm_trust_icons",
         "description"
