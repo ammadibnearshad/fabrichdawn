@@ -31,16 +31,17 @@
         "heading",
         "text"
       ],
+      "disabled": true,
       "settings": {
         "image_overlay_opacity": 0,
         "image_height": "large",
-        "desktop_content_position": "middle-center",
-        "show_text_box": true,
-        "desktop_content_alignment": "center",
-        "color_scheme": "scheme-1",
         "image_behavior": "none",
-        "mobile_content_alignment": "center",
+        "desktop_content_position": "middle-center",
+        "desktop_content_alignment": "center",
+        "show_text_box": true,
+        "color_scheme": "scheme-1",
         "stack_images_on_mobile": true,
+        "mobile_content_alignment": "center",
         "show_text_below": true
       }
     },
@@ -58,16 +59,17 @@
       "block_order": [
         "heading"
       ],
+      "disabled": true,
       "settings": {
         "image_overlay_opacity": 0,
         "image_height": "large",
-        "desktop_content_position": "middle-center",
-        "show_text_box": true,
-        "desktop_content_alignment": "center",
-        "color_scheme": "scheme-1",
         "image_behavior": "none",
-        "mobile_content_alignment": "center",
+        "desktop_content_position": "middle-center",
+        "desktop_content_alignment": "center",
+        "show_text_box": true,
+        "color_scheme": "scheme-1",
         "stack_images_on_mobile": true,
+        "mobile_content_alignment": "center",
         "show_text_below": true
       }
     },
@@ -85,34 +87,35 @@
       "block_order": [
         "heading"
       ],
+      "disabled": true,
       "settings": {
         "image_overlay_opacity": 0,
         "image_height": "large",
-        "desktop_content_position": "middle-center",
-        "show_text_box": true,
-        "desktop_content_alignment": "center",
-        "color_scheme": "scheme-1",
         "image_behavior": "none",
-        "mobile_content_alignment": "center",
+        "desktop_content_position": "middle-center",
+        "desktop_content_alignment": "center",
+        "show_text_box": true,
+        "color_scheme": "scheme-1",
         "stack_images_on_mobile": true,
+        "mobile_content_alignment": "center",
         "show_text_below": true
       }
     },
     "fc_cotton_lawn": {
       "type": "featured-collection",
       "settings": {
+        "collection": "1-million-cotton-lawn",
+        "products_to_show": 10,
         "title": "1 Million Cotton Lawn",
         "heading_size": "h2",
         "description": "",
         "show_description": false,
         "description_style": "body",
-        "collection": "1-million-cotton-lawn",
-        "products_to_show": 10,
         "columns_desktop": 4,
+        "enable_desktop_slider": false,
         "full_width": false,
         "show_view_all": true,
         "view_all_style": "solid",
-        "enable_desktop_slider": false,
         "color_scheme": "scheme-1",
         "image_ratio": "adapt",
         "image_shape": "default",
@@ -129,18 +132,18 @@
     "fc_zouq_cotton": {
       "type": "featured-collection",
       "settings": {
+        "collection": "collections-zouq-cotton",
+        "products_to_show": 10,
         "title": "Zouq Cotton",
         "heading_size": "h2",
         "description": "",
         "show_description": false,
         "description_style": "body",
-        "collection": "collections-zouq-cotton",
-        "products_to_show": 10,
         "columns_desktop": 4,
+        "enable_desktop_slider": false,
         "full_width": false,
         "show_view_all": true,
         "view_all_style": "solid",
-        "enable_desktop_slider": false,
         "color_scheme": "scheme-1",
         "image_ratio": "adapt",
         "image_shape": "default",
@@ -157,18 +160,18 @@
     "fc_fine_cotton": {
       "type": "featured-collection",
       "settings": {
+        "collection": "fine-cotton",
+        "products_to_show": 10,
         "title": "Fine Cotton",
         "heading_size": "h2",
         "description": "",
         "show_description": false,
         "description_style": "body",
-        "collection": "fine-cotton",
-        "products_to_show": 10,
         "columns_desktop": 4,
+        "enable_desktop_slider": false,
         "full_width": false,
         "show_view_all": true,
         "view_all_style": "solid",
-        "enable_desktop_slider": false,
         "color_scheme": "scheme-1",
         "image_ratio": "adapt",
         "image_shape": "default",
@@ -185,18 +188,18 @@
     "fc_mizaaj_latha": {
       "type": "featured-collection",
       "settings": {
+        "collection": "mizaaj-latha",
+        "products_to_show": 10,
         "title": "Mizaaj Latha",
         "heading_size": "h2",
         "description": "",
         "show_description": false,
         "description_style": "body",
-        "collection": "mizaaj-latha",
-        "products_to_show": 10,
         "columns_desktop": 4,
+        "enable_desktop_slider": false,
         "full_width": false,
         "show_view_all": true,
         "view_all_style": "solid",
-        "enable_desktop_slider": false,
         "color_scheme": "scheme-1",
         "image_ratio": "adapt",
         "image_shape": "default",
@@ -231,7 +234,10 @@
           "settings": {
             "button_label": "Shop Now",
             "button_link": "shopify://collections/all",
-            "button_style_secondary": false
+            "button_style_secondary": false,
+            "button_label_2": "",
+            "button_link_2": "",
+            "button_style_secondary_2": false
           }
         }
       },
