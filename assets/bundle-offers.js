@@ -53,9 +53,10 @@ if (!customElements.get('bundle-offers')) {
       }
 
       update(variant) {
-        const { compareAt, savingsFormat, strings, tiers } = this.config;
+        const { savingsFormat, strings, tiers } = this.config;
         const price = variant.price;
-        const compareUnit = compareAt && variant.compare_at_price > price ? variant.compare_at_price : price;
+        // Bundle discount only: reference is the selling price, never compare-at.
+        const compareUnit = price;
         const fixedRate = 100 * this.rate();
 
         this.tiers.forEach((el, i) => {

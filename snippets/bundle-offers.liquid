@@ -27,10 +27,8 @@
   endif
 
   assign unit_price = variant.price
+  # Savings are the bundle discount only: the reference is the selling price, never compare-at.
   assign compare_unit_price = variant.price
-  if bs.use_compare_at and variant.compare_at_price > variant.price
-    assign compare_unit_price = variant.compare_at_price
-  endif
 
   assign selected_index = 0
   for tier in tiers
@@ -242,7 +240,6 @@
     <script type="application/json" data-bundle-config>
       {
         "format": {{ money_format | json }},
-        "compareAt": {{ bs.use_compare_at | json }},
         "savingsFormat": {{ bs.savings_format | json }},
         "variant": {
           "price": {{ variant.price | json }},
