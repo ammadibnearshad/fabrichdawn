@@ -103,6 +103,94 @@
             "swatch_shape": "square"
           }
         },
+        "bundle_offers_xDHDiE": {
+          "type": "bundle_offers",
+          "settings": {
+            "heading": "Bundle & save",
+            "show_heading_lines": true,
+            "heading_alignment": "center",
+            "heading_size": "h5",
+            "subheading": "",
+            "layout": "list",
+            "columns_desktop": 3,
+            "mobile_layout": "stack",
+            "card_radius": 8,
+            "card_padding": 16,
+            "card_gap": 12,
+            "border_width": 1,
+            "use_color_scheme": false,
+            "color_scheme": "scheme-1",
+            "card_bg": "",
+            "card_border": "",
+            "selected_bg": "",
+            "selected_border": "",
+            "price_color": "",
+            "compare_color": "",
+            "pill_bg": "",
+            "pill_text": "",
+            "show_radio": true,
+            "show_thumbnails": false,
+            "thumbnail_size": 56,
+            "show_savings": true,
+            "savings_format": "percent",
+            "use_compare_at": true,
+            "footer_note": "Discount applied at checkout"
+          }
+        },
+        "bundle_tier_3Vmb7L": {
+          "type": "bundle_tier",
+          "settings": {
+            "title": "Buy [quantity]",
+            "subtitle": "",
+            "quantity": 1,
+            "discount_type": "none",
+            "discount_value": 0,
+            "selected_default": false,
+            "badge_text": "",
+            "badge_style": "corner",
+            "badge_bg": "",
+            "badge_text_color": "",
+            "perks_text": "",
+            "perks_icon": "none",
+            "hide_on": "none"
+          }
+        },
+        "bundle_tier_nLCnfB": {
+          "type": "bundle_tier",
+          "settings": {
+            "title": "Buy [quantity]",
+            "subtitle": "",
+            "quantity": 2,
+            "discount_type": "percent",
+            "discount_value": 10,
+            "selected_default": false,
+            "badge_text": "",
+            "badge_style": "corner",
+            "badge_bg": "",
+            "badge_text_color": "",
+            "perks_text": "",
+            "perks_icon": "none",
+            "hide_on": "none"
+          }
+        },
+        "bundle_tier_eftxxT": {
+          "type": "bundle_tier",
+          "settings": {
+            "title": "Buy [quantity]",
+            "subtitle": "",
+            "quantity": 3,
+            "discount_type": "percent",
+            "discount_value": 20,
+            "selected_default": false,
+            "badge_text": "",
+            "badge_style": "corner",
+            "badge_bg": "",
+            "badge_text_color": "",
+            "perks_text": "",
+            "perks_icon": "none",
+            "hide_on": "none"
+          }
+        },
         "buy_buttons": {
           "type": "buy_buttons",
           "settings": {
@@ -181,6 +269,10 @@
         "cm_size_chart",
         "cm_sibling_swatches",
         "variant_picker",
+        "bundle_offers_xDHDiE",
+        "bundle_tier_3Vmb7L",
+        "bundle_tier_nLCnfB",
+        "bundle_tier_eftxxT",
         "buy_buttons",
         "cm_callout",
         "cm_trust_icons",
