@@ -22,6 +22,13 @@
       if block.settings.show_dynamic_checkout and gift_card_recipient_feature_active == false
         assign show_dynamic_checkout = true
       endif
+
+      # product-extras: custom Buy now (add to cart + checkout) replaces dynamic checkout buttons
+      assign show_buy_now = false
+      if block.settings.custom_buy_now
+        assign show_buy_now = true
+        assign show_dynamic_checkout = false
+      endif
     -%}
 
     <product-form
@@ -93,6 +100,28 @@
             </span>
             {%- render 'loading-spinner' -%}
           </button>
+          {%- if show_buy_now -%}
+            {%- comment -%}
+              product-extras: Buy now. With JS, assets/product-form.js adds to cart (incl. gift wrap) and
+              redirects to checkout; without JS, return_to sends the cart add straight to checkout.
+            {%- endcomment -%}
+            <button
+              type="submit"
+              name="return_to"
+              value="/checkout"
+              class="product-form__submit product-form__buy-now button button--full-width button--secondary"
+              data-buy-now
+              {% if product.selected_or_first_available_variant.available == false
+                or quantity_rule_soldout
+                or product.selected_or_first_available_variant == null
+              %}
+                disabled
+              {% endif %}
+            >
+              <span>{{ 'products.product.buy_now' | t }}</span>
+              {%- render 'loading-spinner' -%}
+            </button>
+          {%- endif -%}
           {%- if show_dynamic_checkout -%}
             {{ form | payment_button }}
           {%- endif -%}

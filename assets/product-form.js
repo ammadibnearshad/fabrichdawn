@@ -11,6 +11,7 @@ if (!customElements.get('product-form')) {
         this.cart = document.querySelector('cart-notification') || document.querySelector('cart-drawer');
         this.submitButton = this.querySelector('[type="submit"]');
         this.submitButtonText = this.submitButton.querySelector('span');
+        this.buyNowButton = this.querySelector('[data-buy-now]'); // product-extras: custom Buy now
 
         if (document.querySelector('cart-drawer')) this.submitButton.setAttribute('aria-haspopup', 'dialog');
 
@@ -23,9 +24,15 @@ if (!customElements.get('product-form')) {
 
         this.handleErrorMessage();
 
+        // product-extras: Buy now submits the same form, then goes to checkout instead of the cart drawer
+        const buyNow = Boolean(this.buyNowButton) && evt.submitter === this.buyNowButton;
+        const loadingButton = buyNow ? this.buyNowButton : this.submitButton;
+        let redirecting = false;
+
         this.submitButton.setAttribute('aria-disabled', true);
-        this.submitButton.classList.add('loading');
-        this.querySelector('.loading__spinner').classList.remove('hidden');
+        this.buyNowButton?.setAttribute('aria-disabled', true);
+        loadingButton.classList.add('loading');
+        loadingButton.querySelector('.loading__spinner').classList.remove('hidden');
 
         const config = fetchConfig('javascript');
         config.headers['X-Requested-With'] = 'XMLHttpRequest';
@@ -72,6 +79,11 @@ if (!customElements.get('product-form')) {
               soldOutMessage.classList.remove('hidden');
               this.error = true;
               return;
+            } else if (buyNow) {
+              this.resolveCartLinesUpdate(linesUpdateDeferred);
+              redirecting = true;
+              window.location = `${window.Shopify?.routes?.root || '/'}checkout`;
+              return;
             } else if (!this.cart) {
               this.resolveCartLinesUpdate(linesUpdateDeferred);
               window.location = window.routes.cart_url;
@@ -116,10 +128,12 @@ if (!customElements.get('product-form')) {
             linesUpdateDeferred?.reject(e);
           })
           .finally(() => {
-            this.submitButton.classList.remove('loading');
+            if (redirecting) return; // keep the Buy now spinner while checkout loads
+            loadingButton.classList.remove('loading');
             if (this.cart && this.cart.classList.contains('is-empty')) this.cart.classList.remove('is-empty');
             if (!this.error) this.submitButton.removeAttribute('aria-disabled');
-            this.querySelector('.loading__spinner').classList.add('hidden');
+            this.buyNowButton?.removeAttribute('aria-disabled');
+            loadingButton.querySelector('.loading__spinner').classList.add('hidden');
 
             CartPerformance.measureFromEvent("add:user-action", evt);
           });
@@ -141,6 +155,7 @@ if (!customElements.get('product-form')) {
       }
 
       toggleSubmitButton(disable = true, text) {
+        this.buyNowButton?.toggleAttribute('disabled', disable); // product-extras: Buy now follows Add to cart
         if (disable) {
           this.submitButton.setAttribute('disabled', 'disabled');
           if (text) this.submitButtonText.textContent = text;
