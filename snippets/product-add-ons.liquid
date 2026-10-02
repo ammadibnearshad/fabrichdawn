@@ -148,7 +148,7 @@
                     {%- render 'price', product: add_on, use_variant: true -%}
                   </div>
 
-                  {%- unless add_on.has_only_default_variant -%}
+                  {%- if add_on.variants.size > 1 -%}
                     <div class="add-on-card__options">
                       {%- if bs.picker_style == 'combined' -%}
                         {%- assign option_names = add_on.options | join: ' / ' -%}
@@ -176,33 +176,35 @@
                         </div>
                       {%- else -%}
                         {%- for option in add_on.options_with_values -%}
-                          {%- assign current_value = add_on_variant.options[forloop.index0] -%}
-                          <label class="visually-hidden" for="AddOnOption-{{ card_id }}-{{ forloop.index0 }}">
-                            {{- 'products.product.add_ons.option_label' | t: option: option.name, product: add_on.title -}}
-                          </label>
-                          <div class="select">
-                            <select
-                              id="AddOnOption-{{ card_id }}-{{ forloop.index0 }}"
-                              class="select__select"
-                              data-option-index="{{ forloop.index0 }}"
-                            >
-                              {%- for value in option.values -%}
-                                <option
-                                  value="{{ value.name | escape }}"
-                                  {% if value.name == current_value %}
-                                    selected
-                                  {% endif %}
-                                >
-                                  {{- value.name | escape -}}
-                                </option>
-                              {%- endfor -%}
-                            </select>
-                            <span class="svg-wrapper">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
-                          </div>
+                          {%- if option.values.size > 1 -%}
+                            {%- assign current_value = add_on_variant.options[forloop.index0] -%}
+                            <label class="visually-hidden" for="AddOnOption-{{ card_id }}-{{ forloop.index0 }}">
+                              {{- 'products.product.add_ons.option_label' | t: option: option.name, product: add_on.title -}}
+                            </label>
+                            <div class="select">
+                              <select
+                                id="AddOnOption-{{ card_id }}-{{ forloop.index0 }}"
+                                class="select__select"
+                                data-option-index="{{ forloop.index0 }}"
+                              >
+                                {%- for value in option.values -%}
+                                  <option
+                                    value="{{ value.name | escape }}"
+                                    {% if value.name == current_value %}
+                                      selected
+                                    {% endif %}
+                                  >
+                                    {{- value.name | escape -}}
+                                  </option>
+                                {%- endfor -%}
+                              </select>
+                              <span class="svg-wrapper">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
+                            </div>
+                          {%- endif -%}
                         {%- endfor -%}
                       {%- endif -%}
                     </div>
-                  {%- endunless -%}
+                  {%- endif -%}
 
                   <div class="add-on-card__actions">
                     <button

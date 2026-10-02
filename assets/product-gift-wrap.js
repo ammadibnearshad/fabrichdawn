@@ -62,6 +62,7 @@ if (!customElements.get('product-gift-wrap')) {
         }
 
         this.unregister = this.extras.register(this.config.formId, {
+          name: 'gift-wrap',
           order: 20,
           checkoutBehavior: this.config.checkoutBehavior,
           checkoutNote: this.config.checkoutNote,

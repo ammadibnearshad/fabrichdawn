@@ -6,6 +6,10 @@ if (!window.ProductFormExtras) {
     const registry = new Map(); // formId -> Set of providers
     let cartPromise = null;
 
+    // Add ?extras_debug=1 to the URL to log what is collected and sent.
+    const debug = /[?&]extras_debug=1/.test(window.location.search);
+    const log = (...args) => debug && console.info('[product-extras]', ...args);
+
     if (typeof subscribe === 'function' && typeof PUB_SUB_EVENTS !== 'undefined') {
       subscribe(PUB_SUB_EVENTS.cartUpdate, () => {
         cartPromise = null;
@@ -56,6 +60,7 @@ if (!window.ProductFormExtras) {
       register(formId, provider) {
         if (!registry.has(formId)) registry.set(formId, new Set());
         registry.get(formId).add(provider);
+        log('registered', provider.name || 'provider', 'for form', formId);
         this.refresh(formId);
         return () => {
           registry.get(formId)?.delete(provider);
@@ -66,6 +71,7 @@ if (!window.ProductFormExtras) {
       // Returns { items, mainProperties, providers } or null when nothing extra is selected.
       collect(form, formData) {
         const providers = providersFor(form.id).filter((provider) => provider.hasSelection());
+        log('submit', form.id, '| registered:', providersFor(form.id).length, '| selected:', providers.length);
         if (!providers.length) return null;
 
         const hasFile = Array.from(formData.values()).some((value) => value instanceof File && value.size > 0);
@@ -77,6 +83,7 @@ if (!window.ProductFormExtras) {
         const quantity = parseInt(formData.get('quantity')) || 1;
         const items = providers.flatMap((provider) => provider.getItems(quantity));
         const mainProperties = Object.assign({}, ...providers.map((provider) => provider.getMainProperties?.() || {}));
+        log('extra lines', items, '| main properties', mainProperties);
         if (!items.length && !Object.keys(mainProperties).length) return null;
         return { items, mainProperties, providers };
       },
@@ -92,10 +99,10 @@ if (!window.ProductFormExtras) {
         // Shopify lists newest lines first: send extras reversed and the main product last so it
         // ends up on top with its extras below in display order.
         const before = variantQuantity(await this.getCart(true), main.id);
-        const response = await jsonPost(
-          cartAddUrl(),
-          withSections({ items: [...items].reverse().concat(main) })
-        );
+        const body = withSections({ items: [...items].reverse().concat(main) });
+        log('POST', cartAddUrl(), body);
+        const response = await jsonPost(cartAddUrl(), body);
+        log('response', response.status ? response : response.items);
 
         if (!response.status) {
           const normalized = normalize(response, main.id, null);

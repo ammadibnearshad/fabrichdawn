@@ -67,8 +67,9 @@ if (!customElements.get('product-add-ons')) {
           selects: Array.from(el.querySelectorAll('[data-option-index]')),
         };
 
-        // Separate selects: disable values that no available variant has.
-        card.selects.forEach((select, index) => {
+        // Separate selects (single-value options aren't rendered): disable values no available variant has.
+        card.selects.forEach((select) => {
+          const index = Number(select.dataset.optionIndex);
           Array.from(select.options).forEach((option) => {
             option.disabled = !variants.some((variant) => variant.available && variant.options[index] === option.value);
           });
@@ -97,7 +98,8 @@ if (!customElements.get('product-add-ons')) {
         if (card.combined) {
           card.variant = card.variants.find((variant) => variant.id === Number(card.combined.value));
         } else {
-          const values = card.selects.map((select) => select.value);
+          const values = [...(card.variant || card.variants[0]).options];
+          card.selects.forEach((select) => (values[Number(select.dataset.optionIndex)] = select.value));
           card.variant = card.variants.find((variant) => variant.options.every((value, i) => value === values[i]));
         }
         this.renderCard(card);
@@ -156,7 +158,7 @@ if (!customElements.get('product-add-ons')) {
           } else {
             let changed = false;
             wanted.forEach(({ index, value }) => {
-              const select = card.selects[index];
+              const select = card.selects.find((el) => Number(el.dataset.optionIndex) === index);
               const option = select && Array.from(select.options).find((opt) => opt.value.toLowerCase() === value);
               if (option && !option.disabled) {
                 select.value = option.value;
