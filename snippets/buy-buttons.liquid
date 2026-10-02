@@ -23,7 +23,8 @@
         assign show_dynamic_checkout = true
       endif
 
-      # product-extras: custom Buy now (add to cart + checkout) replaces dynamic checkout buttons
+      # product-extras: custom Buy now (add to cart + checkout) replaces dynamic checkout buttons.
+      # Add to cart is always the solid (primary) button.
       assign show_buy_now = false
       if block.settings.custom_buy_now
         assign show_buy_now = true
@@ -81,7 +82,7 @@
             id="ProductSubmitButton-{{ section_id }}"
             type="submit"
             name="add"
-            class="product-form__submit button button--full-width {% if show_dynamic_checkout %}button--secondary{% else %}button--primary{% endif %}"
+            class="product-form__submit button button--full-width button--primary"
             {% if product.selected_or_first_available_variant.available == false
               or quantity_rule_soldout
               or product.selected_or_first_available_variant == null
