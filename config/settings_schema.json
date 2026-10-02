@@ -1456,7 +1456,7 @@
       },
       {
         "type": "paragraph",
-        "content": "Uses the newest cart item's product metafields: custom.upsell_collection (collection) wins over custom.upsell_products (list of products). Falls back to the collection below when no cart item has either."
+        "content": "Uses the newest cart item that has upsell metafields, in this order: custom.add_on_products (list of products, same as the product page Add-on products block), custom.upsell_collection (collection), custom.upsell_products (list of products). Falls back to the collection below when no cart item has any of them."
       },
       {
         "type": "checkbox",

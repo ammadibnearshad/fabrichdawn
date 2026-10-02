@@ -3,7 +3,9 @@
   items form, so every cart refresh path (cart-drawer.js renderContents and
   cart.js onCartUpdate) re-renders it.
 
-  Source, in priority order — first cart item (newest first) that has either:
+  Source, in priority order — first cart item (newest first) that has any of:
+    custom.add_on_products (list.product_reference) — same metafield as the PDP
+      "Add-on products" block (product-extras), shown in admin order
     custom.upsell_collection (collection_reference) — rotating picks from it
     custom.upsell_products (list.product_reference) — shown in admin order
   Fallback: Theme settings → Cart → Fallback collection.
@@ -19,6 +21,12 @@
   assign upsell_list = null
   assign upsell_rotate = false
   for item in cart.items
+    # product-extras: PDP add-on products take priority
+    assign add_on_list = item.product.metafields.custom.add_on_products.value
+    if add_on_list.size > 0
+      assign upsell_list = add_on_list
+      break
+    endif
     assign upsell_collection = item.product.metafields.custom.upsell_collection.value
     if upsell_collection != blank and upsell_collection.products_count > 0
       assign upsell_list = upsell_collection.products
@@ -119,15 +127,16 @@
             <form method="post" action="{{ routes.cart_add_url }}" class="dcart-upsell__card" data-upsell-form>
               <a href="{{ up.url }}" class="dcart-upsell__media" tabindex="-1" aria-hidden="true">
                 {%- if up.featured_image -%}
-                  <img
-                    src="{{ up.featured_image | image_url: width: 160 }}"
-                    srcset="{{ up.featured_image | image_url: width: 160 }} 1x, {{ up.featured_image | image_url: width: 320 }} 2x"
-                    alt=""
-                    width="80"
-                    height="80"
-                    loading="lazy"
-                    class="dcart-upsell__image"
-                  >
+                  {{
+                    up.featured_image
+                    | image_url: width: 480
+                    | image_tag:
+                      widths: '240, 360, 480',
+                      sizes: '(min-width: 750px) 180px, 42vw',
+                      loading: 'lazy',
+                      alt: '',
+                      class: 'dcart-upsell__image'
+                  }}
                 {%- endif -%}
               </a>
 
@@ -150,7 +159,7 @@
                 </div>
 
                 <div class="dcart-upsell__actions">
-                  {%- if up.has_only_default_variant -%}
+                  {%- if up.variants.size < 2 -%}
                     <input type="hidden" name="id" value="{{ current_variant.id }}">
                   {%- else -%}
                     <label class="visually-hidden" for="CartUpsell-Variant-{{ up.id }}">
