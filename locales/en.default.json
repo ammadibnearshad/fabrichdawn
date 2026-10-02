@@ -116,16 +116,16 @@
   "products": {
     "product": {
       "add_ons": {
-        "add_to_order": "Add to order",
-        "add": "Add",
+        "add": "Add to cart",
+        "added": "Added",
         "add_aria": "Add {{ product }} to cart",
         "option_label": "{{ option }} for {{ product }}",
-        "total_html": "Total with add-ons: {{ total }}",
-        "error": "Not all items could be added: {{ message }}"
+        "error": "Couldn't add to cart: {{ message }}"
       },
       "gift_wrap": {
         "free": "Free",
-        "already_added": "Gift wrap already added",
+        "already_added": "Gift wrap is already in your cart. Tick the box to have this item wrapped too.",
+        "yes": "Yes",
         "style_label": "Gift wrap style",
         "message_limit": "Maximum {{ count }} characters",
         "property_message": "Gift message",

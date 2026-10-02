@@ -28,11 +28,6 @@
   cursor: pointer;
 }
 
-.gift-wrap--in-cart .gift-wrap__main {
-  cursor: default;
-  opacity: 0.6;
-}
-
 /* Native checkbox stays focusable; the visual control is drawn next to it */
 .gift-wrap__checkbox {
   position: absolute;

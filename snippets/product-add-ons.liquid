@@ -3,7 +3,7 @@
 
   Source priority: block "Products" setting (connect a list.product_reference metafield as
   dynamic source) -> product.metafields[namespace][key] -> fallback collection.
-  Checked add-ons are added with Dawn's Add to Cart via assets/product-form-extras.js.
+  Each add-on has its own Add to cart button (assets/product-form-extras.js addStandalone).
 
   Accepts:
   - block: {Object} The 'add_on_products' block
@@ -108,7 +108,7 @@
             -%}
             <li class="product-add-ons__item">
               <div
-                class="add-on-card{% if bs.add_mode != 'button' %} add-on-card--toggle{% endif %}{% if add_on.available == false %} add-on-card--unavailable{% endif %}"
+                class="add-on-card{% if add_on.available == false %} add-on-card--unavailable{% endif %}"
                 data-add-on
                 data-variant-id="{{ add_on_variant.id }}"
                 data-option-names="{{ add_on.options | json | escape }}"
@@ -140,9 +140,6 @@
                   {%- else -%}
                     {{ 'product-1' | placeholder_svg_tag: 'add-on-card__image placeholder-svg' }}
                   {%- endif -%}
-                  <span class="add-on-card__check" aria-hidden="true">
-                    {{- 'icon-checkmark.svg' | inline_asset_content -}}
-                  </span>
                 </div>
 
                 <div class="add-on-card__info">
@@ -208,39 +205,24 @@
                   {%- endunless -%}
 
                   <div class="add-on-card__actions">
-                    {%- if bs.add_mode != 'button' -%}
-                      <label class="add-on-card__toggle">
-                        <input
-                          type="checkbox"
-                          class="add-on-card__checkbox"
-                          data-add-on-checkbox
-                          {% if bs.preselect and add_on.available %}
-                            checked
-                          {% endif %}
-                          {% unless add_on.available %}
-                            disabled
-                          {% endunless %}
-                        >
-                        <span>
-                          {{- 'products.product.add_ons.add_to_order' | t -}}
-                          <span class="visually-hidden">: {{ add_on.title | escape }}</span>
-                        </span>
-                      </label>
-                    {%- endif -%}
-                    {%- if bs.add_mode != 'checkbox' -%}
-                      <button
-                        type="button"
-                        class="button button--secondary add-on-card__button"
-                        data-add-on-button
-                        aria-label="{{ 'products.product.add_ons.add_aria' | t: product: add_on.title | escape }}"
-                        {% unless add_on.available %}
-                          disabled
-                        {% endunless %}
-                      >
-                        <span>{{ 'products.product.add_ons.add' | t }}</span>
-                        {%- render 'loading-spinner' -%}
-                      </button>
-                    {%- endif -%}
+                    <button
+                      type="button"
+                      class="button button--{{ bs.button_style }} add-on-card__button"
+                      data-add-on-button
+                      aria-label="{{ 'products.product.add_ons.add_aria' | t: product: add_on.title | escape }}"
+                      {% unless add_on.available %}
+                        disabled
+                      {% endunless %}
+                    >
+                      <span>
+                        {%- if add_on.available -%}
+                          {{ 'products.product.add_ons.add' | t }}
+                        {%- else -%}
+                          {{ 'products.product.sold_out' | t }}
+                        {%- endif -%}
+                      </span>
+                      {%- render 'loading-spinner' -%}
+                    </button>
                   </div>
                 </div>
 
@@ -264,29 +246,22 @@
       {%- endfor -%}
     </ul>
 
-    {%- if bs.show_total -%}
-      <p class="product-add-ons__total" data-total-line hidden>
-        {{ 'products.product.add_ons.total_html' | t: total: '<span data-total></span>' }}
-      </p>
-    {%- endif -%}
-
     <p class="product-add-ons__status" role="status" data-status></p>
 
     <script type="application/json" data-add-ons-config>
       {
         "formId": {{ product_form_id | json }},
-        "addMode": {{ bs.add_mode | json }},
         "quantityMode": {{ bs.quantity_mode | json }},
         "sync": {{ bs.sync_option | json }},
         "mainOptions": {{ product.options | json }},
         "mainVariantOptions": {{ product.selected_or_first_available_variant.options | json }},
-        "mainPrice": {{ product.selected_or_first_available_variant.price | default: 0 }},
         "propertyFor": {% if bs.add_property %}{{ product.title | json }}{% else %}null{% endif %},
-        "checkoutBehavior": {{ bs.checkout_behavior | json }},
-        "checkoutNote": {{ bs.checkout_note | json }},
         "moneyFormat": {{ money_format | json }},
         "strings": {
-          "error": {{ 'products.product.add_ons.error' | t: message: '[message]' | json }}
+          "error": {{ 'products.product.add_ons.error' | t: message: '[message]' | json }},
+          "add": {{ 'products.product.add_ons.add' | t | json }},
+          "added": {{ 'products.product.add_ons.added' | t | json }},
+          "soldOut": {{ 'products.product.sold_out' | t | json }}
         }
       }
     </script>

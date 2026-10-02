@@ -3,7 +3,8 @@
 
   The gift wrap is a separate product (block setting), overridable per product with the
   custom.gift_wrap_product metafield and hidden with custom.disable_gift_wrap. When checked it is
-  added with Dawn's Add to Cart via assets/product-form-extras.js.
+  added with Dawn's Add to Cart via assets/product-form-extras.js, and the main product line gets a
+  visible property (setting "Main product property", default "Gift wrap: Yes").
 
   Accepts:
   - block: {Object} The 'gift_wrap' block
@@ -249,6 +250,7 @@
         "quantityMode": {{ bs.quantity_mode | json }},
         "messageTarget": {{ bs.message_target | json }},
         "propertyFor": {% if bs.add_property %}{{ product.title | json }}{% else %}null{% endif %},
+        "mainProperty": { "name": {{ bs.main_property_name | strip | json }} },
         "checkoutBehavior": {{ bs.checkout_behavior | json }},
         "checkoutNote": {{ bs.checkout_note | json }},
         "moneyFormat": {{ money_format | json }},
@@ -256,12 +258,18 @@
         "description": {{ bs.description | json }},
         "variants": [
           {%- for variant in wrap.variants -%}
-            { "id": {{ variant.id }}, "price": {{ variant.price }}, "available": {{ variant.available | json }} }
+            {
+              "id": {{ variant.id }},
+              "title": {{ variant.title | json }},
+              "price": {{ variant.price }},
+              "available": {{ variant.available | json }}
+            }
             {%- unless forloop.last %},{% endunless -%}
           {%- endfor -%}
         ],
         "strings": {
           "free": {{ 'products.product.gift_wrap.free' | t | json }},
+          "yes": {{ 'products.product.gift_wrap.yes' | t | json }},
           "alreadyAdded": {{ 'products.product.gift_wrap.already_added' | t | json }},
           "error": {{ 'products.product.gift_wrap.error' | t: message: '[message]' | json }},
           "message": {{ 'products.product.gift_wrap.property_message' | t | json }},

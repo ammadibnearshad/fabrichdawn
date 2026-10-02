@@ -1,34 +1,34 @@
 /* product-extras: "Add-on products" block (snippets/product-add-ons.liquid).
-   Registers checked add-ons with ProductFormExtras so Dawn's Add to Cart includes them. */
+   Each card has its own Add to cart button; the main product form is not involved. */
 if (!customElements.get('product-add-ons')) {
   customElements.define(
     'product-add-ons',
     class ProductAddOns extends HTMLElement {
       connectedCallback() {
+        if (this.initialized) return;
+        // Scripts can run out of order (theme editor / quick add): wait for the shared helper.
+        if (!window.ProductFormExtras) {
+          document.addEventListener('product-extras:ready', () => this.isConnected && this.connectedCallback(), {
+            once: true,
+          });
+          return;
+        }
+
         try {
           this.config = JSON.parse(this.querySelector('[data-add-ons-config]').textContent);
         } catch (e) {
           return;
         }
-        if (!window.ProductFormExtras) return;
 
+        this.initialized = true;
         this.extras = window.ProductFormExtras;
-        this.mainPrice = this.config.mainPrice;
         this.status = this.querySelector('[data-status]');
-        this.totalLine = this.querySelector('[data-total-line]');
         this.cards = Array.from(this.querySelectorAll('[data-add-on]')).map((el) => this.initCard(el));
 
         this.abortController = new AbortController();
         const { signal } = this.abortController;
         this.addEventListener('change', this.onChange.bind(this), { signal });
         this.addEventListener('click', this.onClick.bind(this), { signal });
-        document.addEventListener(
-          'change',
-          (event) => {
-            if (event.target.name === 'quantity' && event.target.form?.id === this.config.formId) this.updateTotal();
-          },
-          { signal }
-        );
         document.addEventListener(
           'shopify:block:select',
           (event) => {
@@ -37,31 +37,16 @@ if (!customElements.get('product-add-ons')) {
           { signal }
         );
 
-        this.unsubscribers = [];
-        if (typeof subscribe === 'function' && typeof PUB_SUB_EVENTS !== 'undefined') {
-          this.unsubscribers.push(
-            subscribe(PUB_SUB_EVENTS.variantChange, ({ data }) => this.onMainVariantChange(data)),
-            subscribe(PUB_SUB_EVENTS.quantityUpdate, () => this.updateTotal())
-          );
+        if (this.config.sync && typeof subscribe === 'function' && typeof PUB_SUB_EVENTS !== 'undefined') {
+          this.unsubscribe = subscribe(PUB_SUB_EVENTS.variantChange, ({ data }) => this.onMainVariantChange(data));
         }
-
-        this.unregister = this.extras.register(this.config.formId, {
-          order: 10,
-          checkoutBehavior: this.config.checkoutBehavior,
-          checkoutNote: this.config.checkoutNote,
-          hasSelection: () => this.selected().length > 0,
-          getItems: (quantity) => this.selected().map((card) => this.lineFor(card, quantity)),
-          onError: (message) => this.showStatus(message),
-        });
-
         if (this.config.sync) this.syncOptions(this.config.mainVariantOptions);
-        this.updateTotal();
       }
 
       disconnectedCallback() {
         this.abortController?.abort();
-        this.unsubscribers?.forEach((unsubscribe) => unsubscribe());
-        this.unregister?.();
+        this.unsubscribe?.();
+        this.initialized = false;
       }
 
       initCard(el) {
@@ -77,7 +62,6 @@ if (!customElements.get('product-add-ons')) {
           variants,
           optionNames,
           variant: variants.find((variant) => variant.id === Number(el.dataset.variantId)) || variants[0],
-          checkbox: el.querySelector('[data-add-on-checkbox]'),
           button: el.querySelector('[data-add-on-button]'),
           combined: el.querySelector('[data-variant-select]'),
           selects: Array.from(el.querySelectorAll('[data-option-index]')),
@@ -96,37 +80,17 @@ if (!customElements.get('product-add-ons')) {
         return this.cards.find((card) => card.el.contains(target));
       }
 
-      selected() {
-        return this.cards.filter((card) => card.checkbox?.checked && card.variant?.available);
-      }
-
-      lineFor(card, mainQuantity) {
-        const item = { id: card.variant.id, quantity: this.config.quantityMode === 'match' ? mainQuantity : 1 };
-        if (this.config.propertyFor) item.properties = { _add_on_for: this.config.propertyFor };
-        return item;
-      }
-
       onChange(event) {
         const card = this.cardFor(event.target);
-        if (!card) return;
-        if (event.target === card.combined || card.selects.includes(event.target)) this.resolveVariant(card);
+        if (!card || !(event.target === card.combined || card.selects.includes(event.target))) return;
+        this.resolveVariant(card);
         this.showStatus('');
-        this.extras.refresh(this.config.formId);
-        this.updateTotal();
       }
 
       onClick(event) {
-        const card = this.cardFor(event.target);
-        if (!card) return;
-
-        if (event.target.closest('[data-add-on-button]')) {
-          this.addSingle(card);
-          return;
-        }
-
-        // Whole card toggles the checkbox, except its own interactive elements.
-        if (!card.checkbox || card.checkbox.disabled || event.target.closest('a, button, select, input, label')) return;
-        card.checkbox.click();
+        const button = event.target.closest('[data-add-on-button]');
+        const card = button && this.cardFor(button);
+        if (card) this.addToCart(card);
       }
 
       resolveVariant(card) {
@@ -140,14 +104,13 @@ if (!customElements.get('product-add-ons')) {
       }
 
       renderCard(card) {
-        const { variant } = card;
+        const { variant, button } = card;
         const available = Boolean(variant?.available);
         card.el.classList.toggle('add-on-card--unavailable', !available);
-        if (card.checkbox) {
-          card.checkbox.disabled = !available;
-          if (!available) card.checkbox.checked = false;
+        if (button) {
+          button.disabled = !available;
+          button.querySelector('span').textContent = available ? this.config.strings.add : this.config.strings.soldOut;
         }
-        if (card.button) card.button.disabled = !available;
         if (!variant) return;
 
         card.el.dataset.variantId = variant.id;
@@ -166,9 +129,7 @@ if (!customElements.get('product-add-ons')) {
       onMainVariantChange(data) {
         const productInfo = this.closest('product-info');
         if (!data?.variant || (productInfo && productInfo.sectionId !== data.sectionId)) return;
-        this.mainPrice = data.variant.price;
-        if (this.config.sync) this.syncOptions(data.variant.options);
-        this.updateTotal();
+        this.syncOptions(data.variant.options);
       }
 
       // Pre-select the add-on value matching the main product's same-named option (e.g. Size).
@@ -206,23 +167,33 @@ if (!customElements.get('product-add-ons')) {
           }
           this.resolveVariant(card);
         });
-        this.extras.refresh(this.config.formId);
       }
 
-      async addSingle(card) {
+      async addToCart(card) {
         const { button } = card;
         if (!card.variant?.available || button.getAttribute('aria-disabled') === 'true') return;
 
+        const label = button.querySelector('span');
         const spinner = button.querySelector('.loading__spinner');
         button.setAttribute('aria-disabled', 'true');
         button.classList.add('loading');
         spinner?.classList.remove('hidden');
         this.showStatus('');
 
+        const item = {
+          id: card.variant.id,
+          quantity: this.config.quantityMode === 'match' ? this.extras.mainQuantity(this.config.formId) : 1,
+        };
+        if (this.config.propertyFor) item.properties = { _add_on_for: this.config.propertyFor };
+
         try {
-          const quantity = this.extras.mainQuantity(this.config.formId);
-          const response = await this.extras.addStandalone([this.lineFor(card, quantity)], button);
-          if (response.status) this.showStatus(response.description || response.message);
+          const response = await this.extras.addStandalone([item], button);
+          if (response.status) {
+            this.showStatus(response.description || response.message);
+          } else {
+            label.textContent = this.config.strings.added;
+            setTimeout(() => (label.textContent = this.config.strings.add), 2000);
+          }
         } catch (error) {
           console.error(error);
         } finally {
@@ -230,18 +201,6 @@ if (!customElements.get('product-add-ons')) {
           button.classList.remove('loading');
           spinner?.classList.add('hidden');
         }
-      }
-
-      updateTotal() {
-        if (!this.totalLine) return;
-        const selected = this.selected();
-        this.totalLine.hidden = selected.length === 0;
-        if (!selected.length) return;
-
-        const quantity = this.extras.mainQuantity(this.config.formId);
-        const addOnQuantity = this.config.quantityMode === 'match' ? quantity : 1;
-        const total = selected.reduce((sum, card) => sum + card.variant.price * addOnQuantity, this.mainPrice * quantity);
-        this.totalLine.querySelector('[data-total]').textContent = this.extras.formatMoney(total, this.config.moneyFormat);
       }
 
       showStatus(message) {

@@ -1,17 +1,26 @@
 /* product-extras: "Gift wrap" block (snippets/product-gift-wrap.liquid).
-   Registers the gift wrap line (and optional message properties) with ProductFormExtras. */
+   Registers the gift wrap line with ProductFormExtras so Dawn's Add to Cart includes it, and marks
+   the main product line with a visible "Gift wrap" property. */
 if (!customElements.get('product-gift-wrap')) {
   customElements.define(
     'product-gift-wrap',
     class ProductGiftWrap extends HTMLElement {
       connectedCallback() {
+        if (this.initialized) return;
+        // Scripts can run out of order (theme editor / quick add): wait for the shared helper.
+        if (!window.ProductFormExtras) {
+          document.addEventListener('product-extras:ready', () => this.isConnected && this.connectedCallback(), {
+            once: true,
+          });
+          return;
+        }
+
         try {
           this.config = JSON.parse(this.querySelector('[data-gift-wrap-config]').textContent);
         } catch (e) {
           return;
         }
-        if (!window.ProductFormExtras) return;
-
+        this.initialized = true;
         this.extras = window.ProductFormExtras;
         this.checkbox = this.querySelector('[data-gift-wrap-checkbox]');
         this.status = this.querySelector('[data-status]');
@@ -57,9 +66,8 @@ if (!customElements.get('product-gift-wrap')) {
           checkoutBehavior: this.config.checkoutBehavior,
           checkoutNote: this.config.checkoutNote,
           hasSelection: () => this.isActive(),
-          getItems: (quantity) => (this.isActive() ? [this.line(quantity)] : []),
-          getMainProperties: () =>
-            this.isActive() && this.config.messageTarget === 'main' ? this.messageProperties() : {},
+          getItems: (quantity) => (this.addsWrapLine() ? [this.line(quantity)] : []),
+          getMainProperties: () => (this.isActive() ? this.mainProperties() : {}),
           onError: (message) => this.showStatus(this.config.strings.error.replace('[message]', message)),
         });
 
@@ -71,10 +79,29 @@ if (!customElements.get('product-gift-wrap')) {
         this.observer?.disconnect();
         this.unsubscribe?.();
         this.unregister?.();
+        this.initialized = false;
       }
 
       isActive() {
-        return Boolean(this.checkbox.checked && !this.inCart && this.variant?.available);
+        return Boolean(this.checkbox.checked && this.variant?.available);
+      }
+
+      // Once per order: when the wrap is already in the cart, only the main line gets marked.
+      addsWrapLine() {
+        return this.isActive() && !(this.config.quantityMode === 'once' && this.inCart);
+      }
+
+      messagesOnMain() {
+        return this.config.messageTarget === 'main' || !this.addsWrapLine();
+      }
+
+      mainProperties() {
+        const properties = this.messagesOnMain() ? this.messageProperties() : {};
+        const { name } = this.config.mainProperty;
+        if (name) {
+          properties[name] = this.config.variants.length > 1 ? this.variant.title : this.config.strings.yes;
+        }
+        return properties;
       }
 
       selectedVariantId() {
@@ -84,7 +111,7 @@ if (!customElements.get('product-gift-wrap')) {
 
       line(mainQuantity) {
         const item = { id: this.variant.id, quantity: this.config.quantityMode === 'match' ? mainQuantity : 1 };
-        const properties = this.config.messageTarget === 'main' ? {} : this.messageProperties();
+        const properties = this.messagesOnMain() ? {} : this.messageProperties();
         if (this.config.propertyFor) properties._gift_wrap_for = this.config.propertyFor;
         if (Object.keys(properties).length) item.properties = properties;
         return item;
@@ -140,8 +167,6 @@ if (!customElements.get('product-gift-wrap')) {
         }
 
         this.classList.toggle('gift-wrap--in-cart', this.inCart);
-        this.checkbox.disabled = this.inCart;
-        if (this.inCart) this.checkbox.checked = false;
         // Keep any add-to-cart error visible; only swap the "already added" message.
         if (this.inCart) this.showStatus(this.config.strings.alreadyAdded);
         else if (this.status?.textContent === this.config.strings.alreadyAdded) this.showStatus('');

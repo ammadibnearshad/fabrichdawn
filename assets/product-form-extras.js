@@ -12,6 +12,9 @@ if (!window.ProductFormExtras) {
       });
     }
 
+    // Documented Ajax endpoint (routes.cart_add_url is '/cart/add', locale-aware).
+    const cartAddUrl = () => `${routes.cart_add_url}.js`;
+
     const jsonPost = (url, body) => {
       const config = fetchConfig('json');
       config.headers['X-Requested-With'] = 'XMLHttpRequest';
@@ -90,7 +93,7 @@ if (!window.ProductFormExtras) {
         // ends up on top with its extras below in display order.
         const before = variantQuantity(await this.getCart(true), main.id);
         const response = await jsonPost(
-          routes.cart_add_url,
+          cartAddUrl(),
           withSections({ items: [...items].reverse().concat(main) })
         );
 
@@ -112,7 +115,7 @@ if (!window.ProductFormExtras) {
             : null;
           return { ...line, id: main.id, sections: rendered };
         }
-        return jsonPost(routes.cart_add_url, withSections({ items: [main] })).then((retry) =>
+        return jsonPost(cartAddUrl(), withSections({ items: [main] })).then((retry) =>
           retry.status ? retry : normalize(retry, main.id, null)
         );
       },
@@ -127,7 +130,7 @@ if (!window.ProductFormExtras) {
           cart.setActiveElement(sourceElement);
         }
 
-        const response = await jsonPost(routes.cart_add_url, body);
+        const response = await jsonPost(cartAddUrl(), body);
         if (response.status) return response;
 
         const normalized = normalize(response, items[0].id, null);
@@ -208,3 +211,6 @@ if (!window.ProductFormExtras) {
     };
   })();
 }
+
+// Block scripts may run before this file (theme editor / quick add insert scripts without order).
+document.dispatchEvent(new CustomEvent('product-extras:ready'));

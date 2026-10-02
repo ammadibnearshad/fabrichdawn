@@ -1830,7 +1830,7 @@
       "settings": [
         {
           "type": "paragraph",
-          "content": "Connect \"Products\" to a product metafield (type: list of products, e.g. custom.add_on_products) with \"Connect dynamic source\" so each product shows its own add-ons. Checked add-ons are added with the main Add to cart button."
+          "content": "Connect \"Products\" to a product metafield (type: list of products, e.g. custom.add_on_products) with \"Connect dynamic source\" so each product shows its own add-ons. Each add-on has its own Add to cart button."
         },
         {
           "type": "text",
@@ -2038,33 +2038,23 @@
         },
         {
           "type": "header",
-          "content": "Selection"
+          "content": "Add to cart"
         },
         {
           "type": "select",
-          "id": "add_mode",
-          "label": "Add mode",
-          "default": "checkbox",
+          "id": "button_style",
+          "label": "Button style",
+          "default": "secondary",
           "options": [
             {
-              "value": "checkbox",
-              "label": "Add with main product"
+              "value": "secondary",
+              "label": "Secondary"
             },
             {
-              "value": "button",
-              "label": "Separate Add button"
-            },
-            {
-              "value": "both",
-              "label": "Both"
+              "value": "primary",
+              "label": "Primary"
             }
           ]
-        },
-        {
-          "type": "checkbox",
-          "id": "preselect",
-          "label": "Pre-select add-ons",
-          "default": false
         },
         {
           "type": "select",
@@ -2107,12 +2097,6 @@
         },
         {
           "type": "checkbox",
-          "id": "show_total",
-          "label": "Show total with add-ons",
-          "default": true
-        },
-        {
-          "type": "checkbox",
           "id": "add_property",
           "label": "Add hidden \"_add_on_for\" line item property",
           "default": true
@@ -2144,37 +2128,6 @@
           "type": "color",
           "id": "image_bg",
           "label": "Image background"
-        },
-        {
-          "type": "header",
-          "content": "Dynamic checkout"
-        },
-        {
-          "type": "select",
-          "id": "checkout_behavior",
-          "label": "When selected, dynamic checkout buttons",
-          "info": "Buy it now skips the cart, so it can't include extras",
-          "default": "hide",
-          "options": [
-            {
-              "value": "hide",
-              "label": "Hide"
-            },
-            {
-              "value": "note",
-              "label": "Show note"
-            },
-            {
-              "value": "none",
-              "label": "Do nothing"
-            }
-          ]
-        },
-        {
-          "type": "text",
-          "id": "checkout_note",
-          "label": "Dynamic checkout note",
-          "default": "Use Add to cart to include your extras"
         }
       ]
     },
@@ -2291,6 +2244,13 @@
           "id": "add_property",
           "label": "Add hidden \"_gift_wrap_for\" line item property",
           "default": true
+        },
+        {
+          "type": "text",
+          "id": "main_property_name",
+          "label": "Main product property",
+          "info": "Visible line item property added to the main product when gift wrap is selected (value: Yes, or the chosen wrap style). Leave blank to skip.",
+          "default": "Gift wrap"
         },
         {
           "type": "header",
