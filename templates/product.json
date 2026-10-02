@@ -30,9 +30,9 @@
         "cm_checklist": {
           "type": "cm_checklist",
           "settings": {
-            "heading": "Why customers love it",
+            "heading": "",
             "uppercase_heading": true,
-            "items": "Premium Quality Wash & Wear Fabric\nSoft & Comfortable Feel\nBreathable for All-Day Comfort\nIdeal for Formal & Casual Wear\nApprox. 4 Meters Length | 56 Inches Width\nLong-Lasting Color & Finish",
+            "items": "Premium Quality Fabric\nSoft & Comfortable Feel\nBreathable for All-Day Comfort",
             "metafield_key": "custom.key_features",
             "columns": "1",
             "icon": "checkmark",
