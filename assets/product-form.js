@@ -46,8 +46,13 @@ if (!customElements.get('product-form')) {
         const quantity = parseInt(formData.get('quantity')) || 1;
         const linesUpdateDeferred = this.createCartLinesUpdateEvent(variantId, quantity);
 
-        fetch(`${routes.cart_add_url}`, config)
-          .then((response) => response.json())
+        // product-extras: selected add-ons / gift wrap go in the same request (assets/product-form-extras.js)
+        const extras = window.ProductFormExtras?.collect(this.form, formData);
+        const addRequest = extras
+          ? window.ProductFormExtras.add(this.form, formData, extras)
+          : fetch(`${routes.cart_add_url}`, config).then((response) => response.json());
+
+        addRequest
           .then((response) => {
             if (response.status) {
               publish(PUB_SUB_EVENTS.cartError, {

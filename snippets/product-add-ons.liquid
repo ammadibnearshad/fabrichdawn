@@ -1,0 +1,294 @@
+{% comment %}
+  product-extras: "Add-on products" block (complete the look).
+
+  Source priority: block "Products" setting (connect a list.product_reference metafield as
+  dynamic source) -> product.metafields[namespace][key] -> fallback collection.
+  Checked add-ons are added with Dawn's Add to Cart via assets/product-form-extras.js.
+
+  Accepts:
+  - block: {Object} The 'add_on_products' block
+  - product: {Object} Main product
+  - section: {Object} Parent section
+  - product_form_id: {String} ID of the main product form
+
+  Usage:
+  {% render 'product-add-ons', block: block, product: product, section: section, product_form_id: product_form_id %}
+{% endcomment %}
+
+{%- liquid
+  assign bs = block.settings
+
+  assign source = bs.products
+  if source == blank and bs.metafield_namespace != blank and bs.metafield_key != blank
+    assign source = product.metafields[bs.metafield_namespace][bs.metafield_key].value
+  endif
+  if source == blank and bs.fallback_collection != blank
+    assign source = bs.fallback_collection.products
+  endif
+
+  assign count = 0
+  for add_on in source
+    if count >= bs.max_products
+      break
+    endif
+    if add_on.id != product.id
+      if add_on.available or bs.show_sold_out
+        assign count = count | plus: 1
+      endif
+    endif
+  endfor
+
+  assign money_format = shop.money_format
+  if settings.currency_code_enabled
+    assign money_format = shop.money_with_currency_format
+  endif
+
+  assign cols = bs.cards_desktop
+  if count > bs.cards_desktop
+    assign cols = bs.cards_desktop | plus: 0.25
+  endif
+-%}
+
+{%- if count == 0 -%}
+  {%- if request.design_mode -%}
+    {{ 'product-add-ons.css' | asset_url | stylesheet_tag }}
+    <p class="product-extras-empty" {{ block.shopify_attributes }}>
+      Add-on products: nothing to show for this product. Connect "Products" to a product list metafield (e.g.
+      custom.add_on_products) or set a fallback collection.
+    </p>
+  {%- endif -%}
+{%- else -%}
+  {{ 'product-add-ons.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'product-form-extras.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'product-add-ons.js' | asset_url }}" defer="defer"></script>
+
+  <product-add-ons
+    class="product-add-ons product-add-ons--{{ bs.layout }}"
+    data-block-id="{{ block.id }}"
+    style="
+      --pa-cols: {{ cols }};
+      --pa-visible: {{ bs.cards_mobile }};
+      --pa-radius: {{ bs.card_radius }}px;
+      --pa-padding: {{ bs.card_padding | divided_by: 10.0 }}rem;
+      --pa-gap: {{ bs.card_gap | divided_by: 10.0 }}rem;
+      --pa-align: {{ bs.heading_alignment }};
+      {%- if bs.card_bg != blank %}--pa-card-bg: {{ bs.card_bg }};{% endif -%}
+      {%- if bs.card_border != blank %}--pa-card-border: {{ bs.card_border }};{% endif -%}
+      {%- if bs.selected_border != blank %}--pa-selected-border: {{ bs.selected_border }};{% endif -%}
+      {%- if bs.image_bg != blank %}--pa-image-bg: {{ bs.image_bg }};{% endif -%}
+    "
+    {{ block.shopify_attributes }}
+  >
+    {%- if bs.heading != blank -%}
+      <h2 class="product-add-ons__heading {{ bs.heading_size }}">{{ bs.heading | escape }}</h2>
+    {%- endif -%}
+    {%- if bs.subheading != blank -%}
+      <p class="product-add-ons__subheading">{{ bs.subheading }}</p>
+    {%- endif -%}
+
+    <ul class="product-add-ons__list" role="list">
+      {%- assign rendered = 0 -%}
+      {%- for add_on in source -%}
+        {%- if rendered >= bs.max_products -%}
+          {%- break -%}
+        {%- endif -%}
+        {%- if add_on.id != product.id -%}
+          {%- if add_on.available or bs.show_sold_out -%}
+            {%- liquid
+              assign rendered = rendered | plus: 1
+              assign add_on_variant = add_on.selected_or_first_available_variant
+              assign card_id = block.id | append: '-' | append: add_on.id
+              assign media = add_on.featured_media
+              assign ratio = 1
+              if bs.image_ratio == 'portrait'
+                assign ratio = 0.75
+              elsif bs.image_ratio == 'adapt' and media
+                assign ratio = media.aspect_ratio
+              endif
+            -%}
+            <li class="product-add-ons__item">
+              <div
+                class="add-on-card{% if bs.add_mode != 'button' %} add-on-card--toggle{% endif %}{% if add_on.available == false %} add-on-card--unavailable{% endif %}"
+                data-add-on
+                data-variant-id="{{ add_on_variant.id }}"
+                data-option-names="{{ add_on.options | json | escape }}"
+              >
+                <div class="add-on-card__media" style="--pa-ratio: {{ ratio }};">
+                  {%- if media -%}
+                    {{
+                      media
+                      | image_url: width: 720
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '165, 360, 535, 720',
+                        sizes: '(min-width: 990px) 240px, (min-width: 750px) 30vw, 60vw',
+                        class: 'add-on-card__image',
+                        alt: media.alt
+                    }}
+                    {%- if bs.show_hover_image and add_on.media.size > 1 -%}
+                      {{
+                        add_on.media[1]
+                        | image_url: width: 720
+                        | image_tag:
+                          loading: 'lazy',
+                          widths: '165, 360, 535, 720',
+                          sizes: '(min-width: 990px) 240px, (min-width: 750px) 30vw, 60vw',
+                          class: 'add-on-card__image add-on-card__image--hover',
+                          alt: ''
+                      }}
+                    {%- endif -%}
+                  {%- else -%}
+                    {{ 'product-1' | placeholder_svg_tag: 'add-on-card__image placeholder-svg' }}
+                  {%- endif -%}
+                  <span class="add-on-card__check" aria-hidden="true">
+                    {{- 'icon-checkmark.svg' | inline_asset_content -}}
+                  </span>
+                </div>
+
+                <div class="add-on-card__info">
+                  <a href="{{ add_on.url }}" class="add-on-card__title full-unstyled-link">{{ add_on.title | escape }}</a>
+                  <div class="add-on-card__price">
+                    {%- render 'price', product: add_on, use_variant: true -%}
+                  </div>
+
+                  {%- unless add_on.has_only_default_variant -%}
+                    <div class="add-on-card__options">
+                      {%- if bs.picker_style == 'combined' -%}
+                        {%- assign option_names = add_on.options | join: ' / ' -%}
+                        <label class="visually-hidden" for="AddOnVariant-{{ card_id }}">
+                          {{- 'products.product.add_ons.option_label' | t: option: option_names, product: add_on.title -}}
+                        </label>
+                        <div class="select">
+                          <select id="AddOnVariant-{{ card_id }}" class="select__select" data-variant-select>
+                            {%- for variant in add_on.variants -%}
+                              <option
+                                value="{{ variant.id }}"
+                                {% if variant.id == add_on_variant.id %}
+                                  selected
+                                {% endif %}
+                                {% unless variant.available %}
+                                  disabled
+                                {% endunless %}
+                              >
+                                {{- variant.title | escape -}}
+                                {%- unless variant.available %} - {{ 'products.product.sold_out' | t }}{% endunless -%}
+                              </option>
+                            {%- endfor -%}
+                          </select>
+                          <span class="svg-wrapper">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
+                        </div>
+                      {%- else -%}
+                        {%- for option in add_on.options_with_values -%}
+                          {%- assign current_value = add_on_variant.options[forloop.index0] -%}
+                          <label class="visually-hidden" for="AddOnOption-{{ card_id }}-{{ forloop.index0 }}">
+                            {{- 'products.product.add_ons.option_label' | t: option: option.name, product: add_on.title -}}
+                          </label>
+                          <div class="select">
+                            <select
+                              id="AddOnOption-{{ card_id }}-{{ forloop.index0 }}"
+                              class="select__select"
+                              data-option-index="{{ forloop.index0 }}"
+                            >
+                              {%- for value in option.values -%}
+                                <option
+                                  value="{{ value.name | escape }}"
+                                  {% if value.name == current_value %}
+                                    selected
+                                  {% endif %}
+                                >
+                                  {{- value.name | escape -}}
+                                </option>
+                              {%- endfor -%}
+                            </select>
+                            <span class="svg-wrapper">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
+                          </div>
+                        {%- endfor -%}
+                      {%- endif -%}
+                    </div>
+                  {%- endunless -%}
+
+                  <div class="add-on-card__actions">
+                    {%- if bs.add_mode != 'button' -%}
+                      <label class="add-on-card__toggle">
+                        <input
+                          type="checkbox"
+                          class="add-on-card__checkbox"
+                          data-add-on-checkbox
+                          {% if bs.preselect and add_on.available %}
+                            checked
+                          {% endif %}
+                          {% unless add_on.available %}
+                            disabled
+                          {% endunless %}
+                        >
+                        <span>
+                          {{- 'products.product.add_ons.add_to_order' | t -}}
+                          <span class="visually-hidden">: {{ add_on.title | escape }}</span>
+                        </span>
+                      </label>
+                    {%- endif -%}
+                    {%- if bs.add_mode != 'checkbox' -%}
+                      <button
+                        type="button"
+                        class="button button--secondary add-on-card__button"
+                        data-add-on-button
+                        aria-label="{{ 'products.product.add_ons.add_aria' | t: product: add_on.title | escape }}"
+                        {% unless add_on.available %}
+                          disabled
+                        {% endunless %}
+                      >
+                        <span>{{ 'products.product.add_ons.add' | t }}</span>
+                        {%- render 'loading-spinner' -%}
+                      </button>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+                <script type="application/json" data-variants>
+                  [
+                    {%- for variant in add_on.variants -%}
+                      {
+                        "id": {{ variant.id }},
+                        "available": {{ variant.available | json }},
+                        "price": {{ variant.price }},
+                        "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+                        "options": {{ variant.options | json }}
+                      }{% unless forloop.last %},{% endunless %}
+                    {%- endfor -%}
+                  ]
+                </script>
+              </div>
+            </li>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+
+    {%- if bs.show_total -%}
+      <p class="product-add-ons__total" data-total-line hidden>
+        {{ 'products.product.add_ons.total_html' | t: total: '<span data-total></span>' }}
+      </p>
+    {%- endif -%}
+
+    <p class="product-add-ons__status" role="status" data-status></p>
+
+    <script type="application/json" data-add-ons-config>
+      {
+        "formId": {{ product_form_id | json }},
+        "addMode": {{ bs.add_mode | json }},
+        "quantityMode": {{ bs.quantity_mode | json }},
+        "sync": {{ bs.sync_option | json }},
+        "mainOptions": {{ product.options | json }},
+        "mainVariantOptions": {{ product.selected_or_first_available_variant.options | json }},
+        "mainPrice": {{ product.selected_or_first_available_variant.price | default: 0 }},
+        "propertyFor": {% if bs.add_property %}{{ product.title | json }}{% else %}null{% endif %},
+        "checkoutBehavior": {{ bs.checkout_behavior | json }},
+        "checkoutNote": {{ bs.checkout_note | json }},
+        "moneyFormat": {{ money_format | json }},
+        "strings": {
+          "error": {{ 'products.product.add_ons.error' | t: message: '[message]' | json }}
+        }
+      }
+    </script>
+  </product-add-ons>
+{%- endif -%}

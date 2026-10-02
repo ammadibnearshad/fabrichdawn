@@ -1,0 +1,293 @@
+/* product-extras: "Gift wrap" block (snippets/product-gift-wrap.liquid) */
+
+.gift-wrap {
+  display: block;
+}
+
+.gift-wrap__card {
+  border: 0.1rem solid var(--gw-border, rgba(var(--color-foreground), 0.15));
+  border-radius: var(--gw-radius);
+  background: var(--gw-bg, rgb(var(--color-background)));
+  transition: border-color var(--duration-short, 0.1s) ease, background-color var(--duration-short, 0.1s) ease,
+    box-shadow var(--duration-short, 0.1s) ease;
+}
+
+.gift-wrap:has(.gift-wrap__checkbox:checked) .gift-wrap__card {
+  border-color: var(--gw-checked-border, rgb(var(--color-foreground)));
+  background: var(--gw-checked-bg, rgba(var(--color-foreground), 0.04));
+  box-shadow: inset 0 0 0 0.1rem var(--gw-checked-border, rgb(var(--color-foreground)));
+}
+
+.gift-wrap__main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  min-height: 4.4rem;
+  padding: var(--gw-padding);
+  cursor: pointer;
+}
+
+.gift-wrap--in-cart .gift-wrap__main {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* Native checkbox stays focusable; the visual control is drawn next to it */
+.gift-wrap__checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+
+.gift-wrap__control {
+  position: relative;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border: 0.1rem solid rgba(var(--color-foreground), 0.55);
+  border-radius: 0.4rem;
+  transition: background-color var(--duration-short, 0.1s) ease, border-color var(--duration-short, 0.1s) ease;
+}
+
+.gift-wrap__control::after {
+  content: '';
+  position: absolute;
+  left: 0.6rem;
+  top: 0.2rem;
+  width: 0.5rem;
+  height: 1rem;
+  border: solid rgb(var(--color-background));
+  border-width: 0 0.2rem 0.2rem 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform var(--duration-short, 0.1s) ease;
+}
+
+.gift-wrap__checkbox:checked + .gift-wrap__control {
+  border-color: rgb(var(--color-foreground));
+  background: rgb(var(--color-foreground));
+}
+
+.gift-wrap__checkbox:checked + .gift-wrap__control::after {
+  transform: rotate(45deg) scale(1);
+}
+
+/* Switch style */
+.gift-wrap--switch .gift-wrap__control {
+  width: 4rem;
+  height: 2.4rem;
+  border-radius: 1.2rem;
+}
+
+.gift-wrap--switch .gift-wrap__control::after {
+  left: 0.2rem;
+  top: 0.2rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(var(--color-foreground), 0.55);
+  transform: none;
+  transition: transform var(--duration-short, 0.1s) ease, background-color var(--duration-short, 0.1s) ease;
+}
+
+.gift-wrap--switch .gift-wrap__checkbox:checked + .gift-wrap__control::after {
+  background: rgb(var(--color-background));
+  transform: translateX(1.6rem);
+}
+
+.gift-wrap__checkbox:focus-visible + .gift-wrap__control {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
+  outline-offset: 0.3rem;
+}
+
+.gift-wrap__checkbox:disabled + .gift-wrap__control {
+  opacity: 0.4;
+}
+
+.gift-wrap__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: rgba(var(--color-foreground), 0.06);
+}
+
+.gift-wrap__icon svg {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+.gift-wrap__image {
+  flex: 0 0 auto;
+  width: 4.8rem;
+  height: 4.8rem;
+  object-fit: cover;
+  border-radius: calc(var(--gw-radius) / 2);
+}
+
+.gift-wrap__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.gift-wrap__title {
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.gift-wrap__description {
+  font-size: 1.4rem;
+  line-height: 1.4;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+.gift-wrap__price {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Smooth reveal; collapsed fields leave the tab order via visibility */
+.gift-wrap__details {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows var(--duration-default, 0.2s) ease, visibility var(--duration-default, 0.2s);
+}
+
+.gift-wrap:has(.gift-wrap__checkbox:checked) .gift-wrap__details {
+  grid-template-rows: 1fr;
+  visibility: visible;
+}
+
+.gift-wrap__details-inner {
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  gap: 1rem;
+  padding: 0 var(--gw-padding);
+}
+
+.gift-wrap:has(.gift-wrap__checkbox:checked) .gift-wrap__details-inner {
+  padding-bottom: var(--gw-padding);
+}
+
+.gift-wrap__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.gift-wrap__swatch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 4.4rem;
+  padding: 0.4rem 1.2rem;
+  border: 0.1rem solid rgba(var(--color-foreground), 0.2);
+  border-radius: 2.2rem;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.gift-wrap__swatch-input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+
+.gift-wrap__swatch:has(.gift-wrap__swatch-input:checked) {
+  border-color: rgb(var(--color-foreground));
+  box-shadow: inset 0 0 0 0.1rem rgb(var(--color-foreground));
+}
+
+.gift-wrap__swatch:has(.gift-wrap__swatch-input:focus-visible) {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
+  outline-offset: 0.3rem;
+}
+
+.gift-wrap__swatch:has(.gift-wrap__swatch-input:disabled) {
+  opacity: 0.45;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.gift-wrap__swatch-image {
+  width: 3.2rem;
+  height: 3.2rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.gift-wrap__field {
+  margin: 0;
+}
+
+.gift-wrap__counter {
+  margin: -0.6rem 0 0;
+  font-size: 1.2rem;
+  text-align: right;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.gift-wrap__names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.gift-wrap__names .field {
+  margin: 0;
+}
+
+.gift-wrap__status {
+  margin: 0;
+  padding: 0 var(--gw-padding) var(--gw-padding);
+  font-size: 1.3rem;
+}
+
+.gift-wrap__status:empty {
+  display: none;
+}
+
+.product-extras-empty {
+  padding: 1.6rem;
+  border: 0.1rem dashed rgba(var(--color-foreground), 0.3);
+  font-size: 1.4rem;
+}
+
+/* Shared with product-add-ons.css: dynamic checkout state set by product-form-extras.js */
+.product-form__buttons .shopify-payment-button[hidden] {
+  display: none;
+}
+
+.product-form__extras-note {
+  margin: 1rem 0 0;
+  text-align: center;
+  color: rgba(var(--color-foreground), 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gift-wrap__card,
+  .gift-wrap__control,
+  .gift-wrap__control::after,
+  .gift-wrap__details {
+    transition: none;
+  }
+}

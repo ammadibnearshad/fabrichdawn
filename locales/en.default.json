@@ -115,6 +115,24 @@
   },
   "products": {
     "product": {
+      "add_ons": {
+        "add_to_order": "Add to order",
+        "add": "Add",
+        "add_aria": "Add {{ product }} to cart",
+        "option_label": "{{ option }} for {{ product }}",
+        "total_html": "Total with add-ons: {{ total }}",
+        "error": "Not all items could be added: {{ message }}"
+      },
+      "gift_wrap": {
+        "free": "Free",
+        "already_added": "Gift wrap already added",
+        "style_label": "Gift wrap style",
+        "message_limit": "Maximum {{ count }} characters",
+        "property_message": "Gift message",
+        "to": "To",
+        "from": "From",
+        "error": "Gift wrap couldn't be added: {{ message }}"
+      },
       "bundle": {
         "legend": "Choose a bundle",
         "save_percent": "Save {{ percent }}%",

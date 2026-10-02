@@ -1,0 +1,274 @@
+{% comment %}
+  product-extras: "Gift wrap" block.
+
+  The gift wrap is a separate product (block setting), overridable per product with the
+  custom.gift_wrap_product metafield and hidden with custom.disable_gift_wrap. When checked it is
+  added with Dawn's Add to Cart via assets/product-form-extras.js.
+
+  Accepts:
+  - block: {Object} The 'gift_wrap' block
+  - product: {Object} Main product
+  - product_form_id: {String} ID of the main product form
+
+  Usage:
+  {% render 'product-gift-wrap', block: block, product: product, product_form_id: product_form_id %}
+{% endcomment %}
+
+{%- liquid
+  assign bs = block.settings
+  assign wrap = product.metafields.custom.gift_wrap_product.value | default: bs.product
+  assign wrap_disabled = false
+  if product.metafields.custom.disable_gift_wrap.value == true or wrap.id == product.id
+    assign wrap_disabled = true
+  endif
+
+  assign money_format = shop.money_format
+  if settings.currency_code_enabled
+    assign money_format = shop.money_with_currency_format
+  endif
+-%}
+
+{%- if wrap_disabled -%}
+  {%- if request.design_mode -%}
+    {{ 'product-gift-wrap.css' | asset_url | stylesheet_tag }}
+    <p class="product-extras-empty" {{ block.shopify_attributes }}>
+      Gift wrap is hidden on this product (metafield custom.disable_gift_wrap).
+    </p>
+  {%- endif -%}
+{%- elsif wrap == blank or wrap.available == false -%}
+  {%- if request.design_mode -%}
+    {{ 'product-gift-wrap.css' | asset_url | stylesheet_tag }}
+    <p class="product-extras-empty" {{ block.shopify_attributes }}>
+      Gift wrap: choose an available gift wrap product in the block settings.
+    </p>
+  {%- endif -%}
+{%- else -%}
+  {%- liquid
+    assign wrap_variant = wrap.selected_or_first_available_variant
+    if wrap_variant.price == 0
+      assign price_text = 'products.product.gift_wrap.free' | t
+    elsif settings.currency_code_enabled
+      assign price_text = wrap_variant.price | money_with_currency
+    else
+      assign price_text = wrap_variant.price | money
+    endif
+
+    assign title = bs.title | replace: '[price]', price_text
+    assign description = bs.description | replace: '[price]', price_text
+
+    assign show_variants = false
+    if wrap.has_only_default_variant == false and wrap.variants.size > 1
+      assign show_variants = true
+    endif
+    assign has_details = false
+    if show_variants or bs.show_message
+      assign has_details = true
+    endif
+  -%}
+  {{ 'product-gift-wrap.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'product-form-extras.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'product-gift-wrap.js' | asset_url }}" defer="defer"></script>
+
+  <product-gift-wrap
+    class="gift-wrap gift-wrap--{{ bs.control_style }}"
+    data-block-id="{{ block.id }}"
+    style="
+      --gw-radius: {{ bs.card_radius }}px;
+      --gw-padding: {{ bs.card_padding | divided_by: 10.0 }}rem;
+      {%- if bs.card_bg != blank %}--gw-bg: {{ bs.card_bg }};{% endif -%}
+      {%- if bs.card_border != blank %}--gw-border: {{ bs.card_border }};{% endif -%}
+      {%- if bs.checked_border != blank %}--gw-checked-border: {{ bs.checked_border }};{% endif -%}
+      {%- if bs.checked_bg != blank %}--gw-checked-bg: {{ bs.checked_bg }};{% endif -%}
+    "
+    {{ block.shopify_attributes }}
+  >
+    <div class="gift-wrap__card">
+      <label class="gift-wrap__main" for="GiftWrap-{{ block.id }}">
+        <input
+          type="checkbox"
+          id="GiftWrap-{{ block.id }}"
+          class="gift-wrap__checkbox"
+          data-gift-wrap-checkbox
+          {% if bs.control_style == 'switch' %}
+            role="switch"
+          {% endif %}
+          {% if has_details %}
+            aria-controls="GiftWrapDetails-{{ block.id }}"
+          {% endif %}
+          {% if bs.checked_default %}
+            checked
+          {% endif %}
+        >
+        <span class="gift-wrap__control" aria-hidden="true"></span>
+
+        {%- if bs.icon == 'image' and bs.image != blank -%}
+          {{
+            bs.image
+            | image_url: width: 96
+            | image_tag: class: 'gift-wrap__image', width: 48, height: 48, loading: 'lazy', alt: ''
+          }}
+        {%- elsif bs.icon == 'gift' -%}
+          <span class="gift-wrap__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" focusable="false">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8m16 0H4m16 0a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1m8-4v13m0-13H8.5a2.5 2.5 0 1 1 0-5C11 3 12 8 12 8Zm0 0h3.5a2.5 2.5 0 1 0 0-5C13 3 12 8 12 8Z"/>
+            </svg>
+          </span>
+        {%- endif -%}
+
+        <span class="gift-wrap__text">
+          <span class="gift-wrap__title" data-title>{{ title | escape }}</span>
+          {%- if description != blank -%}
+            <span class="gift-wrap__description" data-description>{{ description | escape }}</span>
+          {%- endif -%}
+        </span>
+        <span class="gift-wrap__price" data-price>{{ price_text }}</span>
+      </label>
+
+      {%- if has_details -%}
+        <div class="gift-wrap__details" id="GiftWrapDetails-{{ block.id }}">
+          <div class="gift-wrap__details-inner">
+            {%- if show_variants -%}
+              {%- if bs.variant_style == 'swatches' -%}
+                <fieldset class="gift-wrap__swatches">
+                  <legend class="visually-hidden">{{ 'products.product.gift_wrap.style_label' | t }}</legend>
+                  {%- for variant in wrap.variants -%}
+                    <label class="gift-wrap__swatch">
+                      <input
+                        type="radio"
+                        name="GiftWrapVariant-{{ block.id }}"
+                        value="{{ variant.id }}"
+                        class="gift-wrap__swatch-input"
+                        data-wrap-variant
+                        {% if variant.id == wrap_variant.id %}
+                          checked
+                        {% endif %}
+                        {% unless variant.available %}
+                          disabled
+                        {% endunless %}
+                      >
+                      {%- if variant.featured_image -%}
+                        {{
+                          variant.featured_image
+                          | image_url: width: 64
+                          | image_tag: class: 'gift-wrap__swatch-image', width: 32, height: 32, loading: 'lazy', alt: ''
+                        }}
+                      {%- endif -%}
+                      <span>{{ variant.title | escape }}</span>
+                    </label>
+                  {%- endfor -%}
+                </fieldset>
+              {%- else -%}
+                <div class="select">
+                  <label class="visually-hidden" for="GiftWrapVariant-{{ block.id }}">
+                    {{- 'products.product.gift_wrap.style_label' | t -}}
+                  </label>
+                  <select id="GiftWrapVariant-{{ block.id }}" class="select__select" data-wrap-variant>
+                    {%- for variant in wrap.variants -%}
+                      <option
+                        value="{{ variant.id }}"
+                        {% if variant.id == wrap_variant.id %}
+                          selected
+                        {% endif %}
+                        {% unless variant.available %}
+                          disabled
+                        {% endunless %}
+                      >
+                        {{- variant.title | escape -}}
+                      </option>
+                    {%- endfor -%}
+                  </select>
+                  <span class="svg-wrapper">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- if bs.show_message -%}
+              <div class="field gift-wrap__field">
+                <textarea
+                  id="GiftWrapMessage-{{ block.id }}"
+                  class="text-area field__input"
+                  rows="3"
+                  maxlength="{{ bs.message_max }}"
+                  placeholder="{{ bs.message_placeholder | default: bs.message_label | escape }}"
+                  aria-describedby="GiftWrapLimit-{{ block.id }}"
+                  data-message
+                ></textarea>
+                <label class="field__label" for="GiftWrapMessage-{{ block.id }}">{{ bs.message_label | escape }}</label>
+              </div>
+              <p class="gift-wrap__counter">
+                <span class="visually-hidden" id="GiftWrapLimit-{{ block.id }}">
+                  {{- 'products.product.gift_wrap.message_limit' | t: count: bs.message_max -}}
+                </span>
+                <span aria-hidden="true"><span data-count>0</span>/{{ bs.message_max }}</span>
+              </p>
+
+              {%- if bs.show_to_from -%}
+                <div class="gift-wrap__names">
+                  <div class="field">
+                    <input
+                      id="GiftWrapTo-{{ block.id }}"
+                      class="field__input"
+                      type="text"
+                      maxlength="60"
+                      autocomplete="off"
+                      placeholder="{{ 'products.product.gift_wrap.to' | t }}"
+                      data-to
+                    >
+                    <label class="field__label" for="GiftWrapTo-{{ block.id }}">
+                      {{- 'products.product.gift_wrap.to' | t -}}
+                    </label>
+                  </div>
+                  <div class="field">
+                    <input
+                      id="GiftWrapFrom-{{ block.id }}"
+                      class="field__input"
+                      type="text"
+                      maxlength="60"
+                      autocomplete="off"
+                      placeholder="{{ 'products.product.gift_wrap.from' | t }}"
+                      data-from
+                    >
+                    <label class="field__label" for="GiftWrapFrom-{{ block.id }}">
+                      {{- 'products.product.gift_wrap.from' | t -}}
+                    </label>
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      <p class="gift-wrap__status" role="status" data-status></p>
+    </div>
+
+    <script type="application/json" data-gift-wrap-config>
+      {
+        "formId": {{ product_form_id | json }},
+        "productId": {{ wrap.id }},
+        "quantityMode": {{ bs.quantity_mode | json }},
+        "messageTarget": {{ bs.message_target | json }},
+        "propertyFor": {% if bs.add_property %}{{ product.title | json }}{% else %}null{% endif %},
+        "checkoutBehavior": {{ bs.checkout_behavior | json }},
+        "checkoutNote": {{ bs.checkout_note | json }},
+        "moneyFormat": {{ money_format | json }},
+        "title": {{ bs.title | json }},
+        "description": {{ bs.description | json }},
+        "variants": [
+          {%- for variant in wrap.variants -%}
+            { "id": {{ variant.id }}, "price": {{ variant.price }}, "available": {{ variant.available | json }} }
+            {%- unless forloop.last %},{% endunless -%}
+          {%- endfor -%}
+        ],
+        "strings": {
+          "free": {{ 'products.product.gift_wrap.free' | t | json }},
+          "alreadyAdded": {{ 'products.product.gift_wrap.already_added' | t | json }},
+          "error": {{ 'products.product.gift_wrap.error' | t: message: '[message]' | json }},
+          "message": {{ 'products.product.gift_wrap.property_message' | t | json }},
+          "to": {{ 'products.product.gift_wrap.to' | t | json }},
+          "from": {{ 'products.product.gift_wrap.from' | t | json }}
+        }
+      }
+    </script>
+  </product-gift-wrap>
+{%- endif -%}
