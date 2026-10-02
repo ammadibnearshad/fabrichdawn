@@ -133,7 +133,6 @@
             "thumbnail_size": 56,
             "show_savings": true,
             "savings_format": "percent",
-            "use_compare_at": true,
             "footer_note": "Discount applied at checkout"
           }
         },
@@ -230,6 +229,40 @@
             "require_size_selection": false
           }
         },
+        "add_on_products_jLrhAR": {
+          "type": "add_on_products",
+          "settings": {
+            "heading": "Complete the look",
+            "subheading": "",
+            "heading_size": "h5",
+            "heading_alignment": "left",
+            "products": [
+              "luxor-cotton-lawn-unstitched-kameez-shalwar-for-men"
+            ],
+            "metafield_namespace": "custom",
+            "metafield_key": "add_on_products",
+            "fallback_collection": "",
+            "max_products": 4,
+            "show_sold_out": false,
+            "layout": "list",
+            "cards_desktop": 2,
+            "cards_mobile": "1.6",
+            "image_ratio": "square",
+            "show_hover_image": false,
+            "card_radius": 0,
+            "card_padding": 10,
+            "card_gap": 12,
+            "button_style": "primary",
+            "quantity_mode": "one",
+            "picker_style": "separate",
+            "sync_option": true,
+            "add_property": false,
+            "card_bg": "",
+            "card_border": "",
+            "selected_border": "",
+            "image_bg": ""
+          }
+        },
         "cm_callout": {
           "type": "cm_callout",
           "settings": {
@@ -280,40 +313,6 @@
             "border_opacity": 20
           }
         },
-        "add_on_products_jLrhAR": {
-          "type": "add_on_products",
-          "settings": {
-            "heading": "Complete the look",
-            "subheading": "",
-            "heading_size": "h5",
-            "heading_alignment": "left",
-            "products": [
-              "luxor-cotton-lawn-unstitched-kameez-shalwar-for-men"
-            ],
-            "metafield_namespace": "custom",
-            "metafield_key": "add_on_products",
-            "fallback_collection": "",
-            "max_products": 4,
-            "show_sold_out": false,
-            "layout": "list",
-            "cards_desktop": 2,
-            "cards_mobile": "1.6",
-            "image_ratio": "square",
-            "show_hover_image": false,
-            "card_radius": 0,
-            "card_padding": 10,
-            "card_gap": 12,
-            "button_style": "primary",
-            "quantity_mode": "one",
-            "picker_style": "separate",
-            "sync_option": true,
-            "add_property": false,
-            "card_bg": "",
-            "card_border": "",
-            "selected_border": "",
-            "image_bg": ""
-          }
-        },
         "description": {
           "type": "description",
           "settings": {
@@ -339,9 +338,9 @@
         "bundle_tier_eftxxT",
         "gift_wrap_ibWwjd",
         "buy_buttons",
+        "add_on_products_jLrhAR",
         "cm_callout",
         "cm_trust_icons",
-        "add_on_products_jLrhAR",
         "description"
       ],
       "settings": {
