@@ -17,22 +17,39 @@
         "announcement-bar-0": {
           "type": "announcement",
           "settings": {
-            "text": "Welcome to our store",
+            "text": "Free Shipping All Over the Pakistan",
+            "link": ""
+          }
+        },
+        "announcement_LT6pew": {
+          "type": "announcement",
+          "settings": {
+            "text": "Cash On Delivery",
             "link": ""
           }
         }
       },
       "block_order": [
-        "announcement-bar-0"
+        "announcement-bar-0",
+        "announcement_LT6pew"
       ],
       "settings": {
         "auto_rotate": false,
         "change_slides_speed": 5,
-        "color_scheme": "scheme-1",
+        "show_arrows": true,
+        "color_scheme": "scheme-3",
         "show_line_separator": true,
         "show_social": false,
         "enable_country_selector": false,
-        "enable_language_selector": false
+        "enable_language_selector": false,
+        "enable_whatsapp": false,
+        "whatsapp_number": "",
+        "whatsapp_message": "",
+        "whatsapp_text": "Chat on WhatsApp",
+        "enable_instagram": false,
+        "instagram_link": "",
+        "enable_facebook": false,
+        "facebook_link": ""
       }
     },
     "header": {
