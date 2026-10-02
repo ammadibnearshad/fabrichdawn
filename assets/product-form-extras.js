@@ -70,8 +70,10 @@ if (!window.ProductFormExtras) {
 
       // Returns { items, mainProperties, providers } or null when nothing extra is selected.
       collect(form, formData) {
-        const providers = providersFor(form.id).filter((provider) => provider.hasSelection());
-        log('submit', form.id, '| registered:', providersFor(form.id).length, '| selected:', providers.length);
+        // Not form.id: Dawn's form has <input name="id">, which shadows the id property.
+        const formId = form.getAttribute('id');
+        const providers = providersFor(formId).filter((provider) => provider.hasSelection());
+        log('submit', formId, '| registered:', providersFor(formId).length, '| selected:', providers.length);
         if (!providers.length) return null;
 
         const hasFile = Array.from(formData.values()).some((value) => value instanceof File && value.size > 0);
@@ -107,7 +109,7 @@ if (!window.ProductFormExtras) {
         if (!response.status) {
           const normalized = normalize(response, main.id, null);
           document.dispatchEvent(
-            new CustomEvent('product-extras:added', { detail: { formId: form.id, response: normalized } })
+            new CustomEvent('product-extras:added', { detail: { formId: form.getAttribute('id'), response: normalized } })
           );
           return normalized;
         }
