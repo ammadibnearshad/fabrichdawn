@@ -229,7 +229,6 @@
         },
         "add_on_products_jLrhAR": {
           "type": "add_on_products",
-          "disabled": true,
           "settings": {
             "heading": "Complete the look",
             "subheading": "",
