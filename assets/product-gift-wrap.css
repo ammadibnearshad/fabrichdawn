@@ -152,6 +152,37 @@
   font-weight: 600;
 }
 
+/* Mobile: the fixed-width price squeezed the text to one word per line, so drop
+   it under the title and let the text take the full remaining width. */
+@media screen and (max-width: 749px) {
+  .gift-wrap__main {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    column-gap: 1.2rem;
+    row-gap: 0.4rem;
+  }
+
+  .gift-wrap__main:not(:has(.gift-wrap__icon, .gift-wrap__image)) {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .gift-wrap__control,
+  .gift-wrap__icon,
+  .gift-wrap__image {
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+
+  .gift-wrap__text,
+  .gift-wrap__price {
+    grid-column: -2;
+  }
+
+  .gift-wrap__price {
+    margin-left: 0;
+  }
+}
+
 /* Smooth reveal; collapsed fields leave the tab order via visibility */
 .gift-wrap__details {
   display: grid;
