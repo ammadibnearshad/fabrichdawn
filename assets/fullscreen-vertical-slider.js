@@ -191,6 +191,7 @@
       this.setBodyHeaderClass(false);
       if (!document.querySelector('fullscreen-vertical-slider[data-pin-header="true"]')) {
         document.body.classList.remove('fvs-header-pinned');
+        this.setGroupPinned(false);
       }
       if (!document.querySelector('fullscreen-vertical-slider[data-full-footer="true"]')) {
         document.body.classList.remove('fvs-footer-full');
@@ -222,6 +223,11 @@
       this.headerIsPinned =
         this.pinHeader || stickyType === 'always' || stickyType === 'reduce-logo-size';
 
+      // On mobile, pin the whole header group (announcement bar included) so
+      // nothing above the slider scrolls away and shifts the header mid-swipe.
+      this.setGroupPinned(this.pinHeader && this.mobileMedia.matches);
+      this.pinnedHeight = this.groupPinned ? this.headerGroupHeight : this.headerHeight;
+
       document.documentElement.style.setProperty(
         '--fvs-header-group-height',
         this.headerGroupHeight + 'px'
@@ -230,7 +236,7 @@
       // "full screen minus header" height.
       this.style.setProperty(
         '--fvs-header-height',
-        (this.headerIsPinned ? this.headerHeight : 0) + 'px'
+        (this.headerIsPinned ? this.pinnedHeight : 0) + 'px'
       );
 
       this.isFirstSection = Boolean(main && this.sectionWrapper && main.firstElementChild === this.sectionWrapper);
@@ -239,6 +245,22 @@
 
       if (this.sectionWrapper) {
         this.sectionWrapper.classList.toggle('fvs-overlap-parent', this.overlapActive);
+      }
+    }
+
+    // Each header group section sticks just below the ones before it.
+    setGroupPinned(on) {
+      this.groupPinned = on;
+      document.body.classList.toggle('fvs-header-group-pinned', on);
+      var els = this.headerGroupEls || [];
+      var offset = 0;
+      for (var i = 0; i < els.length; i++) {
+        if (on) {
+          els[i].style.setProperty('--fvs-sticky-top', offset + 'px');
+          offset += els[i].offsetHeight;
+        } else {
+          els[i].style.removeProperty('--fvs-sticky-top');
+        }
       }
     }
 
@@ -558,7 +580,7 @@
     }
 
     getTopOffset() {
-      if (this.heightMode === 'full_minus_header' && this.headerIsPinned) return this.headerHeight;
+      if (this.heightMode === 'full_minus_header' && this.headerIsPinned) return this.pinnedHeight;
       return 0;
     }
 
@@ -693,7 +715,7 @@
 
     getNextScrollTarget() {
       // A pinned header covers the top of whatever we land on.
-      var pinned = this.headerIsPinned ? this.headerHeight : 0;
+      var pinned = this.headerIsPinned ? this.pinnedHeight : 0;
       var wrapper = this.sectionWrapper || this;
       var next = wrapper.nextElementSibling;
       while (next && next.offsetHeight === 0) next = next.nextElementSibling;

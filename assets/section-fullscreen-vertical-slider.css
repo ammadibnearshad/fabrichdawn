@@ -115,6 +115,22 @@ body.fvs-header-pinned .section-header.shopify-section-header-hidden.menu-open {
   top: 0;
 }
 
+/* Mobile: the announcement bar sticks too, and the header sits right below it.
+   --fvs-sticky-top is set per section by JS. */
+@media screen and (max-width: 749px) {
+  body.fvs-header-group-pinned .shopify-section-group-header-group,
+  body.fvs-header-group-pinned .section-header.shopify-section-group-header-group,
+  body.fvs-header-group-pinned .section-header.shopify-section-header-hidden,
+  body.fvs-header-group-pinned .section-header.shopify-section-header-hidden.menu-open {
+    position: sticky;
+    top: var(--fvs-sticky-top, 0);
+  }
+
+  body.fvs-header-group-pinned .section-header.animate {
+    transition: none;
+  }
+}
+
 /* Footer as a full-viewport panel: content sits at the bottom, the empty space
    falls above it. Targets any <footer> in the footer group, so it works for
    Dawn's .footer and the custom .footer-custom alike.
