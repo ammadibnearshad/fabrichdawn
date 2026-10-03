@@ -206,9 +206,97 @@
         "show_slide_counter": false,
         "show_scroll_hint": false
       }
+    },
+    "lookbook_slider_XiYxYB": {
+      "type": "lookbook-slider",
+      "blocks": {
+        "slide_nxKE6K": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/FAB-30_3.jpg",
+            "link": "",
+            "caption": ""
+          }
+        },
+        "slide_PGKeMJ": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/FAB-34_1.jpg",
+            "link": "",
+            "caption": ""
+          }
+        },
+        "slide_HAkxkj": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/FAB-35_3.jpg",
+            "link": "",
+            "caption": ""
+          }
+        },
+        "slide_hEM3zn": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/FAB-33_2.jpg",
+            "link": "",
+            "caption": ""
+          }
+        },
+        "slide_c3aG7i": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/1_1.png",
+            "link": "",
+            "caption": ""
+          }
+        },
+        "slide_kz8piU": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/FAB-9390_1.png",
+            "link": "",
+            "caption": ""
+          }
+        },
+        "slide_gVjK9N": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/Karigari-1.jpg",
+            "link": "",
+            "caption": ""
+          }
+        }
+      },
+      "block_order": [
+        "slide_nxKE6K",
+        "slide_PGKeMJ",
+        "slide_HAkxkj",
+        "slide_hEM3zn",
+        "slide_c3aG7i",
+        "slide_kz8piU",
+        "slide_gVjK9N"
+      ],
+      "name": "Lookbook slider",
+      "settings": {
+        "heading": "Lookbook",
+        "heading_size": "h1",
+        "accessibility_label": "Lookbook",
+        "full_width": true,
+        "show_captions": false,
+        "show_dots": true,
+        "autoplay": false,
+        "autoplay_speed": 5,
+        "button_label": "",
+        "button_link": "",
+        "button_style_secondary": true,
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
     }
   },
   "order": [
-    "fullscreen_vertical_slider_fYXQEf"
+    "fullscreen_vertical_slider_fYXQEf",
+    "lookbook_slider_XiYxYB"
   ]
 }
