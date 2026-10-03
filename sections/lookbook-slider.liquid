@@ -1,0 +1,353 @@
+{{ 'section-lookbook-slider.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'section-lookbook-slider.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign slide_count = section.blocks.size
+  assign eager = false
+  if section.index == 1
+    assign eager = true
+  endif
+-%}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+  <section
+    class="lookbook section-{{ section.id }} section-{{ section.id }}-padding"
+    aria-labelledby="Lookbook-Heading-{{ section.id }}"
+  >
+    {%- if section.settings.heading != blank -%}
+      <div class="page-width lookbook__header">
+        <h2
+          id="Lookbook-Heading-{{ section.id }}"
+          class="lookbook__heading {{ section.settings.heading_size }}"
+        >
+          {{ section.settings.heading | escape }}
+        </h2>
+      </div>
+    {%- endif -%}
+
+    <div class="{% unless section.settings.full_width %}page-width{% endunless %}">
+      <lookbook-slider
+        class="lookbook__slider"
+        role="region"
+        aria-roledescription="{{ 'sections.slideshow.carousel' | t }}"
+        aria-label="{{ section.settings.heading | default: section.settings.accessibility_label | escape }}"
+        data-autoplay="{{ section.settings.autoplay }}"
+        data-speed="{{ section.settings.autoplay_speed | times: 1000 }}"
+        tabindex="-1"
+      >
+        <div class="lookbook__stage">
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign image_alt = block.settings.image.alt | default: block.settings.caption | escape
+              assign focal_style = block.settings.image.presentation.focal_point | prepend: 'object-position: '
+              assign loading = 'lazy'
+              if eager and forloop.index0 < 3
+                assign loading = 'eager'
+              endif
+              if eager and forloop.rindex0 < 2
+                assign loading = 'eager'
+              endif
+            -%}
+            <div
+              class="lookbook__slide"
+              role="group"
+              aria-roledescription="{{ 'sections.slideshow.slide' | t }}"
+              aria-label="{{ forloop.index }} {{ 'general.slider.of' | t }} {{ slide_count }}"
+              data-index="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              {%- if block.settings.link != blank -%}
+                <a
+                  class="lookbook__media"
+                  href="{{ block.settings.link }}"
+                  {% if block.settings.caption != blank %}
+                    aria-label="{{ block.settings.caption | escape }}"
+                  {% endif %}
+                >
+              {%- else -%}
+                <div class="lookbook__media">
+              {%- endif -%}
+
+              {%- if block.settings.image != blank -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 1500
+                  | image_tag:
+                    widths: '375, 550, 750, 1100, 1500',
+                    sizes: '(min-width: 750px) 32vw, 62vw',
+                    loading: loading,
+                    alt: image_alt,
+                    class: 'lookbook__image',
+                    style: focal_style
+                }}
+              {%- else -%}
+                {{ 'lifestyle-1' | placeholder_svg_tag: 'lookbook__image placeholder-svg' }}
+              {%- endif -%}
+
+              {%- if block.settings.link != blank -%}
+                </a>
+              {%- else -%}
+                </div>
+              {%- endif -%}
+
+              {%- if block.settings.caption != blank and section.settings.show_captions -%}
+                <p class="lookbook__caption">{{ block.settings.caption | escape }}</p>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if slide_count > 1 -%}
+          <div class="lookbook__controls">
+            <button
+              type="button"
+              class="lookbook__arrow lookbook__arrow--prev"
+              data-lookbook-prev
+              aria-label="{{ 'sections.slideshow.previous_slideshow' | t }}"
+            >
+              <span class="svg-wrapper" aria-hidden="true">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
+            </button>
+
+            {%- if section.settings.show_dots -%}
+              <div class="lookbook__dots">
+                {%- for block in section.blocks -%}
+                  <button
+                    type="button"
+                    class="lookbook__dot"
+                    data-lookbook-dot="{{ forloop.index0 }}"
+                    aria-label="{{ 'sections.slideshow.load_slide' | t }} {{ forloop.index }} {{ 'general.slider.of' | t }} {{ slide_count }}"
+                  ></button>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.autoplay -%}
+              <button
+                type="button"
+                class="lookbook__pause"
+                data-lookbook-pause
+                aria-label="{{ 'sections.slideshow.pause_slideshow' | t }}"
+                data-label-pause="{{ 'sections.slideshow.pause_slideshow' | t }}"
+                data-label-play="{{ 'sections.slideshow.play_slideshow' | t }}"
+              >
+                <svg class="lookbook__pause-icon" aria-hidden="true" focusable="false" viewBox="0 0 10 10">
+                  <path d="M2 1h2v8H2zM6 1h2v8H6z" fill="currentColor"/>
+                </svg>
+                <svg class="lookbook__play-icon" aria-hidden="true" focusable="false" viewBox="0 0 10 10">
+                  <path d="M2 1l7 4-7 4z" fill="currentColor"/>
+                </svg>
+              </button>
+            {%- endif -%}
+
+            <button
+              type="button"
+              class="lookbook__arrow lookbook__arrow--next"
+              data-lookbook-next
+              aria-label="{{ 'sections.slideshow.next_slideshow' | t }}"
+            >
+              <span class="svg-wrapper" aria-hidden="true">{{- 'icon-caret.svg' | inline_asset_content -}}</span>
+            </button>
+          </div>
+        {%- endif -%}
+
+        <p class="visually-hidden" aria-live="polite" data-lookbook-live></p>
+      </lookbook-slider>
+    </div>
+
+    {%- if section.settings.button_label != blank -%}
+      <div class="page-width lookbook__footer">
+        <a
+          {% if section.settings.button_link != blank %}
+            href="{{ section.settings.button_link }}"
+          {% else %}
+            role="link" aria-disabled="true"
+          {% endif %}
+          class="button{% if section.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}"
+        >
+          {{- section.settings.button_label | escape -}}
+        </a>
+      </div>
+    {%- endif -%}
+  </section>
+</div>
+
+{% schema %}
+{
+  "name": "Lookbook slider",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Lookbook"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h2", "label": "Small" },
+        { "value": "h1", "label": "Medium" },
+        { "value": "h0", "label": "Large" }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "text",
+      "id": "accessibility_label",
+      "label": "Slider label for screen readers",
+      "info": "Used when the heading is empty.",
+      "default": "Lookbook"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Make section full width",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_captions",
+      "label": "Show caption on the main image",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show pagination dots",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-rotate slides",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Change slides every",
+      "min": 3,
+      "max": 9,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "info": "Leave empty to hide the button."
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "checkbox",
+      "id": "button_style_secondary",
+      "label": "Use outline button style",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Look",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "Portrait images work best (3:4 or taller)."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Opens when the main image is clicked."
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption",
+          "info": "Used as the link label for screen readers."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook slider",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
+    }
+  ]
+}
+{% endschema %}

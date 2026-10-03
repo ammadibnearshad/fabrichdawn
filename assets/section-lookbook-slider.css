@@ -1,0 +1,316 @@
+/* Lookbook slider (sections/lookbook-slider.liquid)
+   Coverflow layout: the active look sits in the middle at full size, its
+   neighbours step down in height on each side. Every size is in cqi (a share
+   of the slider's width), so the whole stage scales with the container and
+   keeps its height reserved before images load. */
+
+.lookbook__header {
+  margin-bottom: 2.4rem;
+  text-align: center;
+}
+
+.lookbook__heading {
+  margin: 0;
+}
+
+.lookbook__slider {
+  display: block;
+  container-type: inline-size;
+
+  /* Mobile: one main look with a neighbour peeking on each side. */
+  --lb-w0: 62cqi;
+  --lb-h0: 82.68cqi;
+  --lb-w1: 30cqi;
+  --lb-h1: 68cqi;
+  --lb-x1: 46cqi;
+  --lb-w2: 30cqi;
+  --lb-h2: 55cqi;
+  --lb-x2: 76cqi;
+  --lb-x3: 106cqi;
+  --lb-speed: 600ms;
+  --lb-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lookbook__slider:focus {
+  outline: none;
+}
+
+.lookbook__stage {
+  position: relative;
+  height: var(--lb-h0);
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.lookbook__slide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--lb-w2);
+  height: var(--lb-h2);
+  opacity: 0;
+  transform: translate(calc(var(--lb-x, 0cqi) - 50%), -50%);
+  transition: width var(--lb-speed) var(--lb-ease), height var(--lb-speed) var(--lb-ease),
+    transform var(--lb-speed) var(--lb-ease), opacity var(--lb-speed) var(--lb-ease);
+  will-change: transform;
+}
+
+/* Before JS runs, show the first look in the middle so nothing stacks up. */
+.lookbook__slider:not(.is-ready) .lookbook__slide:first-child {
+  width: var(--lb-w0);
+  height: var(--lb-h0);
+  opacity: 1;
+}
+
+.lookbook__slide[data-pos='0'] {
+  z-index: 2;
+  width: var(--lb-w0);
+  height: var(--lb-h0);
+  opacity: 1;
+  --lb-x: 0cqi;
+}
+
+.lookbook__slide[data-pos='1'],
+.lookbook__slide[data-pos='-1'] {
+  z-index: 1;
+  width: var(--lb-w1);
+  height: var(--lb-h1);
+  opacity: 1;
+  cursor: pointer;
+}
+
+.lookbook__slide[data-pos='1'] {
+  --lb-x: var(--lb-x1);
+}
+
+.lookbook__slide[data-pos='-1'] {
+  --lb-x: calc(var(--lb-x1) * -1);
+}
+
+.lookbook__slide[data-pos='2'] {
+  --lb-x: var(--lb-x2);
+}
+
+.lookbook__slide[data-pos='-2'] {
+  --lb-x: calc(var(--lb-x2) * -1);
+}
+
+.lookbook__slide[data-pos='out-next'] {
+  --lb-x: var(--lb-x3);
+}
+
+.lookbook__slide[data-pos='out-prev'] {
+  --lb-x: calc(var(--lb-x3) * -1);
+}
+
+/* A slide jumping from one end to the other (loop wrap) moves without a
+   transition while hidden, then fades in at its new spot. */
+.lookbook__slide.is-wrapping {
+  opacity: 0;
+  transition: none;
+}
+
+/* First paint and block select: place slides without animating. */
+.lookbook__slider.is-instant .lookbook__slide {
+  transition: none;
+}
+
+.lookbook__media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(var(--color-foreground), 0.04);
+}
+
+.lookbook__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+a.lookbook__media:focus-visible {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: -0.4rem;
+}
+
+.lookbook__caption {
+  position: absolute;
+  bottom: 1.6rem;
+  left: 50%;
+  max-width: calc(100% - 3.2rem);
+  margin: 0;
+  padding: 0.6rem 1.2rem;
+  font-size: 1.4rem;
+  line-height: 1.4;
+  text-align: center;
+  color: rgb(var(--color-foreground));
+  background-color: rgb(var(--color-background));
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity var(--lb-speed) var(--lb-ease);
+  pointer-events: none;
+}
+
+.lookbook__slide[data-pos='0'] .lookbook__caption {
+  opacity: 1;
+}
+
+/* ---------- Controls ---------- */
+
+.lookbook__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.6rem;
+}
+
+.lookbook__arrow,
+.lookbook__pause {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.4rem;
+  height: 4.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: rgb(var(--color-foreground));
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--duration-short, 0.1s) ease;
+}
+
+.lookbook__arrow .svg-wrapper {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.lookbook__arrow--prev .svg-wrapper {
+  transform: rotate(90deg);
+}
+
+.lookbook__arrow--next .svg-wrapper {
+  transform: rotate(-90deg);
+}
+
+.lookbook__pause svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.lookbook__pause .lookbook__play-icon,
+.lookbook__pause.is-paused .lookbook__pause-icon {
+  display: none;
+}
+
+.lookbook__pause.is-paused .lookbook__play-icon {
+  display: block;
+}
+
+.lookbook__arrow:hover,
+.lookbook__pause:hover {
+  background-color: rgba(var(--color-foreground), 0.06);
+}
+
+.lookbook__arrow:focus-visible,
+.lookbook__pause:focus-visible,
+.lookbook__dot:focus-visible {
+  outline: 0.2rem solid rgba(var(--color-foreground), 0.5);
+  outline-offset: 0.2rem;
+}
+
+.lookbook__dots {
+  display: flex;
+  align-items: center;
+}
+
+/* 24px hit area around a small visible dot */
+.lookbook__dot {
+  position: relative;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lookbook__dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background-color: rgba(var(--color-foreground), 0.25);
+  transform: translate(-50%, -50%);
+  transition: background-color var(--duration-short, 0.1s) ease, transform var(--duration-short, 0.1s) ease;
+}
+
+.lookbook__dot[aria-current='true']::after {
+  background-color: rgb(var(--color-foreground));
+  transform: translate(-50%, -50%) scale(1.25);
+}
+
+.lookbook__footer {
+  margin-top: 2.4rem;
+  text-align: center;
+}
+
+@media screen and (max-width: 749px) {
+  /* Only three looks fit; the outer pair waits off-stage. */
+  .lookbook__slide[data-pos='2'],
+  .lookbook__slide[data-pos='-2'] {
+    opacity: 0;
+  }
+
+  .lookbook__footer .button {
+    width: 100%;
+  }
+}
+
+/* Tablet and up: five looks across, sized from the reference layout
+   (main 3:4, inner pair ~82% and outer pair ~64% of its height). */
+@media screen and (min-width: 750px) {
+  .lookbook__slider {
+    --lb-w0: 31cqi;
+    --lb-h0: 41.34cqi;
+    --lb-w1: 17.25cqi;
+    --lb-h1: 34cqi;
+    --lb-x1: 24.125cqi;
+    --lb-w2: 17.25cqi;
+    --lb-h2: 26.5cqi;
+    --lb-x2: 41.375cqi;
+    --lb-x3: 58.625cqi;
+  }
+
+  .lookbook__slide[data-pos='2'],
+  .lookbook__slide[data-pos='-2'] {
+    z-index: 0;
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .lookbook__header {
+    margin-bottom: 3.2rem;
+  }
+
+  .lookbook__controls {
+    margin-top: 2.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lookbook__slide,
+  .lookbook__caption,
+  .lookbook__dot::after {
+    transition: none;
+  }
+}
