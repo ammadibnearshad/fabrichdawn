@@ -103,6 +103,7 @@
         },
         "bundle_offers_xDHDiE": {
           "type": "bundle_offers",
+          "disabled": true,
           "settings": {
             "heading": "Bundle & save",
             "show_heading_lines": true,
