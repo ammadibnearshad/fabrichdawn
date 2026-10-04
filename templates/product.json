@@ -191,6 +191,7 @@
         },
         "gift_wrap_ibWwjd": {
           "type": "gift_wrap",
+          "disabled": true,
           "settings": {
             "product": "black-claasic-jacquard-kurta-unstitched-fabric-for-men",
             "title": "Add gift wrap",
@@ -206,7 +207,7 @@
             "message_label": "Gift message",
             "message_placeholder": "Write a short message",
             "message_max": 200,
-            "show_to_from": false,
+            "show_to_from": true,
             "message_target": "wrap",
             "card_bg": "",
             "card_border": "",
