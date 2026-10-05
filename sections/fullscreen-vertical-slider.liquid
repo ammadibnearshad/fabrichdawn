@@ -143,6 +143,23 @@
         style="--fvs-fit: {{ block.settings.image_fit }}; --fvs-pos-d: {{ pos_desktop }}; --fvs-pos-m: {{ pos_mobile }}; --fvs-overlay-color: {{ block.settings.overlay_color }}; --fvs-overlay-opacity: {{ block.settings.overlay_opacity | divided_by: 100.0 }};"
         {{ block.shopify_attributes }}
       >
+        {%- liquid
+          assign banner_tag = 'div'
+          if block.settings.link != blank
+            assign banner_tag = 'a'
+          endif
+        -%}
+        <{{ banner_tag }}
+          class="fvs__link{% if banner_tag == 'div' %} fvs__link--static{% endif %}"
+          {% if banner_tag == 'a' %}
+            href="{{ block.settings.link }}"
+            aria-label="{{ link_label | escape }}"
+            {% if block.settings.open_new_tab %}
+              target="_blank"
+              rel="noopener"
+            {% endif %}
+          {% endif %}
+        >
         <div class="fvs__media-wrap">
           {%- if desktop_image != blank -%}
             <picture class="fvs__media">
@@ -215,18 +232,7 @@
         {%- if block.settings.overlay_opacity > 0 -%}
           <div class="fvs__overlay" aria-hidden="true"></div>
         {%- endif -%}
-
-        {%- if block.settings.link != blank -%}
-          <a
-            class="fvs__link"
-            href="{{ block.settings.link }}"
-            aria-label="{{ link_label | escape }}"
-            {% if block.settings.open_new_tab %}
-              target="_blank"
-              rel="noopener"
-            {% endif %}
-          ></a>
-        {%- endif -%}
+        </{{ banner_tag }}>
 
         {%- if block.settings.show_content -%}
           <div class="fvs__content-wrap fvs__content-wrap--{{ block.settings.content_position_desktop }} fvs__content-wrap--m-{{ block.settings.content_position_mobile }}">
